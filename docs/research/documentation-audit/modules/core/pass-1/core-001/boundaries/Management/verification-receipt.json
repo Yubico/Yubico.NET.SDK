@@ -1,0 +1,30 @@
+{
+  "kind": "static record verification, not independent semantic review",
+  "report_sha256": "e3d207a2b502b6dfd35365b50a1ff1a79ea6387380d53ebae7ed6520ecf11f9a",
+  "exact_primary_ids": 331,
+  "candidate_files": 55,
+  "inherited_keys": 9,
+  "local_candidates": 3,
+  "clean_nominees": 4,
+  "local_links_checked": 10,
+  "source_range_pin_capture_checks": "PASS",
+  "registry_identity": "UNCHANGED",
+  "sdk_build_test_native_device_executions": 0,
+  "records": {
+    "assemble.py": "f82eebf1a49f5f65e51907ab67b03cf1e8d54f7c833f6bb818a45df4fe42d85b",
+    "candidates.json": "0955f7e5df5dccfb311eeedb617a84b5f5b626afd4b5c96bd11e2811ca7b957b",
+    "capture_sources.py": "b3c38f810b80ee9291ea0759894fbeb6c49ab6d3a0b1adcee2d427925b4f1043",
+    "clean-nominees.json": "c0b2b85762a251bb4125bcad90862e21b8e68e1e33f0a8f4d827ca2c6cae889d",
+    "file-dispositions.json": "88779ddcde9f6b10118b982190771f6d71682f5acdd599d078372ac2354e3354",
+    "inherited-dispositions.json": "ab5c9818d8e9e4ee3d0b190f5876a9eb98e50a9f3801bb89877ff3d1ab13a65f",
+    "mechanism-identities.json": "89deb02685d7b0a5682e7b1d4c36f9ee452265f99910c3746d67f18b3595bc5f",
+    "shared-dependencies.json": "4415ec2efbda869ee91bcce64bebec13117f10cc8dd8b22927111756807a4655",
+    "sources/bio-mpe.html": "180641a30a73463bca30121f2186919b4452725f193ae825341476d5c7fd2c5a",
+    "sources/captures.json": "d36a9de6e9978c179ff41e67e5264eaadd96f9a05bb5833f997c2b5e974e16cc",
+    "sources/device-reset-command.html": "e818b46ccfbcc6bf3c58b1b7283a4adc0ebe6fe3322d9c38cffebe6e1235bbf0",
+    "sources.md": "1d4384bd1e8aaebd61e29eb802a6bd01158bcffd397b97b50c14c8a251c57bdb",
+    "unit-dispositions.json": "5c327d24b29181363295a43fa5f4767b101447641d724f143b28c265868a5788",
+    "verification.json": "3e5bd0bfc031174682b8060e08d31034db81ff5eb27dc341f6bd9055b91d742b",
+    "verify_records.py": "e8d21e74d3d6b08a007773df2dc9d63879c7d613af2289675f97218443da835e"
+  }
+}

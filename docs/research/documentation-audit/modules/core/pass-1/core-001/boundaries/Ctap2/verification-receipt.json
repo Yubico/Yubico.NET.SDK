@@ -1,0 +1,94 @@
+{
+  "kind": "separate-static-record-consistency-check",
+  "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "assigned_units": 590,
+  "selected_paths": 180,
+  "candidate_paths": 181,
+  "inherited_keys": 26,
+  "clean_nominees": 9,
+  "failures": [],
+  "sdk_native_crypto_device_execution": false,
+  "independent_content_review": false,
+  "owned_record_identities": [
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Ctap2/read_packet.py",
+      "sha256": "8eb74375109587e30fbdf886e6264010fe95855b7dfddb19e427647f71e201ca",
+      "bytes": 868
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Ctap2/candidates.md",
+      "sha256": "d719f307b97710eef252790cc4efe289a2935b670188903a05609b5766f4f759",
+      "bytes": 24750
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Ctap2/traces.md",
+      "sha256": "27bc9cb867fb3b63c97cb6e001e5a960823e88d737c106cc7917a8d8353280db",
+      "bytes": 18091
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Ctap2/sources.md",
+      "sha256": "305da241be6897c52720778529a7e83b37023c5197473e4203fa95d51be6d216",
+      "bytes": 10383
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Ctap2/verification.md",
+      "sha256": "474b0d96d882bab1e1c3e9c5e30df9eb49ebbe7e5191a1ee9161fe71d5aca316",
+      "bytes": 11725
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Ctap2/assemble.py",
+      "sha256": "e41d22ec02de7d90d1fe142bb35a880d2d1675e73be7af69d964fbe78b9a0846",
+      "bytes": 50091
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Ctap2/unit-dispositions.json",
+      "sha256": "49a22ea23bd2c6090e67b51e74989d02f330f96f90956126317203e8db6872d5",
+      "bytes": 944675
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Ctap2/file-dispositions.json",
+      "sha256": "b6ff2c55695ef505d23a3e9fe65d97d21589a8147f5bee5395a92726f70c4baf",
+      "bytes": 286986
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Ctap2/clean-nominees.json",
+      "sha256": "0b5cd6d0edbf09f1ece5e9c25e8fbc26575b1846d9e267152c5c07d7332804bd",
+      "bytes": 14060
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Ctap2/inherited-dispositions.json",
+      "sha256": "1cdb2d23eee6ca5c7a659251c18d5f6b9a7aac2d6fb8137cbdecdfbb6201bfe4",
+      "bytes": 54214
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Ctap2/source-identities.json",
+      "sha256": "c53ee93c79d102b229c2f15608b9401d39f73463aee29f6f323820e73652d41c",
+      "bytes": 11468
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Ctap2/verification.json",
+      "sha256": "6bfafe8f8026610b2bd64e8c5a89000db7faafa8c8f31e6618827fd88d316a0e",
+      "bytes": 1267
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Ctap2/check_records.py",
+      "sha256": "01bcd75e8cba0fa370b5cb0ec8f2d0c886e93209602c02face53e70d0785ed4e",
+      "bytes": 4179
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Ctap2/candidate-index.json",
+      "sha256": "0087cc8a2c43bcb9e629e29ad21f82e7252cefac615c75e8a324f7b943a1ce1d",
+      "bytes": 81446
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundaries/Ctap2/dependency-identities.json",
+      "sha256": "fdf352b1f8fadef3f0ab7e29460975a32c4525be256aff9d75933c2795e19a58",
+      "bytes": 13084
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/boundary-Ctap2.md",
+      "sha256": "35fe15e38608882555a619b1cd79a41d89a86cbc90c412b50836d9aa660f6005",
+      "bytes": 9704
+    }
+  ]
+}

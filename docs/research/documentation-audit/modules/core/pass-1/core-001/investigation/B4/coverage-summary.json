@@ -1,0 +1,164 @@
+{
+  "status": "COMPLETE-PINNED-INVESTIGATION",
+  "source_pin": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "observed_head": "bb94f0884f63f260156227957d4cc112d984e300",
+  "packet_sha256": "5591684535811520dc9cf6e62e32614e66a77cac9ea5353c31ca428920021244",
+  "primary_files": 106,
+  "primary_lines": 14842,
+  "complete_primary_file_dispositions": 106,
+  "complete_primary_file_reads": 105,
+  "scoped_related_context_snapshot_files": 1,
+  "unread_primary_files": 0,
+  "primary_unit_count": 1456,
+  "shared_unit_count": 894,
+  "total_unit_count": 2350,
+  "primary_status_counts": {
+    "READ-CANDIDATE": 397,
+    "READ-CLEAN": 1053,
+    "READ-SOURCE-QUALIFIED": 1,
+    "READ-RELATED-CONTEXT": 5
+  },
+  "shared_status_counts": {
+    "READ-CANDIDATE": 177,
+    "READ-HISTORICAL-QUALIFIED": 158,
+    "READ-CLEAN": 193,
+    "READ-RELATED-CONTEXT": 366
+  },
+  "combined_status_counts": {
+    "READ-CANDIDATE": 574,
+    "READ-CLEAN": 1246,
+    "READ-SOURCE-QUALIFIED": 1,
+    "READ-RELATED-CONTEXT": 371,
+    "READ-HISTORICAL-QUALIFIED": 158
+  },
+  "resolved_checkpoint_outstanding": {
+    "READ-PENDING-CONTEXT": 253,
+    "UNREAD": 1209
+  },
+  "families": [
+    {
+      "family": "benchmarks",
+      "files": 4,
+      "lines": 785,
+      "complete_file_dispositions": 4,
+      "full_file_reads": 4,
+      "unread_paths": []
+    },
+    {
+      "family": "public-api-and-support",
+      "files": 4,
+      "lines": 1537,
+      "complete_file_dispositions": 4,
+      "full_file_reads": 3,
+      "unread_paths": []
+    },
+    {
+      "family": "desktop-pcsc-native",
+      "files": 14,
+      "lines": 1368,
+      "complete_file_dispositions": 14,
+      "full_file_reads": 14,
+      "unread_paths": []
+    },
+    {
+      "family": "native-loading-and-platform-support",
+      "files": 7,
+      "lines": 383,
+      "complete_file_dispositions": 7,
+      "full_file_reads": 7,
+      "unread_paths": []
+    },
+    {
+      "family": "windows-native",
+      "files": 14,
+      "lines": 2070,
+      "complete_file_dispositions": 14,
+      "full_file_reads": 14,
+      "unread_paths": []
+    },
+    {
+      "family": "portable-hid",
+      "files": 14,
+      "lines": 892,
+      "complete_file_dispositions": 14,
+      "full_file_reads": 14,
+      "unread_paths": []
+    },
+    {
+      "family": "keyboard-translators",
+      "files": 10,
+      "lines": 1958,
+      "complete_file_dispositions": 10,
+      "full_file_reads": 10,
+      "unread_paths": []
+    },
+    {
+      "family": "windows-hid-facades",
+      "files": 4,
+      "lines": 591,
+      "complete_file_dispositions": 4,
+      "full_file_reads": 4,
+      "unread_paths": []
+    },
+    {
+      "family": "integration-oracles",
+      "files": 3,
+      "lines": 273,
+      "complete_file_dispositions": 3,
+      "full_file_reads": 3,
+      "unread_paths": []
+    },
+    {
+      "family": "audit-child-hosts",
+      "files": 2,
+      "lines": 206,
+      "complete_file_dispositions": 2,
+      "full_file_reads": 2,
+      "unread_paths": []
+    },
+    {
+      "family": "boundary-inventory-and-contract-oracles",
+      "files": 14,
+      "lines": 2595,
+      "complete_file_dispositions": 14,
+      "full_file_reads": 14,
+      "unread_paths": []
+    },
+    {
+      "family": "windows-native-registration-test",
+      "files": 1,
+      "lines": 53,
+      "complete_file_dispositions": 1,
+      "full_file_reads": 1,
+      "unread_paths": []
+    },
+    {
+      "family": "resilience-static-oracle",
+      "files": 1,
+      "lines": 373,
+      "complete_file_dispositions": 1,
+      "full_file_reads": 1,
+      "unread_paths": []
+    },
+    {
+      "family": "hid-unit-oracles",
+      "files": 5,
+      "lines": 768,
+      "complete_file_dispositions": 5,
+      "full_file_reads": 5,
+      "unread_paths": []
+    },
+    {
+      "family": "external-verification-hosts",
+      "files": 9,
+      "lines": 990,
+      "complete_file_dispositions": 9,
+      "full_file_reads": 9,
+      "unread_paths": []
+    }
+  ],
+  "local_candidate_count": 10,
+  "sdk_builds_tests_native_device_formatter_executions": 0,
+  "identity_failures": [],
+  "note": "106/106 primary files dispositioned; 105 full reads and one whole-file API snapshot reconciled for B4 support/type inventory with explicit non-B4 signature scope. Qualified/context rows are not clean or await-context. Hashes never establish semantic verdicts."
+}

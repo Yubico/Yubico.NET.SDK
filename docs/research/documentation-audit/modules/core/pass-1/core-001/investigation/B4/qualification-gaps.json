@@ -1,0 +1,62 @@
+{
+  "status": "BOUNDED-EXTERNAL-QUALIFICATIONS-NOT-UNREAD",
+  "source_pin": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "gaps": [
+    {
+      "id": "B4-Q001",
+      "owner": "NativeShims package producer with B2/B3 and Windows platform owners",
+      "scope": "Exact deployed JIT shared or AOT static NativeShims binary-to-producer/header/flags correspondence, including PC/SC PCI and Windows string boundary",
+      "known": "Published1.18.1 source/tree/build targets and managed default Transmit path are retained. Linux LP64 pcsc-lite two-unsigned-long PCI disagrees with managed eight-byte carrier on that conditional build route. Windows two-DWORD PCI does not share this size mismatch; macOS framework selection is separate.",
+      "limit": "Published source, equal cached/deployed file hashes and local2.5.3 headers do not attest the installed native producer or actual successful transmit. Exact Apple producer/header layout was not recovered; no Linux-to-Apple inference.",
+      "research_stop": "Initial release/header pass plus focused Linux build/static-target follow-up completed; producer metadata unavailable in assigned evidence.",
+      "reopen_with": "RID/architecture, binary/archive SHA256, package identity, immutable producer source, build commands/patches and exact target headers; separately authorized ABI/transmit/non-ASCII reader traces",
+      "candidate_ids": ["CORE-B4-C006", "CORE-B4-C008", "CORE-B4-C009"]
+    },
+    {
+      "id": "B4-Q002",
+      "owner": "Historical Windows evidence owner/coordinator; A-C020 alias",
+      "scope": "Exact prior Windows CCID/HID/AOT runtime artifacts and their source/native/OS/architecture/driver/token/fixture binding",
+      "known": "Current managed/native contracts and historical guides/output statements are read; current baseline Windows HID remains synchronous and excluded from verified adapter registry.",
+      "limit": "No recovered exact current-source trace proves every listed function or the access/lifetime/race cells. x64 success cannot certify x86/arm64; compile/link/source checks are not Windows runtime acceptance.",
+      "research_stop": "Assigned current/historical reports plus original API follow-up inspected; exact artifact is external rather than searchable source text.",
+      "reopen_with": "Retained original run artifacts with identities and per-operation terminal/drain/release oracles; separately ready Windows delta handoff",
+      "candidate_ids": ["CORE-B4-C001", "CORE-B4-C002", "CORE-B4-C003", "CORE-B4-C004", "CORE-B4-C008"]
+    },
+    {
+      "id": "B4-Q003",
+      "owner": "Core Windows catalog maintainers",
+      "scope": "CmClassGuid.SmartCard990a2bd7-e738-46c7-b26f-1cf8fb9f1391; exact unit core-001:unit:d6efcc57eba79156",
+      "known": "Full catalog and usages read. Other compared values match pinned official Microsoft headers; all27 property GUID/PIDs and active interface GUIDs reconcile.",
+      "limit": "This SmartCard value had no match in inspected official headers. That absence does not prove a wrong GUID, nor justify clean provenance.",
+      "research_stop": "Initial catalog comparison plus focused official devguid/devpkey/hidclass/ntddkbd/usbiodef/winsmcrd follow-up completed.",
+      "reopen_with": "Original Microsoft definition/version or source provenance explaining this distinct class value; no hardware needed",
+      "candidate_ids": ["CORE-B4-C010"]
+    },
+    {
+      "id": "B4-Q004",
+      "owner": "Windows report-access documentation author/editor",
+      "scope": "Comparative HIDAPI retry/feature-access rationale in WindowsHidReportAccess comments",
+      "known": "Current source retry/access behavior and Microsoft desired-access/report-buffer contracts are inspected; universal zero-access rescue/no-sharing/elevation assertions are unsupported by those contracts.",
+      "limit": "No exact HIDAPI revision/platform implementation is bound to the comparison. An unspecified external implementation cannot establish this SDK's host behavior.",
+      "research_stop": "Initial comment/reference review and focused Microsoft access/report follow-up completed; no revision identity supplied.",
+      "reopen_with": "Exact external revision/passages with platform conditions, or remove/qualify the comparison while retaining current implementation behavior",
+      "candidate_ids": ["CORE-B4-C004"]
+    },
+    {
+      "id": "B4-Q005",
+      "owner": "Historical fixes-wave-001:CORE-001 evidence owner with B2 Linux investigator",
+      "scope": "Past serial9681620 Linux hidraw discovery failure",
+      "known": "Inherited issue and modern source/managed/native-only evidence retain separate identities.",
+      "limit": "No historical native cause recovered. Current Windows declarations, fake tests and serial103 results do not diagnose or close that old failure.",
+      "research_stop": "Inherited record/current source comparison completed; missing historical trace is an external artifact, not remaining B4 source reading.",
+      "reopen_with": "Original failing source/package/host/permission/device/output trace, or an explicitly authorized matching reproduction",
+      "candidate_ids": ["CORE-B4-C008"]
+    }
+  ],
+  "separate_later_gates": [
+    "Independent documentation/candidate review and accepted-ID adjudication belong to coordinator; no accepted IDs allocated here.",
+    "Consumer compilation, evaluated source-generator/AOT inputs, current fixed SDK/provider identity, native ABI/driver/service execution and physical qualification remain unrun, not source findings certified by this audit.",
+    "PIV physical sharing/PIN/authentication/reset lane remains user-deferred; no physical operation or new authorization follows from this packet.",
+    "Windows unmerged CCID/HID work is unready; no checkout/branch inspected. Focused ready-handoff delta list is retained in continuation-and-verification.md."
+  ]
+}

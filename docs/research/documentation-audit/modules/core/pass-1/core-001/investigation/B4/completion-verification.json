@@ -1,0 +1,263 @@
+{
+  "status": "PASSED-STATIC-RECORD-VERIFICATION",
+  "utc": "2026-11-12T00:05:06.750460+00:00",
+  "packet_completion": "COMPLETE-PINNED-INVESTIGATION",
+  "source_pin": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "observed_head": "bb94f0884f63f260156227957d4cc112d984e300",
+  "assigned_units": 2350,
+  "primary_files_dispositioned": 106,
+  "full_primary_reads": 105,
+  "qualified_snapshot_files": 1,
+  "primary_units": 1456,
+  "shared_units": 894,
+  "outstanding_units": 0,
+  "resolved_checkpoint_outstanding": 1462,
+  "status_counts": {
+    "READ-CANDIDATE": 574,
+    "READ-CLEAN": 1246,
+    "READ-SOURCE-QUALIFIED": 1,
+    "READ-RELATED-CONTEXT": 371,
+    "READ-HISTORICAL-QUALIFIED": 158
+  },
+  "source_paths_checked": 230,
+  "source_capture_count": 42,
+  "history_checks": [
+    {
+      "path": "investigation-B4.md",
+      "sha256": "d05fe7d466abfdb175a2a56f55893fb18e7498993e996e9f80b87f6e63e2b903",
+      "match": true
+    },
+    {
+      "path": "unit-dispositions.json",
+      "sha256": "11e7dd4fa3a034ee48e932a354e9d6e3165addaba055d957059bdd028bdadbf6",
+      "match": true
+    },
+    {
+      "path": "coverage-summary.json",
+      "sha256": "657c3f2d724b4f8d68b7e2848e601060d59ed25425af6524aa80c047b0d19089",
+      "match": true
+    },
+    {
+      "path": "continuation.json",
+      "sha256": "4b8d24e539f4e72c6edf81943238b8cdecfcbf1b5c7b31cf07d9f63b10e017eb",
+      "match": true
+    },
+    {
+      "path": "file-evidence.md",
+      "sha256": "d3272dfe1ba80a56a8c4478e54b854c70efdcab61df33a664d403c3b439e8a9f",
+      "match": true
+    },
+    {
+      "path": "file-identities.json",
+      "sha256": "b7fd378248382ed1ea5ba5fefc52ae53db18c19703b00e225b26bb3ce85bb782",
+      "match": true
+    },
+    {
+      "path": "candidate-index.json",
+      "sha256": "777bbb62745810e7799522fe63c24675bf45554952b4aecd9aa2da11b1a33b7a",
+      "match": true
+    },
+    {
+      "path": "candidates.md",
+      "sha256": "9b644aa8ae0d621a87272ac3c064f03fa15467a584af020d966c053d05860969",
+      "match": true
+    },
+    {
+      "path": "continuation-and-verification.md",
+      "sha256": "d2fd560a9d641992288e86d8977c8062fe7301ab035b38afa2d76c5927414a48",
+      "match": true
+    },
+    {
+      "path": "preservation-verification.json",
+      "sha256": "caefa31ba0e8a20af8de118e639a8e3656c1106ecede37691cc86872bfc88557",
+      "match": true
+    },
+    {
+      "path": "checkpoint-verification.json",
+      "sha256": "a45bdff89982e9a80bb4a3b0351b060d2a5f6b2f5bbf8fc0843dbe6ef9a40ba1",
+      "match": true
+    },
+    {
+      "path": "record_checkpoint.py",
+      "sha256": "f41abd204993b2b749f815178235389f9aa03d8587c3426946e5b2dbca695e87",
+      "match": true
+    },
+    {
+      "path": "verify_checkpoint.py",
+      "sha256": "1e892fa590603437a439a69c9c8a3234e1dc95470d4857ed6a897f4b64680c8a",
+      "match": true
+    }
+  ],
+  "published_source_blob_checks": [
+    {
+      "local": "shim-pcsc.c",
+      "release_path": "Yubico.NativeShims/pcsc.c",
+      "git_blob": "5f580dd0897d28f0ab854622786e5ec4abf53c73",
+      "expected": "5f580dd0897d28f0ab854622786e5ec4abf53c73",
+      "match": true
+    },
+    {
+      "local": "shim-native_abi.h",
+      "release_path": "Yubico.NativeShims/native_abi.h",
+      "git_blob": "8bdad6cd64eb6fdd95946278b708e46f7705851c",
+      "expected": "8bdad6cd64eb6fdd95946278b708e46f7705851c",
+      "match": true
+    },
+    {
+      "local": "shim-CMakeLists.txt",
+      "release_path": "Yubico.NativeShims/CMakeLists.txt",
+      "git_blob": "b9e5fd9cef08391309678739156856f655841120",
+      "expected": "b9e5fd9cef08391309678739156856f655841120",
+      "match": true
+    },
+    {
+      "local": "shim-exports.msvc",
+      "release_path": "Yubico.NativeShims/exports.msvc",
+      "git_blob": "382d662b4170b82bd2ff916aaa2bb93e54ec085e",
+      "expected": "382d662b4170b82bd2ff916aaa2bb93e54ec085e",
+      "match": true
+    },
+    {
+      "local": "shim-nuspec.xml",
+      "release_path": "Yubico.NativeShims/Yubico.NativeShims.nuspec",
+      "git_blob": "1d70f0a2149ade39976e720f4130645eb174beaf",
+      "expected": "1d70f0a2149ade39976e720f4130645eb174beaf",
+      "match": true
+    },
+    {
+      "local": "shim-header.in",
+      "release_path": "Yubico.NativeShims/Yubico.NativeShims.h.in",
+      "git_blob": "272d16edbb9621e0f0746ccdd31cc3203b303b08",
+      "expected": "272d16edbb9621e0f0746ccdd31cc3203b303b08",
+      "match": true
+    },
+    {
+      "local": "shim-build-windows.ps1",
+      "release_path": "Yubico.NativeShims/build-windows.ps1",
+      "git_blob": "51726c5b48a0948ca6124492e308634a5ec0e297",
+      "expected": "51726c5b48a0948ca6124492e308634a5ec0e297",
+      "match": true
+    },
+    {
+      "local": "shim-pcscd.cmake",
+      "release_path": "Yubico.NativeShims/cmake/pcscd.cmake",
+      "git_blob": "422269386218c9aeec18e95d25828070ec1bc981",
+      "expected": "422269386218c9aeec18e95d25828070ec1bc981",
+      "match": true
+    },
+    {
+      "local": "shim-build-linux-amd64.sh",
+      "release_path": "Yubico.NativeShims/build-linux-amd64.sh",
+      "git_blob": "315d69cdec4ebc6e61e57f4c9e11e2277a9d3c15",
+      "expected": "315d69cdec4ebc6e61e57f4c9e11e2277a9d3c15",
+      "match": true
+    },
+    {
+      "local": "shim-build-linux-arm64.sh",
+      "release_path": "Yubico.NativeShims/build-linux-arm64.sh",
+      "git_blob": "f973d31e84877e07ef94eb555f8ca80d8686d302",
+      "expected": "f973d31e84877e07ef94eb555f8ca80d8686d302",
+      "match": true
+    },
+    {
+      "local": "shim-Aot.targets",
+      "release_path": "Yubico.NativeShims/msbuild/Yubico.NativeShims.Aot.targets",
+      "git_blob": "8381aa7645a9f3ff809e1fd6b5a5f0da8a6e8df0",
+      "expected": "8381aa7645a9f3ff809e1fd6b5a5f0da8a6e8df0",
+      "match": true
+    }
+  ],
+  "local_links_checked": 16,
+  "clean_nominees": 7,
+  "external_qualification_gaps": 5,
+  "frozen_populations_checked": {
+    "prior_artifacts": 5366,
+    "integration_records": 8325,
+    "prior_piv_files": 114,
+    "user_files": 4
+  },
+  "product_worktree_differences": [],
+  "assigned_pinned_raw_newline_differences": [
+    {
+      "path": "Directory.Build.props",
+      "raw_sha256": "df3cdc4095e94f1d2d4f7144980e7bb4450560531a6e2f4ae9ec92e4c0ae5100",
+      "pinned_raw_sha256": "e27951c0c26be8796b9bdbe9b80454efb58fc5d3894f757dd0beb67d4e49952c",
+      "lf_equal": true
+    },
+    {
+      "path": "Directory.Packages.props",
+      "raw_sha256": "12fdb96d359e19121bc57718413b4608e4a12a0339a1eebb56751e4cbb7c410f",
+      "pinned_raw_sha256": "b23da80b99da850555f2eea923994e748c35e725c1f9d79630df789a89bf3054",
+      "lf_equal": true
+    },
+    {
+      "path": "benchmarks/Yubico.YubiKit.PerformanceBenchmarks/Yubico.YubiKit.PerformanceBenchmarks.csproj",
+      "raw_sha256": "422b3e8a23f2258972f8d2e7602eee4e45e8d7946ed19d07d6eba81ae2c9e0f3",
+      "pinned_raw_sha256": "1fcc6f9d64e0635e750dfe3fd5346e9cef4abfa027a6da71690f459a05543270",
+      "lf_equal": true
+    },
+    {
+      "path": "src/Cli.Commands/src/Yubico.YubiKit.Cli.Commands.csproj",
+      "raw_sha256": "1988442b20626b9984a9df89d1741f53f6b1703bf8a08ea448e09af5ca7693eb",
+      "pinned_raw_sha256": "06213e37ce3daf3c39691b4f4cc927ffbbfa7a8b60254889483e16a5ad1012f3",
+      "lf_equal": true
+    },
+    {
+      "path": "src/Cli.Shared/src/Yubico.YubiKit.Cli.Shared.csproj",
+      "raw_sha256": "dd59c5617d354bd7973976f12571bbbcd32f85beedd21df8e04cf594a7fb5102",
+      "pinned_raw_sha256": "48ed58f718710d8dba8e3c34e870d280ef29dd22b95443c67ea2b4820e340939",
+      "lf_equal": true
+    },
+    {
+      "path": "src/Core/src/Yubico.YubiKit.Core.csproj",
+      "raw_sha256": "fd04737837a54845a15f034fc1a79c57618b06ed84e26cbf4400880b26676d76",
+      "pinned_raw_sha256": "091a0365c45a105d928da08ca457f722af5cde4c933d8d65832f7095d81cac0b",
+      "lf_equal": true
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Yubico.YubiKit.Core.IntegrationTests.csproj",
+      "raw_sha256": "793083dd180e464019bb614187ba24a6b71332265bff8bc06586e594fed8a608",
+      "pinned_raw_sha256": "7f8dcb9f5340e8acb3fe39e9d6a8a3219ff78b991300dd9221e130e9447d8a5c",
+      "lf_equal": true
+    },
+    {
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj",
+      "raw_sha256": "a778d4fe2a7ba5e3da251972f9d142b6e3e3e0a7aa782fbb0e2ee3065ab3a6ad",
+      "pinned_raw_sha256": "53edab7187616afaad07d913c48277e738ca2cae775133f7f5c0c9b8fba7bff3",
+      "lf_equal": true
+    },
+    {
+      "path": "src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/Yubico.YubiKit.PublicApi.UnitTests.csproj",
+      "raw_sha256": "86059d70123adaeac3505fda72da1b4ce10850bd2101a99e6d9daa924f0fb2ad",
+      "pinned_raw_sha256": "f3bcde7dfc0cd435799d8363e4569472164a20cb9504c370478a0b53e4e42e29",
+      "lf_equal": true
+    },
+    {
+      "path": "src/Tests.Shared/Yubico.YubiKit.Tests.Shared.csproj",
+      "raw_sha256": "4f37a8227bd5b8c1ef9fb089c65667c989b60d9b80f2d5e7c5e3287ae494a963",
+      "pinned_raw_sha256": "c9666d8293410b6ef2a57eb288cd164179967d0f39a603d557714cd992991d88",
+      "lf_equal": true
+    },
+    {
+      "path": "verification/NativeAotVerification/Yubico.YubiKit.NativeAotVerification.csproj",
+      "raw_sha256": "82b206fda06085a97765b4c8f4511b52d07a11b070456e38eb49be4ed049b9fc",
+      "pinned_raw_sha256": "930034466a92b8f4f84cef0487add67e9da5bf73d82d202c1829b03dfe9cb3b3",
+      "lf_equal": true
+    },
+    {
+      "path": "verification/NativeCompatibilityVerification/NativeCompatibilityVerification.csproj",
+      "raw_sha256": "84f5047b7f89666452fdf024a4d822983c41adbccf7f5b2ce2f662ef603d0eb8",
+      "pinned_raw_sha256": "c31654137bf6626608b5df348abcacce972fd1786d73ef42e7a57edb1393b76d",
+      "lf_equal": true
+    },
+    {
+      "path": "verification/NativeCompatibilityVerification/RuntimeConsumer/RuntimeConsumer.csproj",
+      "raw_sha256": "eed07c87835dc9841ffc972b8e7b79a47627ff707f31ca7525cfd7ff588e9b30",
+      "pinned_raw_sha256": "dbabde5fb07045208f838c55de2ff45e32a9c4e6e57e1f464ac89380d633eb25",
+      "lf_equal": true
+    }
+  ],
+  "execution": "Python/Git static reads and B4-only record writes. Zero SDK/build/test/native/device/formatter executions. No index/ref/commit/push writes or subagents.",
+  "qualification": "Structural/source/history/capture checks do not establish semantic completeness, independent review, current SDK/provider/native producer identity or runtime/device acceptance.",
+  "failures": []
+}

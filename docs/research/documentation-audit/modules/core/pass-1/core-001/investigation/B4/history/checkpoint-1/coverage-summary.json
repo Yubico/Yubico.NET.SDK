@@ -1,0 +1,174 @@
+{
+  "status": "CONTINUATION-REQUIRED",
+  "source_pin": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "observed_head": "c7ff868c6f1b89e2d72eaba526bf98d9c28adb05",
+  "packet_sha256": "5591684535811520dc9cf6e62e32614e66a77cac9ea5353c31ca428920021244",
+  "primary_files": 106,
+  "primary_lines": 14842,
+  "complete_primary_file_reads": 77,
+  "unread_primary_files": 29,
+  "primary_unit_count": 1456,
+  "shared_unit_count": 894,
+  "primary_status_counts": {
+    "READ-CANDIDATE": 286,
+    "READ-CLEAN": 590,
+    "READ-PENDING-CONTEXT": 249,
+    "UNREAD": 331
+  },
+  "shared_status_counts": {
+    "READ-PENDING-CONTEXT": 4,
+    "UNREAD": 878,
+    "READ-CLEAN": 1,
+    "READ-CANDIDATE": 11
+  },
+  "combined_status_counts": {
+    "READ-CANDIDATE": 297,
+    "READ-CLEAN": 591,
+    "READ-PENDING-CONTEXT": 253,
+    "UNREAD": 1209
+  },
+  "families": [
+    {
+      "family": "benchmarks",
+      "files": 4,
+      "lines": 785,
+      "complete_file_reads": 4,
+      "unread_paths": []
+    },
+    {
+      "family": "public-api-and-support",
+      "files": 4,
+      "lines": 1537,
+      "complete_file_reads": 2,
+      "unread_paths": [
+        "src/Core/src/PublicAPI.Shipped.txt",
+        "src/Core/src/PublicAPI.Unshipped.txt"
+      ]
+    },
+    {
+      "family": "desktop-pcsc-native",
+      "files": 14,
+      "lines": 1368,
+      "complete_file_reads": 14,
+      "unread_paths": []
+    },
+    {
+      "family": "native-loading-and-platform-support",
+      "files": 7,
+      "lines": 383,
+      "complete_file_reads": 7,
+      "unread_paths": []
+    },
+    {
+      "family": "windows-native",
+      "files": 14,
+      "lines": 2070,
+      "complete_file_reads": 14,
+      "unread_paths": []
+    },
+    {
+      "family": "portable-hid",
+      "files": 14,
+      "lines": 892,
+      "complete_file_reads": 14,
+      "unread_paths": []
+    },
+    {
+      "family": "keyboard-translators",
+      "files": 10,
+      "lines": 1958,
+      "complete_file_reads": 0,
+      "unread_paths": [
+        "src/Core/src/Transports/Hid/Keyboard/HidCodeTranslator.ModHex.cs",
+        "src/Core/src/Transports/Hid/Keyboard/HidCodeTranslator.cs",
+        "src/Core/src/Transports/Hid/Keyboard/HidCodeTranslator.de_DE.cs",
+        "src/Core/src/Transports/Hid/Keyboard/HidCodeTranslator.en_UK.cs",
+        "src/Core/src/Transports/Hid/Keyboard/HidCodeTranslator.en_US.cs",
+        "src/Core/src/Transports/Hid/Keyboard/HidCodeTranslator.es_US.cs",
+        "src/Core/src/Transports/Hid/Keyboard/HidCodeTranslator.fr_FR.cs",
+        "src/Core/src/Transports/Hid/Keyboard/HidCodeTranslator.it_IT.cs",
+        "src/Core/src/Transports/Hid/Keyboard/HidCodeTranslator.sv_SE.cs",
+        "src/Core/src/Transports/Hid/Keyboard/KeyboardLayout.cs"
+      ]
+    },
+    {
+      "family": "windows-hid-facades",
+      "files": 4,
+      "lines": 591,
+      "complete_file_reads": 4,
+      "unread_paths": []
+    },
+    {
+      "family": "integration-oracles",
+      "files": 3,
+      "lines": 273,
+      "complete_file_reads": 3,
+      "unread_paths": []
+    },
+    {
+      "family": "audit-child-hosts",
+      "files": 2,
+      "lines": 206,
+      "complete_file_reads": 0,
+      "unread_paths": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/ChildProcessTestRunner.cs",
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreAuditReproTests.cs"
+      ]
+    },
+    {
+      "family": "boundary-inventory-and-contract-oracles",
+      "files": 14,
+      "lines": 2595,
+      "complete_file_reads": 0,
+      "unread_paths": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/AdapterContractRegistry.cs",
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/AdapterContractRegistryTests.cs",
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/BoundaryInventoryTests.cs",
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/BoundaryManifest.cs",
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/BoundaryScanner.cs",
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/CrossLayerAcceptanceTests.cs",
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/MigrationDiagnosticsTests.cs",
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/PublicSyncBoundaryRegistry.cs",
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/PublicSyncBoundaryRegistryTests.cs",
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/README.md",
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/ResponsivenessProbeTests.cs",
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/WithheldNativeProbe.cs",
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/adapter-contracts.v1.json",
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/core-boundaries.v1.json"
+      ]
+    },
+    {
+      "family": "windows-native-registration-test",
+      "files": 1,
+      "lines": 53,
+      "complete_file_reads": 1,
+      "unread_paths": []
+    },
+    {
+      "family": "resilience-static-oracle",
+      "files": 1,
+      "lines": 373,
+      "complete_file_reads": 0,
+      "unread_paths": [
+        "src/Core/tests/Yubico.YubiKit.Core.UnitTests/RuntimeResilience/RuntimeResilienceStaticScanTests.cs"
+      ]
+    },
+    {
+      "family": "hid-unit-oracles",
+      "files": 5,
+      "lines": 768,
+      "complete_file_reads": 5,
+      "unread_paths": []
+    },
+    {
+      "family": "external-verification-hosts",
+      "files": 9,
+      "lines": 990,
+      "complete_file_reads": 9,
+      "unread_paths": []
+    }
+  ],
+  "sdk_builds_tests_native_device_formatter_executions": 0,
+  "identity_failures": [],
+  "note": "Complete reads with pending context remain outside the clean denominator. Instruction/orientation reading alone does not disposition shared units."
+}

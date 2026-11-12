@@ -1,0 +1,1649 @@
+[
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Apdu/AnswerToReset.cs",
+    "source_sha256": "7a2df833f16bbc6be6fc74c7d31cedef4d0581176852e34c6f8d6361b9ad10ef",
+    "disposition": "RETAIN-UNCHANGED",
+    "reason": "Direct candidate units route to fresh editor; complete neighboring clean/helper/context units remain unchanged after scoped review. Original fixture bytes stay intact.",
+    "candidate_ids": [
+      "CORE-B6-C016"
+    ],
+    "retained_unit_ids": [
+      "core-001:unit:ab31d5901e4556c4",
+      "core-001:unit:936df7e7d648f04b",
+      "core-001:unit:fd5783f7d6c8a099",
+      "core-001:unit:2d9244f3b0cf2027",
+      "core-001:unit:b80ef11249080fb8",
+      "core-001:unit:dc25880f6ab0b1d1",
+      "core-001:unit:e15315b2c6db8744"
+    ],
+    "future_owner": "B6 fresh editor",
+    "reopening_trigger": "Accepted listed concern, implementation/profile/ownership change or supplied original source that changes the scoped qualification; use candidates.md and B5-C001/C004/C005/C006/C008/C009 handoff rather than re-auditing B5."
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Apdu/ApduCommand.cs",
+    "source_sha256": "346254b6ff3ccc12e3093f8520c9dbcb3f5f7c78422433aa95749733cba451cb",
+    "disposition": "RETAIN-UNCHANGED",
+    "reason": "Direct candidate units route to fresh editor; complete neighboring clean/helper/context units remain unchanged after scoped review. Original fixture bytes stay intact.",
+    "candidate_ids": [
+      "CORE-B6-C001",
+      "CORE-B6-C002",
+      "CORE-B6-C015"
+    ],
+    "retained_unit_ids": [
+      "core-001:unit:0b40b92ccab9d25c",
+      "core-001:unit:e773a06262baa27f",
+      "core-001:unit:209c1ac56185eac6",
+      "core-001:unit:4a869cdfb6792c2d",
+      "core-001:unit:4164fd74a803e6d1",
+      "core-001:unit:00dd0c901b6a3d4a",
+      "core-001:unit:d41ecdd3d18d0e91",
+      "core-001:unit:0bdf61f8391f1b9f"
+    ],
+    "future_owner": "B6 fresh editor",
+    "reopening_trigger": "Accepted listed concern, implementation/profile/ownership change or supplied original source that changes the scoped qualification; use candidates.md and B5-C001/C004/C005/C006/C008/C009 handoff rather than re-auditing B5."
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Apdu/ApduException.cs",
+    "source_sha256": "7512b65eba1c0bb65fb6794bf07a7149a9568bdb269c611763d1a4a34c374d76",
+    "disposition": "RETAIN-UNCHANGED",
+    "reason": "Direct candidate units route to fresh editor; complete neighboring clean/helper/context units remain unchanged after scoped review. Original fixture bytes stay intact.",
+    "candidate_ids": [],
+    "retained_unit_ids": [
+      "core-001:unit:61e1972e7d7f7342",
+      "core-001:unit:632d2415590d999f",
+      "core-001:unit:e620f00c21b5cad1",
+      "core-001:unit:b0551643f68ac3a0",
+      "core-001:unit:0e1c67734eb72ad8",
+      "core-001:unit:2a60d0e26fc8626a",
+      "core-001:unit:fc528c4d571ede28",
+      "core-001:unit:87128baa5e22cf10",
+      "core-001:unit:61a2808b3c9dae22",
+      "core-001:unit:fbe13be6dd441542",
+      "core-001:unit:f9a9435628d354b1",
+      "core-001:unit:ff9935607e81f99e"
+    ],
+    "future_owner": "B6 fresh editor",
+    "reopening_trigger": "Accepted listed concern, implementation/profile/ownership change or supplied original source that changes the scoped qualification; use candidates.md and B5-C001/C004/C005/C006/C008/C009 handoff rather than re-auditing B5."
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Apdu/ApduFormatterExtended.cs",
+    "source_sha256": "ff39ab5e3a4bdf57971c60a66b76cd27041b2ce4139d2a6e17bfee06b0efcf9b",
+    "disposition": "RETAIN-UNCHANGED",
+    "reason": "Direct candidate units route to fresh editor; complete neighboring clean/helper/context units remain unchanged after scoped review. Original fixture bytes stay intact.",
+    "candidate_ids": [
+      "CORE-B6-C001",
+      "CORE-B6-C002",
+      "CORE-B6-C011"
+    ],
+    "retained_unit_ids": [
+      "core-001:unit:8741915f8e264d66",
+      "core-001:unit:6d603a867f6a1748",
+      "core-001:unit:b47fa2561fb5fe33"
+    ],
+    "future_owner": "B6 fresh editor",
+    "reopening_trigger": "Accepted listed concern, implementation/profile/ownership change or supplied original source that changes the scoped qualification; use candidates.md and B5-C001/C004/C005/C006/C008/C009 handoff rather than re-auditing B5."
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Apdu/ApduFormatterShort.cs",
+    "source_sha256": "53f5b7ec2f80657d1fbf50f9ee8f1b1fdf6874f49e1b9bac4915d0136899521b",
+    "disposition": "RETAIN-UNCHANGED",
+    "reason": "Direct candidate units route to fresh editor; complete neighboring clean/helper/context units remain unchanged after scoped review. Original fixture bytes stay intact.",
+    "candidate_ids": [
+      "CORE-B6-C001",
+      "CORE-B6-C002"
+    ],
+    "retained_unit_ids": [
+      "core-001:unit:07e3f8fbd56e67a0",
+      "core-001:unit:33865cf7c07d8df5",
+      "core-001:unit:016772305f8f03cd",
+      "core-001:unit:18acbe421dd5a4c9"
+    ],
+    "future_owner": "B6 fresh editor",
+    "reopening_trigger": "Accepted listed concern, implementation/profile/ownership change or supplied original source that changes the scoped qualification; use candidates.md and B5-C001/C004/C005/C006/C008/C009 handoff rather than re-auditing B5."
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Apdu/ApduResponse.cs",
+    "source_sha256": "3991f32ffd2ec3e98f2873ed729fc99f95a9b50175a7e7159457d68ee2395e56",
+    "disposition": "RETAIN-UNCHANGED",
+    "reason": "Direct candidate units route to fresh editor; complete neighboring clean/helper/context units remain unchanged after scoped review. Original fixture bytes stay intact.",
+    "candidate_ids": [],
+    "retained_unit_ids": [
+      "core-001:unit:2db60f3bf871b042",
+      "core-001:unit:21ca719e4ea2fbab",
+      "core-001:unit:2e6cbe9e97f03d1c",
+      "core-001:unit:6be1d61c780616e4",
+      "core-001:unit:c2ce872fba34a5bc",
+      "core-001:unit:4c5881c49a15563a",
+      "core-001:unit:2f55b7ee96288e4c",
+      "core-001:unit:612134a23ee2193c",
+      "core-001:unit:a5b1732b42df82ae",
+      "core-001:unit:8d274935b91ce92c",
+      "core-001:unit:899273ac62aaaf27",
+      "core-001:unit:21cf89d0bc21a9c1",
+      "core-001:unit:186860eadeaa30ae"
+    ],
+    "future_owner": "B6 fresh editor",
+    "reopening_trigger": "Accepted listed concern, implementation/profile/ownership change or supplied original source that changes the scoped qualification; use candidates.md and B5-C001/C004/C005/C006/C008/C009 handoff rather than re-auditing B5."
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Apdu/ApduTransmitter.cs",
+    "source_sha256": "28e84f9216000b9b15ba3e98abe903868fcbaf946804969f3dda2b8124dd421b",
+    "disposition": "RETAIN-UNCHANGED",
+    "reason": "Direct candidate units route to fresh editor; complete neighboring clean/helper/context units remain unchanged after scoped review. Original fixture bytes stay intact.",
+    "candidate_ids": [
+      "CORE-B6-C002"
+    ],
+    "retained_unit_ids": [
+      "core-001:unit:a52f6338f4974e83",
+      "core-001:unit:b95c0613d7ccd371",
+      "core-001:unit:bf874194251f8e3b"
+    ],
+    "future_owner": "B6 fresh editor",
+    "reopening_trigger": "Accepted listed concern, implementation/profile/ownership change or supplied original source that changes the scoped qualification; use candidates.md and B5-C001/C004/C005/C006/C008/C009 handoff rather than re-auditing B5."
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Apdu/ChainedApduTransmitter.cs",
+    "source_sha256": "bd6cb4b312e35f1b2d6f9f8d0c8ea469de500fd4df5529044e1fae9dc7ee0dfb",
+    "disposition": "RETAIN-UNCHANGED",
+    "reason": "Direct candidate units route to fresh editor; complete neighboring clean/helper/context units remain unchanged after scoped review. Original fixture bytes stay intact.",
+    "candidate_ids": [
+      "CORE-B6-C001",
+      "CORE-B6-C003"
+    ],
+    "retained_unit_ids": [
+      "core-001:unit:a6dc5e25a569ddb1",
+      "core-001:unit:11556a8417104227",
+      "core-001:unit:b727a2317fb82e48",
+      "core-001:unit:e9b2ba959a98840c"
+    ],
+    "future_owner": "B6 fresh editor",
+    "reopening_trigger": "Accepted listed concern, implementation/profile/ownership change or supplied original source that changes the scoped qualification; use candidates.md and B5-C001/C004/C005/C006/C008/C009 handoff rather than re-auditing B5."
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Apdu/ChainedResponseReceiver.cs",
+    "source_sha256": "9c822dbc7396fd459f6686b08fe9b71d9fb4533e0194fb778e3391f81d55df78",
+    "disposition": "RETAIN-UNCHANGED",
+    "reason": "Direct candidate units route to fresh editor; complete neighboring clean/helper/context units remain unchanged after scoped review. Original fixture bytes stay intact.",
+    "candidate_ids": [
+      "CORE-B6-C001",
+      "CORE-B6-C002"
+    ],
+    "retained_unit_ids": [
+      "core-001:unit:d810377974552351",
+      "core-001:unit:1608e1632a249626",
+      "core-001:unit:af29b7fcb6c71fa8",
+      "core-001:unit:9e683e6d4c0c52d9",
+      "core-001:unit:6cbd940f678ba894",
+      "core-001:unit:926a6060d5d7b94f",
+      "core-001:unit:74cb68ff02416900"
+    ],
+    "future_owner": "B6 fresh editor",
+    "reopening_trigger": "Accepted listed concern, implementation/profile/ownership change or supplied original source that changes the scoped qualification; use candidates.md and B5-C001/C004/C005/C006/C008/C009 handoff rather than re-auditing B5."
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Apdu/IApduFormatter.cs",
+    "source_sha256": "15842742b246e351945906d80ff1d66f08e4ea82490f65d03833a43ea93ce8fd",
+    "disposition": "RETAIN-UNCHANGED",
+    "reason": "Direct candidate units route to fresh editor; complete neighboring clean/helper/context units remain unchanged after scoped review. Original fixture bytes stay intact.",
+    "candidate_ids": [],
+    "retained_unit_ids": [
+      "core-001:unit:416155a6918a9c05",
+      "core-001:unit:7e9970d4efe01f16",
+      "core-001:unit:dd72fb69466e26c6",
+      "core-001:unit:792cd280065bf21d"
+    ],
+    "future_owner": "B6 fresh editor",
+    "reopening_trigger": "Accepted listed concern, implementation/profile/ownership change or supplied original source that changes the scoped qualification; use candidates.md and B5-C001/C004/C005/C006/C008/C009 handoff rather than re-auditing B5."
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Apdu/IApduProcessor.cs",
+    "source_sha256": "20b9c87454e0d594b40eca88b36129c70372cf3293600e5d1a6f804d29057656",
+    "disposition": "RETAIN-UNCHANGED",
+    "reason": "Direct candidate units route to fresh editor; complete neighboring clean/helper/context units remain unchanged after scoped review. Original fixture bytes stay intact.",
+    "candidate_ids": [],
+    "retained_unit_ids": [
+      "core-001:unit:d0c25495927f3754",
+      "core-001:unit:3a9f4a4fb8e56bba",
+      "core-001:unit:595b8b13f02e4c5d",
+      "core-001:unit:dba607e638633c07"
+    ],
+    "future_owner": "B6 fresh editor",
+    "reopening_trigger": "Accepted listed concern, implementation/profile/ownership change or supplied original source that changes the scoped qualification; use candidates.md and B5-C001/C004/C005/C006/C008/C009 handoff rather than re-auditing B5."
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Apdu/ISmartCardProtocol.cs",
+    "source_sha256": "1c632e792b0ebe71404916997941206014fd211d2fa5bf8bf9ced9d13f4fd1ef",
+    "disposition": "RETAIN-UNCHANGED",
+    "reason": "Direct candidate units route to fresh editor; complete neighboring clean/helper/context units remain unchanged after scoped review. Original fixture bytes stay intact.",
+    "candidate_ids": [
+      "CORE-B6-C003"
+    ],
+    "retained_unit_ids": [
+      "core-001:unit:3f85723bb8ed88cb",
+      "core-001:unit:799c14c55133e81f",
+      "core-001:unit:b408d765d737ca99"
+    ],
+    "future_owner": "B6 fresh editor",
+    "reopening_trigger": "Accepted listed concern, implementation/profile/ownership change or supplied original source that changes the scoped qualification; use candidates.md and B5-C001/C004/C005/C006/C008/C009 handoff rather than re-auditing B5."
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Apdu/PcscProtocol.Scp.cs",
+    "source_sha256": "e4c32cbe7c3883a6f942ed40e27d6d4faccb5f2add662e054030f70978a5d614",
+    "disposition": "RETAIN-UNCHANGED",
+    "reason": "Direct candidate units route to fresh editor; complete neighboring clean/helper/context units remain unchanged after scoped review. Original fixture bytes stay intact.",
+    "candidate_ids": [],
+    "retained_unit_ids": [
+      "core-001:unit:79b00ba67e0fd768",
+      "core-001:unit:eeb1922bca41ceb6",
+      "core-001:unit:05c79df143835e6c"
+    ],
+    "future_owner": "B6 fresh editor",
+    "reopening_trigger": "Accepted listed concern, implementation/profile/ownership change or supplied original source that changes the scoped qualification; use candidates.md and B5-C001/C004/C005/C006/C008/C009 handoff rather than re-auditing B5."
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Apdu/PcscProtocol.cs",
+    "source_sha256": "e1bd7f6dc139821f4ba1c211d185d362a6bb271c2f651ae38b17c4efaf3a1091",
+    "disposition": "RETAIN-UNCHANGED",
+    "reason": "Direct candidate units route to fresh editor; complete neighboring clean/helper/context units remain unchanged after scoped review. Original fixture bytes stay intact.",
+    "candidate_ids": [
+      "CORE-B6-C003",
+      "CORE-B6-C014"
+    ],
+    "retained_unit_ids": [
+      "core-001:unit:81837f0699f394b8",
+      "core-001:unit:6e2ecd9bbc011acb",
+      "core-001:unit:4214b0a9bab40ef2",
+      "core-001:unit:d2a96496b648f992",
+      "core-001:unit:7a4a3234915f5c10",
+      "core-001:unit:6ba0e0e8ae23fd3f",
+      "core-001:unit:c06b5aa5999a3c23",
+      "core-001:unit:255d494dcd475e40",
+      "core-001:unit:220a619968478d1d",
+      "core-001:unit:ee9f856768a61253",
+      "core-001:unit:63db2726255ba437",
+      "core-001:unit:b80275222aee17a3",
+      "core-001:unit:6d005ffcb49db57e",
+      "core-001:unit:df7d6faabd97ea09",
+      "core-001:unit:d15af5d76fb744f4",
+      "core-001:unit:e480f3a1b6f59e94",
+      "core-001:unit:b237ba146f27bb4d",
+      "core-001:unit:ea618de9d0ef671f",
+      "core-001:unit:770285a894a94db6",
+      "core-001:unit:43dd2c3c79e2d8a0",
+      "core-001:unit:d608ad85b0737611",
+      "core-001:unit:568060fd20486819",
+      "core-001:unit:6c6fa4bd6ee3b89b",
+      "core-001:unit:9cd17279b86d5878",
+      "core-001:unit:4e770d67461a7e7b",
+      "core-001:unit:fefed9785d67d20e",
+      "core-001:unit:2b96eb257d9f7d23",
+      "core-001:unit:b2dc39a0e66bee39",
+      "core-001:unit:09bc3a82e48ea4ae",
+      "core-001:unit:87b6815f47b3b86d"
+    ],
+    "future_owner": "B6 fresh editor",
+    "reopening_trigger": "Accepted listed concern, implementation/profile/ownership change or supplied original source that changes the scoped qualification; use candidates.md and B5-C001/C004/C005/C006/C008/C009 handoff rather than re-auditing B5."
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Apdu/ProtocolConfiguration.cs",
+    "source_sha256": "2a1561c92c2b9a8c7b23df18c7ffd4d66332b5fd919f005ca26e6252d35ecfe0",
+    "disposition": "RETAIN-UNCHANGED",
+    "reason": "Direct candidate units route to fresh editor; complete neighboring clean/helper/context units remain unchanged after scoped review. Original fixture bytes stay intact.",
+    "candidate_ids": [
+      "CORE-B6-C001",
+      "CORE-B6-C003"
+    ],
+    "retained_unit_ids": [
+      "core-001:unit:7f7dc6e8db5f2d3b",
+      "core-001:unit:d5c4cf9ddaee2873",
+      "core-001:unit:99cb8af29c0dbbcb"
+    ],
+    "future_owner": "B6 fresh editor",
+    "reopening_trigger": "Accepted listed concern, implementation/profile/ownership change or supplied original source that changes the scoped qualification; use candidates.md and B5-C001/C004/C005/C006/C008/C009 handoff rather than re-auditing B5."
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Apdu/SWConstants.cs",
+    "source_sha256": "a6d9275a147ea733c359f80094aca57c8befb9ccef2296b2356a372561615ba7",
+    "disposition": "RETAIN-UNCHANGED",
+    "reason": "Direct candidate units route to fresh editor; complete neighboring clean/helper/context units remain unchanged after scoped review. Original fixture bytes stay intact.",
+    "candidate_ids": [
+      "CORE-B6-C001"
+    ],
+    "retained_unit_ids": [
+      "core-001:unit:b0c0d59299e1e832",
+      "core-001:unit:f841ff49aa6ee6d5",
+      "core-001:unit:8ea10f01e3ce6cc3",
+      "core-001:unit:543f4b7b24fc6099",
+      "core-001:unit:94bcf78d88cbb34b",
+      "core-001:unit:ebad6609414dc32f",
+      "core-001:unit:7590640bbfe30bdc",
+      "core-001:unit:e8a5d19d04c14599",
+      "core-001:unit:f4910408b1d1ca58",
+      "core-001:unit:e76281efea154dbc",
+      "core-001:unit:8b00707ac0cba272",
+      "core-001:unit:3ad8b9f956a4e672",
+      "core-001:unit:786a39ef71270ffc",
+      "core-001:unit:879a9b1c3fc2986f",
+      "core-001:unit:8e9040753e759723",
+      "core-001:unit:d7f86bb310dd7541",
+      "core-001:unit:f39183b2d438d21d",
+      "core-001:unit:2ead33aceaada535",
+      "core-001:unit:91ce77df175230c9",
+      "core-001:unit:bcadea3448b4c7be",
+      "core-001:unit:76e3bac9f7a38c0a",
+      "core-001:unit:148124700cd38cff",
+      "core-001:unit:802329b35ff9ea83",
+      "core-001:unit:dc8924f8817a6260",
+      "core-001:unit:53f3eee8233f9a20",
+      "core-001:unit:e593b914a14f08e9",
+      "core-001:unit:eb61643f2457ef29",
+      "core-001:unit:cf7ab83a12f4b36e",
+      "core-001:unit:9c1018f83d8742a2",
+      "core-001:unit:b909d626fc8a82e4",
+      "core-001:unit:a7ba5bce6d2f5325",
+      "core-001:unit:904a7d7b250db4c3",
+      "core-001:unit:9f544cbddf06a097",
+      "core-001:unit:eede29d5d91b65d8",
+      "core-001:unit:fd8fdfd576a5df2a",
+      "core-001:unit:e7354a1214c8ba41",
+      "core-001:unit:f7ad438d959a08fa",
+      "core-001:unit:aa9d6d49701b178d",
+      "core-001:unit:12e9b6756b57c449",
+      "core-001:unit:53610e62d0568a28",
+      "core-001:unit:a3d37dc1aed22b2f",
+      "core-001:unit:b0d28f5d66960a4f",
+      "core-001:unit:77ee7f62ff374f99",
+      "core-001:unit:99b3509c2b6c733e",
+      "core-001:unit:5f18c0d67c2c7815",
+      "core-001:unit:6a3b342b4b341f16",
+      "core-001:unit:e6a9b4639038c782",
+      "core-001:unit:d35737ff73e16d1d",
+      "core-001:unit:f2e78d0a603142dd"
+    ],
+    "future_owner": "B6 fresh editor",
+    "reopening_trigger": "Accepted listed concern, implementation/profile/ownership change or supplied original source that changes the scoped qualification; use candidates.md and B5-C001/C004/C005/C006/C008/C009 handoff rather than re-auditing B5."
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Apdu/SmartCardMaxApduSizes.cs",
+    "source_sha256": "eb013d8aaeababdd56312a80520f9c21978b00611b97e0ab64e27dd67fe3b94e",
+    "disposition": "RETAIN-UNCHANGED",
+    "reason": "Direct candidate units route to fresh editor; complete neighboring clean/helper/context units remain unchanged after scoped review. Original fixture bytes stay intact.",
+    "candidate_ids": [
+      "CORE-B6-C001"
+    ],
+    "retained_unit_ids": [
+      "core-001:unit:43b34a2443ea8311",
+      "core-001:unit:1553d463e7a75c61",
+      "core-001:unit:25befffd6a531ef1"
+    ],
+    "future_owner": "B6 fresh editor",
+    "reopening_trigger": "Accepted listed concern, implementation/profile/ownership change or supplied original source that changes the scoped qualification; use candidates.md and B5-C001/C004/C005/C006/C008/C009 handoff rather than re-auditing B5."
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Scp/AesCmac.cs",
+    "source_sha256": "2d44cc4393a59c8c0e5b82e8dfeaa716f4e89f09832b39b511656754a7cf397b",
+    "disposition": "RETAIN-UNCHANGED",
+    "reason": "Direct candidate units route to fresh editor; complete neighboring clean/helper/context units remain unchanged after scoped review. Original fixture bytes stay intact.",
+    "candidate_ids": [
+      "CORE-B6-C004"
+    ],
+    "retained_unit_ids": [
+      "core-001:unit:2210bd44dbe86b36",
+      "core-001:unit:b80296c3f79316cc",
+      "core-001:unit:3f7bb85b8df56725",
+      "core-001:unit:0cfa3b3d3137b867",
+      "core-001:unit:23ad15e2316041bd",
+      "core-001:unit:175da97212cbca16",
+      "core-001:unit:f6e64b6fcfe696e3",
+      "core-001:unit:206d40b03c879c0d",
+      "core-001:unit:2b10aee7276d0bc4",
+      "core-001:unit:db234192cf091939",
+      "core-001:unit:3d005de70786a691",
+      "core-001:unit:bff133f31ebccb57",
+      "core-001:unit:feb464d13e1d8b77",
+      "core-001:unit:6e95de1a0c4dfee2",
+      "core-001:unit:6bc330176447806b",
+      "core-001:unit:5a4dba6c6d25b59e",
+      "core-001:unit:76692b40cfdf8359",
+      "core-001:unit:f04e5966ef4c38af",
+      "core-001:unit:c8c26c059d2c8e82",
+      "core-001:unit:98be61e6ab722713",
+      "core-001:unit:219fd9989e12b5f7",
+      "core-001:unit:2f4fe04ec06bb866",
+      "core-001:unit:49d6dcbff7fe963e",
+      "core-001:unit:62cf5bfad96326e5",
+      "core-001:unit:bb0f88586de82a3b",
+      "core-001:unit:e4d1114904f4442c"
+    ],
+    "future_owner": "B6 fresh editor",
+    "reopening_trigger": "Accepted listed concern, implementation/profile/ownership change or supplied original source that changes the scoped qualification; use candidates.md and B5-C001/C004/C005/C006/C008/C009 handoff rather than re-auditing B5."
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Scp/DataEncryptor.cs",
+    "source_sha256": "c6b4ed034707107b9d11986e42e0482ccb4e1acf5167f5de8504303425cecc81",
+    "disposition": "RETAIN-UNCHANGED",
+    "reason": "Direct candidate units route to fresh editor; complete neighboring clean/helper/context units remain unchanged after scoped review. Original fixture bytes stay intact.",
+    "candidate_ids": [
+      "CORE-B6-C007"
+    ],
+    "retained_unit_ids": [
+      "core-001:unit:9249543a22039bd3"
+    ],
+    "future_owner": "B6 fresh editor",
+    "reopening_trigger": "Accepted listed concern, implementation/profile/ownership change or supplied original source that changes the scoped qualification; use candidates.md and B5-C001/C004/C005/C006/C008/C009 handoff rather than re-auditing B5."
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Scp/KeyReference.cs",
+    "source_sha256": "38bc882f50c19b5f7b2eab307131553b66a55a219e1c209bcb81f95264292c70",
+    "disposition": "RETAIN-UNCHANGED",
+    "reason": "Direct candidate units route to fresh editor; complete neighboring clean/helper/context units remain unchanged after scoped review. Original fixture bytes stay intact.",
+    "candidate_ids": [
+      "CORE-B6-C008"
+    ],
+    "retained_unit_ids": [
+      "core-001:unit:68f87cb62168ebc0",
+      "core-001:unit:24971af1f10c7e8c",
+      "core-001:unit:baa9b23c62b02388",
+      "core-001:unit:578dc87d67a3156a",
+      "core-001:unit:fc770ba077015ab2"
+    ],
+    "future_owner": "B6 fresh editor",
+    "reopening_trigger": "Accepted listed concern, implementation/profile/ownership change or supplied original source that changes the scoped qualification; use candidates.md and B5-C001/C004/C005/C006/C008/C009 handoff rather than re-auditing B5."
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Scp/PcscProtocolScp.cs",
+    "source_sha256": "e2dfec983fc288544ab05cd64f11424e6e5369f1ce4c9baa5cd2242192e840f3",
+    "disposition": "RETAIN-UNCHANGED",
+    "reason": "Direct candidate units route to fresh editor; complete neighboring clean/helper/context units remain unchanged after scoped review. Original fixture bytes stay intact.",
+    "candidate_ids": [
+      "CORE-B6-C007",
+      "CORE-B6-C013",
+      "CORE-B6-C015"
+    ],
+    "retained_unit_ids": [
+      "core-001:unit:8334027986c062c0",
+      "core-001:unit:7b194d802204c3aa",
+      "core-001:unit:625030209ecbd90d",
+      "core-001:unit:57f791ecb3705153",
+      "core-001:unit:ebeaa2b026cb97c4",
+      "core-001:unit:51e2f0502a37bb83",
+      "core-001:unit:500239f3f73f0789",
+      "core-001:unit:0bca625b3a5df9d2",
+      "core-001:unit:fadbe45256667d89",
+      "core-001:unit:c2ea0df6f84b96ec",
+      "core-001:unit:d0ef101ba68f1bf0",
+      "core-001:unit:a3af7098af466632"
+    ],
+    "future_owner": "B6 fresh editor",
+    "reopening_trigger": "Accepted listed concern, implementation/profile/ownership change or supplied original source that changes the scoped qualification; use candidates.md and B5-C001/C004/C005/C006/C008/C009 handoff rather than re-auditing B5."
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Scp/Scp03KeyParameters.cs",
+    "source_sha256": "e20542d76082ed682371ee922dfcfe6d6eea99f730e5ce6ff70b1931f8048232",
+    "disposition": "RETAIN-UNCHANGED",
+    "reason": "Direct candidate units route to fresh editor; complete neighboring clean/helper/context units remain unchanged after scoped review. Original fixture bytes stay intact.",
+    "candidate_ids": [
+      "CORE-B6-C006",
+      "CORE-B6-C007",
+      "CORE-B6-C015"
+    ],
+    "retained_unit_ids": [
+      "core-001:unit:b652e14a84dee385",
+      "core-001:unit:06bce034dd22fc61",
+      "core-001:unit:175449e8fe6c79ab"
+    ],
+    "future_owner": "B6 fresh editor",
+    "reopening_trigger": "Accepted listed concern, implementation/profile/ownership change or supplied original source that changes the scoped qualification; use candidates.md and B5-C001/C004/C005/C006/C008/C009 handoff rather than re-auditing B5."
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Scp/Scp11KeyParameters.cs",
+    "source_sha256": "e4a5084923662f09de9055d54beb5de4dada4059b9b54b6235343c2cbb8138c3",
+    "disposition": "RETAIN-UNCHANGED",
+    "reason": "Direct candidate units route to fresh editor; complete neighboring clean/helper/context units remain unchanged after scoped review. Original fixture bytes stay intact.",
+    "candidate_ids": [
+      "CORE-B6-C007",
+      "CORE-B6-C009",
+      "CORE-B6-C010"
+    ],
+    "retained_unit_ids": [
+      "core-001:unit:e13c80be9bcb5ead",
+      "core-001:unit:20a32e9cc15e9138",
+      "core-001:unit:27ba83c15f71c735",
+      "core-001:unit:6b5f4acc876dda7e",
+      "core-001:unit:7398ffbbdbac06e6"
+    ],
+    "future_owner": "B6 fresh editor",
+    "reopening_trigger": "Accepted listed concern, implementation/profile/ownership change or supplied original source that changes the scoped qualification; use candidates.md and B5-C001/C004/C005/C006/C008/C009 handoff rather than re-auditing B5."
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Scp/Scp11X963Kdf.cs",
+    "source_sha256": "3da2444d8f50e2cf85c10024456d703189f84a96384254a8c0b8dbc58755d268",
+    "disposition": "RETAIN-UNCHANGED",
+    "reason": "Direct candidate units route to fresh editor; complete neighboring clean/helper/context units remain unchanged after scoped review. Original fixture bytes stay intact.",
+    "candidate_ids": [
+      "CORE-B6-C009",
+      "CORE-B6-C010",
+      "CORE-B6-C013"
+    ],
+    "retained_unit_ids": [
+      "core-001:unit:3388f7e432af86e7",
+      "core-001:unit:4028187e13486a72",
+      "core-001:unit:d770eed52d39946f",
+      "core-001:unit:7002f458687c4cfc",
+      "core-001:unit:be96e2d0d5da33ad",
+      "core-001:unit:3b74055124996f9e",
+      "core-001:unit:86e75aa9b55cddbf",
+      "core-001:unit:29c208292e6b9523"
+    ],
+    "future_owner": "B6 fresh editor",
+    "reopening_trigger": "Accepted listed concern, implementation/profile/ownership change or supplied original source that changes the scoped qualification; use candidates.md and B5-C001/C004/C005/C006/C008/C009 handoff rather than re-auditing B5."
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Scp/ScpInitializer.cs",
+    "source_sha256": "ab373887cb8b92f5877d26b3aa06d29815048f1e3606e56c6f449f7ecf807f67",
+    "disposition": "RETAIN-UNCHANGED",
+    "reason": "Direct candidate units route to fresh editor; complete neighboring clean/helper/context units remain unchanged after scoped review. Original fixture bytes stay intact.",
+    "candidate_ids": [
+      "CORE-B6-C006",
+      "CORE-B6-C009",
+      "CORE-B6-C010",
+      "CORE-B6-C013"
+    ],
+    "retained_unit_ids": [
+      "core-001:unit:98db637a10d4508e",
+      "core-001:unit:bdfffc4451d54487",
+      "core-001:unit:7bfc40b480086148",
+      "core-001:unit:075d4f72bfed357b",
+      "core-001:unit:58057de1a04e9884",
+      "core-001:unit:eb4d63e3ec548a6e",
+      "core-001:unit:f35cf3b9c580805b",
+      "core-001:unit:501a63f27d571599"
+    ],
+    "future_owner": "B6 fresh editor",
+    "reopening_trigger": "Accepted listed concern, implementation/profile/ownership change or supplied original source that changes the scoped qualification; use candidates.md and B5-C001/C004/C005/C006/C008/C009 handoff rather than re-auditing B5."
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Scp/ScpKeyParameters.cs",
+    "source_sha256": "574d50fc74a08e4d0fe3b00c3e1fa2f6a80fb23e2ac85c36ae9b15332d8dece1",
+    "disposition": "RETAIN-UNCHANGED",
+    "reason": "Direct candidate units route to fresh editor; complete neighboring clean/helper/context units remain unchanged after scoped review. Original fixture bytes stay intact.",
+    "candidate_ids": [
+      "CORE-B6-C007"
+    ],
+    "retained_unit_ids": [
+      "core-001:unit:d0d20c5cb301de3d",
+      "core-001:unit:45689108d18d0cbd",
+      "core-001:unit:1a872b1f1f92c0f0"
+    ],
+    "future_owner": "B6 fresh editor",
+    "reopening_trigger": "Accepted listed concern, implementation/profile/ownership change or supplied original source that changes the scoped qualification; use candidates.md and B5-C001/C004/C005/C006/C008/C009 handoff rather than re-auditing B5."
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Scp/ScpKid.cs",
+    "source_sha256": "8bd5605b70ab48e0404b2e9dfec52de21bbc76048f7c851c00a6743e8bb416cc",
+    "disposition": "RETAIN-UNCHANGED",
+    "reason": "Direct candidate units route to fresh editor; complete neighboring clean/helper/context units remain unchanged after scoped review. Original fixture bytes stay intact.",
+    "candidate_ids": [
+      "CORE-B6-C010"
+    ],
+    "retained_unit_ids": [
+      "core-001:unit:f5efa5515faba0fb",
+      "core-001:unit:40bde27d0a61ab55",
+      "core-001:unit:bce440683985de79",
+      "core-001:unit:0854b6428dc7d333",
+      "core-001:unit:b2c063e8fbedf3b2"
+    ],
+    "future_owner": "B6 fresh editor",
+    "reopening_trigger": "Accepted listed concern, implementation/profile/ownership change or supplied original source that changes the scoped qualification; use candidates.md and B5-C001/C004/C005/C006/C008/C009 handoff rather than re-auditing B5."
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Scp/ScpProcessor.cs",
+    "source_sha256": "685642e5d7db7a7e7fe0d6bcc8cab2f4495d6ef9d37bcfb6e02ed450884fdef1",
+    "disposition": "RETAIN-UNCHANGED",
+    "reason": "Direct candidate units route to fresh editor; complete neighboring clean/helper/context units remain unchanged after scoped review. Original fixture bytes stay intact.",
+    "candidate_ids": [
+      "CORE-B6-C002",
+      "CORE-B6-C004",
+      "CORE-B6-C005",
+      "CORE-B6-C010",
+      "CORE-B6-C011"
+    ],
+    "retained_unit_ids": [
+      "core-001:unit:491bda07d0e04d6b",
+      "core-001:unit:a8f47501ddb82ec9",
+      "core-001:unit:467cfa8c9802f2d4",
+      "core-001:unit:fa2a1b11c984169a",
+      "core-001:unit:11263d38fbe926c5",
+      "core-001:unit:e36b9cc739f3cfd7",
+      "core-001:unit:f96355d3db0dfcd7",
+      "core-001:unit:4098ca59e7a31518",
+      "core-001:unit:1527228edf7850c1",
+      "core-001:unit:62ede839d51aa516",
+      "core-001:unit:fe050da8a61a8eab"
+    ],
+    "future_owner": "B6 fresh editor",
+    "reopening_trigger": "Accepted listed concern, implementation/profile/ownership change or supplied original source that changes the scoped qualification; use candidates.md and B5-C001/C004/C005/C006/C008/C009 handoff rather than re-auditing B5."
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Scp/ScpState.Scp03.cs",
+    "source_sha256": "7f1a6dc602033053506fc1daf1f72beb4adceb3271b65be72d370f639e55fe0e",
+    "disposition": "RETAIN-UNCHANGED",
+    "reason": "Direct candidate units route to fresh editor; complete neighboring clean/helper/context units remain unchanged after scoped review. Original fixture bytes stay intact.",
+    "candidate_ids": [
+      "CORE-B6-C006",
+      "CORE-B6-C010"
+    ],
+    "retained_unit_ids": [
+      "core-001:unit:d01581a7049d1a0f",
+      "core-001:unit:ab3cd828b9b7df84",
+      "core-001:unit:9739f1015cf58f7b",
+      "core-001:unit:d3c75fd81555b70e",
+      "core-001:unit:ff94739b8d387690",
+      "core-001:unit:6e85c4046f16c408"
+    ],
+    "future_owner": "B6 fresh editor",
+    "reopening_trigger": "Accepted listed concern, implementation/profile/ownership change or supplied original source that changes the scoped qualification; use candidates.md and B5-C001/C004/C005/C006/C008/C009 handoff rather than re-auditing B5."
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Scp/ScpState.Scp11.cs",
+    "source_sha256": "99f937de3413a0072eb0171a13eab0a9612eaa99c3c58aab55f8620f71009302",
+    "disposition": "RETAIN-UNCHANGED",
+    "reason": "Direct candidate units route to fresh editor; complete neighboring clean/helper/context units remain unchanged after scoped review. Original fixture bytes stay intact.",
+    "candidate_ids": [
+      "CORE-B6-C009",
+      "CORE-B6-C010"
+    ],
+    "retained_unit_ids": [
+      "core-001:unit:aadaf84eb1543861",
+      "core-001:unit:81615594415e5bfa",
+      "core-001:unit:5bdf92ad674fe5bc",
+      "core-001:unit:c646e89115056421",
+      "core-001:unit:b98f282cbb9aab1d",
+      "core-001:unit:8403e16c7a748a91",
+      "core-001:unit:403c7730708c325d",
+      "core-001:unit:227f45e04cf5735d",
+      "core-001:unit:c5fcfeccc981dc70",
+      "core-001:unit:42a651abc7d52ac8",
+      "core-001:unit:e9f096ab7835d134"
+    ],
+    "future_owner": "B6 fresh editor",
+    "reopening_trigger": "Accepted listed concern, implementation/profile/ownership change or supplied original source that changes the scoped qualification; use candidates.md and B5-C001/C004/C005/C006/C008/C009 handoff rather than re-auditing B5."
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Scp/ScpState.cs",
+    "source_sha256": "9e03845d5e0c87e951eb8879cd51fbb5014a009e8f4c537015599d1512bb2039",
+    "disposition": "RETAIN-UNCHANGED",
+    "reason": "Direct candidate units route to fresh editor; complete neighboring clean/helper/context units remain unchanged after scoped review. Original fixture bytes stay intact.",
+    "candidate_ids": [
+      "CORE-B6-C004",
+      "CORE-B6-C010",
+      "CORE-B6-C011"
+    ],
+    "retained_unit_ids": [
+      "core-001:unit:d4c130fd71fde0de",
+      "core-001:unit:7a94aedfd06898a7",
+      "core-001:unit:c22c76cc938e8398",
+      "core-001:unit:77cd33ce9f75d777",
+      "core-001:unit:7f6cabf4c59ec456",
+      "core-001:unit:b2719740495bc1be",
+      "core-001:unit:090ddf6623bf5435",
+      "core-001:unit:ab02fd45dc55773d",
+      "core-001:unit:e215ef4ebff9181c",
+      "core-001:unit:63ec5778ce441bad",
+      "core-001:unit:3e8319fd4c000f26",
+      "core-001:unit:d224510f24fab136",
+      "core-001:unit:07e14266a9644353",
+      "core-001:unit:c143535480645641",
+      "core-001:unit:1f63e14fcaca4016",
+      "core-001:unit:3f4a285696b67a7f"
+    ],
+    "future_owner": "B6 fresh editor",
+    "reopening_trigger": "Accepted listed concern, implementation/profile/ownership change or supplied original source that changes the scoped qualification; use candidates.md and B5-C001/C004/C005/C006/C008/C009 handoff rather than re-auditing B5."
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Scp/SessionKeys.cs",
+    "source_sha256": "0fd16eb6e4c0c5d6cee783d353fd466eef63b6586768a02b85f501e53d1667b2",
+    "disposition": "RETAIN-UNCHANGED",
+    "reason": "Direct candidate units route to fresh editor; complete neighboring clean/helper/context units remain unchanged after scoped review. Original fixture bytes stay intact.",
+    "candidate_ids": [],
+    "retained_unit_ids": [
+      "core-001:unit:7cb283fd9e8c03bc",
+      "core-001:unit:6878f5fa2fa27e69",
+      "core-001:unit:0de4e9b2a705fc04",
+      "core-001:unit:5fdf05ed7c2317d4",
+      "core-001:unit:f64026b8dd37ff31",
+      "core-001:unit:d5f580e501d604e7",
+      "core-001:unit:ce0d1c7aa5ddcead",
+      "core-001:unit:67fad4e4077e25a8",
+      "core-001:unit:035ae50978ce88d7",
+      "core-001:unit:05e77a5ba2ca4be7",
+      "core-001:unit:e2a99a2b7b835b52",
+      "core-001:unit:e10c13765671637b",
+      "core-001:unit:1499f7d66e5c85a8"
+    ],
+    "future_owner": "B6 fresh editor",
+    "reopening_trigger": "Accepted listed concern, implementation/profile/ownership change or supplied original source that changes the scoped qualification; use candidates.md and B5-C001/C004/C005/C006/C008/C009 handoff rather than re-auditing B5."
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Scp/StaticKeys.cs",
+    "source_sha256": "63829a13cd3d99623fd312d11025c0c0994cb7b6e7bb6cd22166ab45cacc9a68",
+    "disposition": "RETAIN-UNCHANGED",
+    "reason": "Direct candidate units route to fresh editor; complete neighboring clean/helper/context units remain unchanged after scoped review. Original fixture bytes stay intact.",
+    "candidate_ids": [
+      "CORE-B6-C006",
+      "CORE-B6-C007",
+      "CORE-B6-C010"
+    ],
+    "retained_unit_ids": [
+      "core-001:unit:9287399d186aeb0a",
+      "core-001:unit:ee60417aafc55ba0",
+      "core-001:unit:9572d1221cf18968",
+      "core-001:unit:f10555c1660a42e0",
+      "core-001:unit:a0dec5dca7485262",
+      "core-001:unit:488f0f44d8d5e7b5",
+      "core-001:unit:9f05ae0c7c906b9b",
+      "core-001:unit:9a84b2a9467f656f",
+      "core-001:unit:a8cea640b1b9b9ad",
+      "core-001:unit:7594cee1ac88cb12",
+      "core-001:unit:8c350310d7394ae8",
+      "core-001:unit:15655e9be93936a8",
+      "core-001:unit:1f4c8dfb9fd7ab72",
+      "core-001:unit:09befb55924de014",
+      "core-001:unit:a0099f3208f38fc0",
+      "core-001:unit:2236f464ef8d6570",
+      "core-001:unit:097f54471ea1651e",
+      "core-001:unit:2ae0678faff0832d",
+      "core-001:unit:dff1390be607c605",
+      "core-001:unit:5b7131ee5ffc27a9",
+      "core-001:unit:6f807382bb8772c3"
+    ],
+    "future_owner": "B6 fresh editor",
+    "reopening_trigger": "Accepted listed concern, implementation/profile/ownership change or supplied original source that changes the scoped qualification; use candidates.md and B5-C001/C004/C005/C006/C008/C009 handoff rather than re-auditing B5."
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreScpAuditReproTests.cs",
+    "source_sha256": "adac19d43dc96b853b48229b4e95839e21f4e772b1ce4344efe323acd661bf6f",
+    "disposition": "RETAIN-UNCHANGED",
+    "reason": "Direct candidate units route to fresh editor; complete neighboring clean/helper/context units remain unchanged after scoped review. Original fixture bytes stay intact.",
+    "candidate_ids": [
+      "CORE-B6-C010",
+      "CORE-B6-C013"
+    ],
+    "retained_unit_ids": [
+      "core-001:unit:5f873d61a1f6e87a",
+      "core-001:unit:58ff5b5dfa605da7",
+      "core-001:unit:223e00cc0f54bdbb",
+      "core-001:unit:5a555279e11c1fc3",
+      "core-001:unit:fe491769813d36e2",
+      "core-001:unit:6669826a0631cea5",
+      "core-001:unit:edaef2dcf282acc6",
+      "core-001:unit:e5277ebadf775d92"
+    ],
+    "future_owner": "B6 fresh editor",
+    "reopening_trigger": "Accepted listed concern, implementation/profile/ownership change or supplied original source that changes the scoped qualification; use candidates.md and B5-C001/C004/C005/C006/C008/C009 handoff rather than re-auditing B5."
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Apdu/ApduFormatterTests.cs",
+    "source_sha256": "ac64332cf8ba703ad7677d84f5cb58e2094bd963f8684ad4d37d3661c931a295",
+    "disposition": "RETAIN-UNCHANGED",
+    "reason": "Direct candidate units route to fresh editor; complete neighboring clean/helper/context units remain unchanged after scoped review. Original fixture bytes stay intact.",
+    "candidate_ids": [],
+    "retained_unit_ids": [
+      "core-001:unit:2965da7e7fcb3bb3",
+      "core-001:unit:aa42ef0c402e79f9",
+      "core-001:unit:cda45e6727e2e376",
+      "core-001:unit:b63ab7bc7e120605",
+      "core-001:unit:eee93845073acc35",
+      "core-001:unit:5177e2aeba3f607f",
+      "core-001:unit:4a6c05ddcc756e8f",
+      "core-001:unit:aab4dd2b372765ff",
+      "core-001:unit:eb6a270f52814505",
+      "core-001:unit:5851b37096316c30"
+    ],
+    "future_owner": "B6 fresh editor",
+    "reopening_trigger": "Accepted listed concern, implementation/profile/ownership change or supplied original source that changes the scoped qualification; use candidates.md and B5-C001/C004/C005/C006/C008/C009 handoff rather than re-auditing B5."
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Apdu/ApduResponseOwnershipTests.cs",
+    "source_sha256": "97b22494342eb74d952d3526d4c7b1f15fbdd259fcdb119e8478e314fab2632a",
+    "disposition": "RETAIN-UNCHANGED",
+    "reason": "Direct candidate units route to fresh editor; complete neighboring clean/helper/context units remain unchanged after scoped review. Original fixture bytes stay intact.",
+    "candidate_ids": [],
+    "retained_unit_ids": [
+      "core-001:unit:83a5474fd9ee627d",
+      "core-001:unit:586783fb53efab6c",
+      "core-001:unit:5cb383d7e8d3b26c"
+    ],
+    "future_owner": "B6 fresh editor",
+    "reopening_trigger": "Accepted listed concern, implementation/profile/ownership change or supplied original source that changes the scoped qualification; use candidates.md and B5-C001/C004/C005/C006/C008/C009 handoff rather than re-auditing B5."
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Apdu/Fakes/FakeApduProcessor.cs",
+    "source_sha256": "197768eb7cf136a1627e669307b515d28b5398f44da95f0de358eeb5eb0ccf28",
+    "disposition": "RETAIN-UNCHANGED",
+    "reason": "Direct candidate units route to fresh editor; complete neighboring clean/helper/context units remain unchanged after scoped review. Original fixture bytes stay intact.",
+    "candidate_ids": [
+      "CORE-B6-C002",
+      "CORE-B6-C013"
+    ],
+    "retained_unit_ids": [
+      "core-001:unit:2729eadae22524c5",
+      "core-001:unit:37c5583570490b28",
+      "core-001:unit:2b6a47b08dce0154",
+      "core-001:unit:da354d38190ef64d",
+      "core-001:unit:998f4baf55515b56",
+      "core-001:unit:6283d54039cd4a96",
+      "core-001:unit:540320fd4559ece7",
+      "core-001:unit:cf5d082b3f88b961",
+      "core-001:unit:a27d02d34af039f6",
+      "core-001:unit:cf3911c6a1502deb",
+      "core-001:unit:5287e70a4499db07"
+    ],
+    "future_owner": "B6 fresh editor",
+    "reopening_trigger": "Accepted listed concern, implementation/profile/ownership change or supplied original source that changes the scoped qualification; use candidates.md and B5-C001/C004/C005/C006/C008/C009 handoff rather than re-auditing B5."
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Apdu/Fakes/FakeSmartCardConnection.cs",
+    "source_sha256": "2238b68c379cacc52dc4b8648760ac5d05961092963ce2e44f0f761268e6ebe7",
+    "disposition": "RETAIN-UNCHANGED",
+    "reason": "Direct candidate units route to fresh editor; complete neighboring clean/helper/context units remain unchanged after scoped review. Original fixture bytes stay intact.",
+    "candidate_ids": [
+      "CORE-B6-C013"
+    ],
+    "retained_unit_ids": [
+      "core-001:unit:75249ea1e1bc3dbf",
+      "core-001:unit:5e5ea2c6f82f388f",
+      "core-001:unit:09696fda0afe05ee",
+      "core-001:unit:dc7419cc26499c73",
+      "core-001:unit:162cea0eb818d69b",
+      "core-001:unit:2aa9b244be552b3e",
+      "core-001:unit:1653cae73b444a1e",
+      "core-001:unit:b1d2957c7ccf0a10",
+      "core-001:unit:f7146468cd296b0c",
+      "core-001:unit:4d507045741a5fc7",
+      "core-001:unit:bf6f116363fe0204",
+      "core-001:unit:f5aceae6d78a8f73",
+      "core-001:unit:726a1532ce0a9622",
+      "core-001:unit:2e97d6fb4d7bba72"
+    ],
+    "future_owner": "B6 fresh editor",
+    "reopening_trigger": "Accepted listed concern, implementation/profile/ownership change or supplied original source that changes the scoped qualification; use candidates.md and B5-C001/C004/C005/C006/C008/C009 handoff rather than re-auditing B5."
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Apdu/PcscProtocolConcurrencyTests.cs",
+    "source_sha256": "997dc048355ef6d952681854a65c71d5147e3c067996bf41efe12e97017b30a2",
+    "disposition": "RETAIN-UNCHANGED",
+    "reason": "Direct candidate units route to fresh editor; complete neighboring clean/helper/context units remain unchanged after scoped review. Original fixture bytes stay intact.",
+    "candidate_ids": [
+      "CORE-B6-C013"
+    ],
+    "retained_unit_ids": [
+      "core-001:unit:5dd8f3eef3b2d6fb",
+      "core-001:unit:c5f9650f78b7d30a",
+      "core-001:unit:2d0f2b51db9cbed5",
+      "core-001:unit:81313a03bd148156",
+      "core-001:unit:faa3dc5525b0f175",
+      "core-001:unit:98724675b7858e85",
+      "core-001:unit:3f52f74e93fe9354",
+      "core-001:unit:a8d0fd20943a6c64",
+      "core-001:unit:8feaf086ee26a3de",
+      "core-001:unit:81af601cf488fd5e",
+      "core-001:unit:3dc284c84aea8825",
+      "core-001:unit:785e0ea794a60ff5",
+      "core-001:unit:b597713bcaadab25",
+      "core-001:unit:a3f480fded9af990",
+      "core-001:unit:60eaef5fc597e3c6",
+      "core-001:unit:850d126b8201ef73",
+      "core-001:unit:b6f4693a02a26e5b",
+      "core-001:unit:dbb62f272dfff6fc",
+      "core-001:unit:48f51e4cfe8367cc",
+      "core-001:unit:f957233ef336cfd0",
+      "core-001:unit:3fb5ea99aea2e838",
+      "core-001:unit:f788acb13e1778c6",
+      "core-001:unit:5174dde2cd9ae3f0",
+      "core-001:unit:464e9b024b2c6e85",
+      "core-001:unit:d07fb8f1a8ee68dc",
+      "core-001:unit:8474435f18c8dae5",
+      "core-001:unit:b36b5f54c3841dd4"
+    ],
+    "future_owner": "B6 fresh editor",
+    "reopening_trigger": "Accepted listed concern, implementation/profile/ownership change or supplied original source that changes the scoped qualification; use candidates.md and B5-C001/C004/C005/C006/C008/C009 handoff rather than re-auditing B5."
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Apdu/PcscProtocolTests.cs",
+    "source_sha256": "211b408ad88be119d50d8953d199df6866d7b42f0e1ed9adf9de02e00f175877",
+    "disposition": "RETAIN-UNCHANGED",
+    "reason": "Direct candidate units route to fresh editor; complete neighboring clean/helper/context units remain unchanged after scoped review. Original fixture bytes stay intact.",
+    "candidate_ids": [
+      "CORE-B6-C013"
+    ],
+    "retained_unit_ids": [
+      "core-001:unit:a717cff08cac5b25",
+      "core-001:unit:5ec3180126823913",
+      "core-001:unit:2a06615f9cf6bdef",
+      "core-001:unit:00c3fc96a8f6cd11",
+      "core-001:unit:7d1663a2160990fe",
+      "core-001:unit:7a1d315eb50d497b",
+      "core-001:unit:f8bda62d202a7497",
+      "core-001:unit:09d1d1e660289fd9",
+      "core-001:unit:313778ce01c9eb32",
+      "core-001:unit:dd0502438d1dc1d3",
+      "core-001:unit:2bb9d92f0fe3e24d",
+      "core-001:unit:517dc90abef4566a",
+      "core-001:unit:5f8147f773eb7fc1",
+      "core-001:unit:eea837ef8f375644",
+      "core-001:unit:501196eb7b938a46",
+      "core-001:unit:407a5fd41e36f7f0",
+      "core-001:unit:7a0cfb3f7a7fcb23",
+      "core-001:unit:328813382eda4b62",
+      "core-001:unit:6d4c9110652fbc0f",
+      "core-001:unit:110880430bb89c59",
+      "core-001:unit:4e0df86de9e46efc",
+      "core-001:unit:dc46d48d8b354afa",
+      "core-001:unit:89c932cf03836273",
+      "core-001:unit:6b5942e1cac85bf6",
+      "core-001:unit:b737d393dc2c1a1e",
+      "core-001:unit:65fdf634128e0e19",
+      "core-001:unit:9fa9e08c34fa5710",
+      "core-001:unit:c20c2268df7c22d1",
+      "core-001:unit:1eb07db32f8ee6e6",
+      "core-001:unit:962b7fbde2508e52"
+    ],
+    "future_owner": "B6 fresh editor",
+    "reopening_trigger": "Accepted listed concern, implementation/profile/ownership change or supplied original source that changes the scoped qualification; use candidates.md and B5-C001/C004/C005/C006/C008/C009 handoff rather than re-auditing B5."
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/AesCmacTests.cs",
+    "source_sha256": "0915db50cd6c497e48eaf6cdbbcfb9a88804c0a0c53eb8bc2f7e9096c7229942",
+    "disposition": "RETAIN-UNCHANGED",
+    "reason": "Direct candidate units route to fresh editor; complete neighboring clean/helper/context units remain unchanged after scoped review. Original fixture bytes stay intact.",
+    "candidate_ids": [
+      "CORE-B6-C013"
+    ],
+    "retained_unit_ids": [
+      "core-001:unit:b42891987f1d37ce",
+      "core-001:unit:a83dc161942c712e",
+      "core-001:unit:2b6da4c40e468332",
+      "core-001:unit:5a66f4de4153d385",
+      "core-001:unit:140918fa0f495821",
+      "core-001:unit:325f05c14f5edadf",
+      "core-001:unit:6722c47f59857d5c",
+      "core-001:unit:c15cf0165a7d1367",
+      "core-001:unit:dd451bd60e3bfa28",
+      "core-001:unit:66715b7a11aa4c97",
+      "core-001:unit:155c699f52706051",
+      "core-001:unit:f7d93ecd3d44aa3e",
+      "core-001:unit:57d4eae35181c8c8",
+      "core-001:unit:9df2a1654c179c92",
+      "core-001:unit:87ef60aeb0f61a18",
+      "core-001:unit:beddbb946521ed32",
+      "core-001:unit:2efcc7f8ae90292e",
+      "core-001:unit:c5efbfd37832d132",
+      "core-001:unit:7c1c4536dda19f1e",
+      "core-001:unit:ce7a1b38e299d64c",
+      "core-001:unit:68992acc6a979935"
+    ],
+    "future_owner": "B6 fresh editor",
+    "reopening_trigger": "Accepted listed concern, implementation/profile/ownership change or supplied original source that changes the scoped qualification; use candidates.md and B5-C001/C004/C005/C006/C008/C009 handoff rather than re-auditing B5."
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/PcscProtocolScpTests.cs",
+    "source_sha256": "e13b64ec028edea56a14933074dc06af1da8ecf3c951f391379f18e1dd2e310e",
+    "disposition": "RETAIN-UNCHANGED",
+    "reason": "Direct candidate units route to fresh editor; complete neighboring clean/helper/context units remain unchanged after scoped review. Original fixture bytes stay intact.",
+    "candidate_ids": [
+      "CORE-B6-C011",
+      "CORE-B6-C012",
+      "CORE-B6-C013"
+    ],
+    "retained_unit_ids": [
+      "core-001:unit:a786ea01f7a15204",
+      "core-001:unit:cf45d5ce00ff88ed",
+      "core-001:unit:7518725acec76031",
+      "core-001:unit:3e84d6406d5ca70a",
+      "core-001:unit:7fbae0b508ba9783",
+      "core-001:unit:be9cb73086b14b79",
+      "core-001:unit:d5ef65ddc68423ce",
+      "core-001:unit:f4124ed4d8b4de61",
+      "core-001:unit:1bfee56884adfcae",
+      "core-001:unit:2f77bfbd3d50a45b",
+      "core-001:unit:42cbc0b3a4090a52",
+      "core-001:unit:0c85a9efd5bcacca",
+      "core-001:unit:ad621b08bf910be8",
+      "core-001:unit:e871bc640a302421",
+      "core-001:unit:4f9531beed66e642",
+      "core-001:unit:f24ddac9394cfeab",
+      "core-001:unit:0c1bbc1c7a8c6052",
+      "core-001:unit:aef7870a870e928d",
+      "core-001:unit:b647039db7073716",
+      "core-001:unit:f80134cd7440e821",
+      "core-001:unit:f262122a0a5bd632",
+      "core-001:unit:dc8eba29db78ef26",
+      "core-001:unit:733b71f78c00810a",
+      "core-001:unit:2ead71cfbc8b0ffa",
+      "core-001:unit:1c6d42e19b0c9c1e",
+      "core-001:unit:f37cab2cbbc65920",
+      "core-001:unit:13296b17ce438d58",
+      "core-001:unit:3613ebde16482b15",
+      "core-001:unit:0b464115dda43702",
+      "core-001:unit:b49b79b0dbae63fd",
+      "core-001:unit:38213eb03cb0cde5",
+      "core-001:unit:2914a30f5e6c47ee",
+      "core-001:unit:e40408deff1b1799",
+      "core-001:unit:71e7f8c25fa392a1",
+      "core-001:unit:8d0c551f522cc2d5",
+      "core-001:unit:d45acc083e301e5a",
+      "core-001:unit:b8e5ac61b678a311",
+      "core-001:unit:88b7ddc492f7bed1",
+      "core-001:unit:1f53e969929c7be6",
+      "core-001:unit:ed9b4045f179f644",
+      "core-001:unit:2db7587489d3064b",
+      "core-001:unit:419ac763bca65978",
+      "core-001:unit:ef782f1ad75f0069",
+      "core-001:unit:1bdde989c71ec1c5",
+      "core-001:unit:f4ea09932a1f7fe2",
+      "core-001:unit:503367c9116fc507",
+      "core-001:unit:be3903b27d2d48b1",
+      "core-001:unit:fc58e1266d31e501",
+      "core-001:unit:3b9fc65554d16e38",
+      "core-001:unit:dc9e824bdb8f476c",
+      "core-001:unit:7afd4cdcd74a3874",
+      "core-001:unit:31f2a87417e0b7af",
+      "core-001:unit:d7a294eb6bb0ca3d",
+      "core-001:unit:bb9f2c0fd9a81fb0",
+      "core-001:unit:876b4e80550d7e50",
+      "core-001:unit:9b8b56a8a7f1fdda",
+      "core-001:unit:e23673ead0ed935f"
+    ],
+    "future_owner": "B6 fresh editor",
+    "reopening_trigger": "Accepted listed concern, implementation/profile/ownership change or supplied original source that changes the scoped qualification; use candidates.md and B5-C001/C004/C005/C006/C008/C009 handoff rather than re-auditing B5."
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11TestData.cs",
+    "source_sha256": "bc6b8da1321c48c78bca8efa1367e2c96ee54156b7afd2f85ad8ec4eae62ef79",
+    "disposition": "RETAIN-UNCHANGED",
+    "reason": "Direct candidate units route to fresh editor; complete neighboring clean/helper/context units remain unchanged after scoped review. Original fixture bytes stay intact.",
+    "candidate_ids": [
+      "CORE-B6-C009",
+      "CORE-B6-C013"
+    ],
+    "retained_unit_ids": [
+      "core-001:unit:7a7d75715b2890e0",
+      "core-001:unit:a8e432151751db32"
+    ],
+    "future_owner": "B6 fresh editor",
+    "reopening_trigger": "Accepted listed concern, implementation/profile/ownership change or supplied original source that changes the scoped qualification; use candidates.md and B5-C001/C004/C005/C006/C008/C009 handoff rather than re-auditing B5."
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11Tests.cs",
+    "source_sha256": "f018e9f30015e529418e4e74b5cb76c3adcc341030abf49afd9a4a0942f90155",
+    "disposition": "RETAIN-UNCHANGED",
+    "reason": "Direct candidate units route to fresh editor; complete neighboring clean/helper/context units remain unchanged after scoped review. Original fixture bytes stay intact.",
+    "candidate_ids": [
+      "CORE-B6-C007",
+      "CORE-B6-C013"
+    ],
+    "retained_unit_ids": [
+      "core-001:unit:4ff07b1a2cf6f6ef",
+      "core-001:unit:c6879b356c8d5247",
+      "core-001:unit:2cb834dc0b6c3177",
+      "core-001:unit:86e076ba72695ad0"
+    ],
+    "future_owner": "B6 fresh editor",
+    "reopening_trigger": "Accepted listed concern, implementation/profile/ownership change or supplied original source that changes the scoped qualification; use candidates.md and B5-C001/C004/C005/C006/C008/C009 handoff rather than re-auditing B5."
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/Scp11X963KdfTests.cs",
+    "source_sha256": "a89303ae2ba01745e3f62e97c39a3793c66fb0d2992f0ee65c86e63ec31b8741",
+    "disposition": "RETAIN-UNCHANGED",
+    "reason": "Direct candidate units route to fresh editor; complete neighboring clean/helper/context units remain unchanged after scoped review. Original fixture bytes stay intact.",
+    "candidate_ids": [
+      "CORE-B6-C007",
+      "CORE-B6-C013"
+    ],
+    "retained_unit_ids": [
+      "core-001:unit:1f3249496c346350",
+      "core-001:unit:b5fcef8c764a1121",
+      "core-001:unit:5b3e1238c1395dc8",
+      "core-001:unit:626af9b7b6fd0fe8",
+      "core-001:unit:ad42403b9c4991e1",
+      "core-001:unit:9a3bfa90af18fe5e",
+      "core-001:unit:84e49963b2d7ab4f",
+      "core-001:unit:d43d5dc81e30e613",
+      "core-001:unit:0f5bfb0aba625f4a",
+      "core-001:unit:332e97376cabc978"
+    ],
+    "future_owner": "B6 fresh editor",
+    "reopening_trigger": "Accepted listed concern, implementation/profile/ownership change or supplied original source that changes the scoped qualification; use candidates.md and B5-C001/C004/C005/C006/C008/C009 handoff rather than re-auditing B5."
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/ScpEmptyResponseTests.cs",
+    "source_sha256": "4ef6538074e642794ebd34cabf9061f0056e9c0a473401fe1a9ec943e114fb49",
+    "disposition": "RETAIN-UNCHANGED",
+    "reason": "Direct candidate units route to fresh editor; complete neighboring clean/helper/context units remain unchanged after scoped review. Original fixture bytes stay intact.",
+    "candidate_ids": [
+      "CORE-B6-C005",
+      "CORE-B6-C010",
+      "CORE-B6-C013"
+    ],
+    "retained_unit_ids": [
+      "core-001:unit:97858478538a2132",
+      "core-001:unit:8aa0db1cc1de4e48",
+      "core-001:unit:2ebcff11e400fb46",
+      "core-001:unit:c3a93da1ded9eec5",
+      "core-001:unit:ad84926c805f1fa5"
+    ],
+    "future_owner": "B6 fresh editor",
+    "reopening_trigger": "Accepted listed concern, implementation/profile/ownership change or supplied original source that changes the scoped qualification; use candidates.md and B5-C001/C004/C005/C006/C008/C009 handoff rather than re-auditing B5."
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/ScpExtensionsTests.cs",
+    "source_sha256": "ae24df95b5d3310e2b3d3fb0dbe73b085c4476c3034e80f0975f34bf784c17c1",
+    "disposition": "RETAIN-UNCHANGED",
+    "reason": "Direct candidate units route to fresh editor; complete neighboring clean/helper/context units remain unchanged after scoped review. Original fixture bytes stay intact.",
+    "candidate_ids": [
+      "CORE-B6-C007",
+      "CORE-B6-C013"
+    ],
+    "retained_unit_ids": [
+      "core-001:unit:a239822e2844de6d",
+      "core-001:unit:19bcd286db3d5c03",
+      "core-001:unit:bac8fef0e6d68d52",
+      "core-001:unit:20596e7b8c938708",
+      "core-001:unit:6e2c50a3a603f138",
+      "core-001:unit:d2121b04aaa52d9c",
+      "core-001:unit:6eac55005bea451f",
+      "core-001:unit:599adc9c977d3410",
+      "core-001:unit:b92121f952372da6"
+    ],
+    "future_owner": "B6 fresh editor",
+    "reopening_trigger": "Accepted listed concern, implementation/profile/ownership change or supplied original source that changes the scoped qualification; use candidates.md and B5-C001/C004/C005/C006/C008/C009 handoff rather than re-auditing B5."
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/X963KdfTests.cs",
+    "source_sha256": "2206aba4feec8e08c9743350bf1c5fff789f5f4ac1b7726eade8b8c260a64ba6",
+    "disposition": "RETAIN-UNCHANGED",
+    "reason": "Direct candidate units route to fresh editor; complete neighboring clean/helper/context units remain unchanged after scoped review. Original fixture bytes stay intact.",
+    "candidate_ids": [
+      "CORE-B6-C013"
+    ],
+    "retained_unit_ids": [
+      "core-001:unit:ed2a5b3a8f257f53",
+      "core-001:unit:93b370bf6fc6a24f",
+      "core-001:unit:225f0aa44d55f65c",
+      "core-001:unit:51e71e48e94d1f6f",
+      "core-001:unit:9f8ea0501d3dd12b",
+      "core-001:unit:ab89bc3aa47008e8",
+      "core-001:unit:b8c2741be55135e2",
+      "core-001:unit:1477107f3e0b3647",
+      "core-001:unit:c6a6486477e62329",
+      "core-001:unit:edecef7880c65014",
+      "core-001:unit:623c0c66fc648cc9",
+      "core-001:unit:a823aceaa9207e8b",
+      "core-001:unit:6139c72b8dc5770c",
+      "core-001:unit:d7158a4b7436eae4"
+    ],
+    "future_owner": "B6 fresh editor",
+    "reopening_trigger": "Accepted listed concern, implementation/profile/ownership change or supplied original source that changes the scoped qualification; use candidates.md and B5-C001/C004/C005/C006/C008/C009 handoff rather than re-auditing B5."
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/SmartCard/Scp/ansx963_2001.rsp",
+    "source_sha256": "7661e28b856fbe789aef528c3b056c06b2b91c1f246d64403201692c77123897",
+    "disposition": "RETAIN-UNCHANGED",
+    "reason": "Direct candidate units route to fresh editor; complete neighboring clean/helper/context units remain unchanged after scoped review. Original fixture bytes stay intact.",
+    "candidate_ids": [],
+    "retained_unit_ids": [
+      "core-001:unit:59c33b8c7c8f294c"
+    ],
+    "future_owner": "B6 fresh editor",
+    "reopening_trigger": "Accepted listed concern, implementation/profile/ownership change or supplied original source that changes the scoped qualification; use candidates.md and B5-C001/C004/C005/C006/C008/C009 handoff rather than re-auditing B5."
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/SmartCard/Scp/ansx963_2001.txt",
+    "source_sha256": "d57215dd825e8342c1bd9ff222c908753028709fd5a2d6c208b6fd6d26f2becf",
+    "disposition": "RETAIN-UNCHANGED",
+    "reason": "Direct candidate units route to fresh editor; complete neighboring clean/helper/context units remain unchanged after scoped review. Original fixture bytes stay intact.",
+    "candidate_ids": [],
+    "retained_unit_ids": [
+      "core-001:unit:24a290b7fd0ed693"
+    ],
+    "future_owner": "B6 fresh editor",
+    "reopening_trigger": "Accepted listed concern, implementation/profile/ownership change or supplied original source that changes the scoped qualification; use candidates.md and B5-C001/C004/C005/C006/C008/C009 handoff rather than re-auditing B5."
+  },
+  {
+    "path": "CLAUDE.md",
+    "source_sha256": "cd607c969909e2b0e605e98bf155bb6ca071dfbbfc432f225f67d5293f40bff8",
+    "disposition": "RETAIN-UNCHANGED",
+    "reason": "Direct candidate units route to fresh editor; complete neighboring clean/helper/context units remain unchanged after scoped review. Original fixture bytes stay intact.",
+    "candidate_ids": [
+      "CORE-B6-C002",
+      "CORE-B6-C015"
+    ],
+    "retained_unit_ids": [],
+    "future_owner": "SHARED fresh editor",
+    "reopening_trigger": "Accepted listed concern, implementation/profile/ownership change or supplied original source that changes the scoped qualification; use candidates.md and B5-C001/C004/C005/C006/C008/C009 handoff rather than re-auditing B5."
+  },
+  {
+    "path": "docs/SDK-HOUSE-STYLE.md",
+    "source_sha256": "6374792a819c60abe4336ab4b552515b9d900c7d8fca97088543845eb38d2a20",
+    "disposition": "RETAIN-UNCHANGED",
+    "reason": "Direct candidate units route to fresh editor; complete neighboring clean/helper/context units remain unchanged after scoped review. Original fixture bytes stay intact.",
+    "candidate_ids": [],
+    "retained_unit_ids": [
+      "core-001:unit:adcf2d48efd5b510"
+    ],
+    "future_owner": "SHARED fresh editor",
+    "reopening_trigger": "Accepted listed concern, implementation/profile/ownership change or supplied original source that changes the scoped qualification; use candidates.md and B5-C001/C004/C005/C006/C008/C009 handoff rather than re-auditing B5."
+  },
+  {
+    "path": "docs/architecture/raw-access-tiers.md",
+    "source_sha256": "f0a29452d9b6f63bc4149b4bf115cbaff0371c02d24614f36f7e5743bfd014f5",
+    "disposition": "RETAIN-UNCHANGED",
+    "reason": "Direct candidate units route to fresh editor; complete neighboring clean/helper/context units remain unchanged after scoped review. Original fixture bytes stay intact.",
+    "candidate_ids": [
+      "CORE-B6-C001",
+      "CORE-B6-C003",
+      "CORE-B6-C007",
+      "CORE-B6-C015"
+    ],
+    "retained_unit_ids": [],
+    "future_owner": "SHARED fresh editor",
+    "reopening_trigger": "Accepted listed concern, implementation/profile/ownership change or supplied original source that changes the scoped qualification; use candidates.md and B5-C001/C004/C005/C006/C008/C009 handoff rather than re-auditing B5."
+  },
+  {
+    "path": "docs/migration/v1-to-v2-changelog.md",
+    "source_sha256": "250fa9763bd3ec3ffe98ad8732ae832620d9b72fd62c24da1b3fdace3ff56600",
+    "disposition": "RETAIN-UNCHANGED",
+    "reason": "Direct candidate units route to fresh editor; complete neighboring clean/helper/context units remain unchanged after scoped review. Original fixture bytes stay intact.",
+    "candidate_ids": [],
+    "retained_unit_ids": [
+      "core-001:unit:3be8f3ae5cdbd456",
+      "core-001:unit:b3bcf9df88d4a939"
+    ],
+    "future_owner": "SHARED fresh editor",
+    "reopening_trigger": "Accepted listed concern, implementation/profile/ownership change or supplied original source that changes the scoped qualification; use candidates.md and B5-C001/C004/C005/C006/C008/C009 handoff rather than re-auditing B5."
+  },
+  {
+    "path": "docs/migration/v1-to-v2-gaps.md",
+    "source_sha256": "827ced7b8e4055b98b2cc2b1738086494437c169ba88e92af3ee27488fac177a",
+    "disposition": "RETAIN-UNCHANGED",
+    "reason": "Direct candidate units route to fresh editor; complete neighboring clean/helper/context units remain unchanged after scoped review. Original fixture bytes stay intact.",
+    "candidate_ids": [
+      "CORE-B6-C007",
+      "CORE-B6-C009",
+      "CORE-B6-C010",
+      "CORE-B6-C015"
+    ],
+    "retained_unit_ids": [],
+    "future_owner": "SHARED fresh editor",
+    "reopening_trigger": "Accepted listed concern, implementation/profile/ownership change or supplied original source that changes the scoped qualification; use candidates.md and B5-C001/C004/C005/C006/C008/C009 handoff rather than re-auditing B5."
+  },
+  {
+    "path": "docs/migration/v1-to-v2.md",
+    "source_sha256": "79413a6e09402598c4059a7a5196a8c50995bc93642392cb3e9d880196809280",
+    "disposition": "RETAIN-UNCHANGED",
+    "reason": "Direct candidate units route to fresh editor; complete neighboring clean/helper/context units remain unchanged after scoped review. Original fixture bytes stay intact.",
+    "candidate_ids": [
+      "CORE-B6-C007",
+      "CORE-B6-C015"
+    ],
+    "retained_unit_ids": [],
+    "future_owner": "SHARED fresh editor",
+    "reopening_trigger": "Accepted listed concern, implementation/profile/ownership change or supplied original source that changes the scoped qualification; use candidates.md and B5-C001/C004/C005/C006/C008/C009 handoff rather than re-auditing B5."
+  },
+  {
+    "path": "src/Core/CLAUDE.md",
+    "source_sha256": "e75263ee0c69550b56d7863e0eb86675e4d3513423bb9aa7a370e0834452e65e",
+    "disposition": "RETAIN-UNCHANGED",
+    "reason": "Direct candidate units route to fresh editor; complete neighboring clean/helper/context units remain unchanged after scoped review. Original fixture bytes stay intact.",
+    "candidate_ids": [
+      "CORE-B6-C001",
+      "CORE-B6-C002",
+      "CORE-B6-C007",
+      "CORE-B6-C009",
+      "CORE-B6-C012",
+      "CORE-B6-C015"
+    ],
+    "retained_unit_ids": [],
+    "future_owner": "SHARED fresh editor",
+    "reopening_trigger": "Accepted listed concern, implementation/profile/ownership change or supplied original source that changes the scoped qualification; use candidates.md and B5-C001/C004/C005/C006/C008/C009 handoff rather than re-auditing B5."
+  },
+  {
+    "path": "src/Core/README.md",
+    "source_sha256": "2fd1b886a380f4618a4e0fd25ab7536aecd5a84cb35ae1f0a2d26d058be0ae9a",
+    "disposition": "RETAIN-UNCHANGED",
+    "reason": "Direct candidate units route to fresh editor; complete neighboring clean/helper/context units remain unchanged after scoped review. Original fixture bytes stay intact.",
+    "candidate_ids": [
+      "CORE-B6-C001",
+      "CORE-B6-C002",
+      "CORE-B6-C003",
+      "CORE-B6-C007",
+      "CORE-B6-C009",
+      "CORE-B6-C015"
+    ],
+    "retained_unit_ids": [
+      "core-001:unit:2336d8929cbba2f8"
+    ],
+    "future_owner": "SHARED fresh editor",
+    "reopening_trigger": "Accepted listed concern, implementation/profile/ownership change or supplied original source that changes the scoped qualification; use candidates.md and B5-C001/C004/C005/C006/C008/C009 handoff rather than re-auditing B5."
+  },
+  {
+    "path": "src/Tests.Shared/CLAUDE.md",
+    "source_sha256": "5d9303462a236dcfbc4cf3a71afca4e3d84d3aeecc9ca81b703e284de39e3f35",
+    "disposition": "RETAIN-UNCHANGED",
+    "reason": "Direct candidate units route to fresh editor; complete neighboring clean/helper/context units remain unchanged after scoped review. Original fixture bytes stay intact.",
+    "candidate_ids": [],
+    "retained_unit_ids": [
+      "core-001:unit:8cec358279fb0d77"
+    ],
+    "future_owner": "SHARED fresh editor",
+    "reopening_trigger": "Accepted listed concern, implementation/profile/ownership change or supplied original source that changes the scoped qualification; use candidates.md and B5-C001/C004/C005/C006/C008/C009 handoff rather than re-auditing B5."
+  },
+  {
+    "path": "src/Tests.Shared/RecordingSmartCardConnection.cs",
+    "source_sha256": "22c67219fafe226cdb1364198f018cd2aae1fbe1d04a5bbde758361d8c711ba4",
+    "disposition": "RETAIN-UNCHANGED",
+    "reason": "Direct candidate units route to fresh editor; complete neighboring clean/helper/context units remain unchanged after scoped review. Original fixture bytes stay intact.",
+    "candidate_ids": [],
+    "retained_unit_ids": [
+      "core-001:unit:ad3312a036a8ce65"
+    ],
+    "future_owner": "SHARED fresh editor",
+    "reopening_trigger": "Accepted listed concern, implementation/profile/ownership change or supplied original source that changes the scoped qualification; use candidates.md and B5-C001/C004/C005/C006/C008/C009 handoff rather than re-auditing B5."
+  },
+  {
+    "path": "docs/MEMORY-MANAGEMENT.md",
+    "source_sha256": "8b86a03aa55fc10c7259cd4c8982c1735c0f2bfe79365774c9637a183bc7c20b",
+    "disposition": "RETAIN-DEPENDENCY-UNCHANGED",
+    "assigned_B6_units": [],
+    "coverage": "Dependency referral only; zero added B6 units",
+    "reason": "Reopen copy/source/returned-owner cleanup rules only; complete document disposition remains C-owned.",
+    "candidate_ids": [
+      "CORE-B6-C002",
+      "CORE-B6-C007"
+    ],
+    "future_owner": "C / SHARED",
+    "reopening_trigger": "Accepted related Core concern or changed caller/ownership/profile contract; primary owner performs its own complete call-site review."
+  },
+  {
+    "path": "docs/LOGGING.md",
+    "source_sha256": "346c054ab2660decffcc20b5713755e812524531901d8afecd3d6d70ad2d6a2f",
+    "disposition": "RETAIN-DEPENDENCY-UNCHANGED",
+    "assigned_B6_units": [],
+    "coverage": "Dependency referral only; zero added B6 units",
+    "reason": "C owns logging architecture; B6 supplies actual APDU/header/AID/exception provenance.",
+    "candidate_ids": [
+      "CORE-B6-C014"
+    ],
+    "future_owner": "C / SHARED",
+    "reopening_trigger": "Accepted related Core concern or changed caller/ownership/profile contract; primary owner performs its own complete call-site review."
+  },
+  {
+    "path": "src/Core/src/Sessions/ApplicationSession.cs",
+    "source_sha256": "9a3e226e7845b9143fd3b576a40a40d7f35272beffa8f74cc35aab254f497ced",
+    "disposition": "RETAIN-DEPENDENCY-UNCHANGED",
+    "assigned_B6_units": [],
+    "coverage": "Dependency referral only; zero added B6 units",
+    "reason": "Narrow readiness/public-auth and setup/disposal ranges read; B5-C001/C006 own whole lifecycle/workflow.",
+    "candidate_ids": [
+      "CORE-B6-C004",
+      "CORE-B6-C005",
+      "CORE-B6-C007",
+      "CORE-B6-C015"
+    ],
+    "future_owner": "B5",
+    "reopening_trigger": "Accepted related Core concern or changed caller/ownership/profile contract; primary owner performs its own complete call-site review."
+  },
+  {
+    "path": "src/Core/src/Sessions/RawSmartCardSession.cs",
+    "source_sha256": "751e25ae9124b6a7bd0e3aa8e4b86b15c07e058fed55f99c5a9ac19dce3438af",
+    "disposition": "RETAIN-DEPENDENCY-UNCHANGED",
+    "assigned_B6_units": [],
+    "coverage": "Dependency referral only; zero added B6 units",
+    "reason": "Complete dependency class read; B5 owns primary disposition, B6 supplies actual SCP select/recovery/wire behavior.",
+    "candidate_ids": [
+      "CORE-B6-C001",
+      "CORE-B6-C003",
+      "CORE-B6-C007",
+      "CORE-B6-C015"
+    ],
+    "future_owner": "B5",
+    "reopening_trigger": "Accepted related Core concern or changed caller/ownership/profile contract; primary owner performs its own complete call-site review."
+  },
+  {
+    "path": "src/Core/src/Sessions/SessionCreationOptions.cs",
+    "source_sha256": "79046137077e4f73ce8e4a3fc9f7e1fbd12399f9092d7621a79a5cab532ea32f",
+    "disposition": "RETAIN-DEPENDENCY-UNCHANGED",
+    "assigned_B6_units": [],
+    "coverage": "Dependency referral only; zero added B6 units",
+    "reason": "Retained versus creation-only parameter boundary uses B5-C001; no fresh whole-carrier audit claimed.",
+    "candidate_ids": [
+      "CORE-B6-C007",
+      "CORE-B6-C015"
+    ],
+    "future_owner": "B5",
+    "reopening_trigger": "Accepted related Core concern or changed caller/ownership/profile contract; primary owner performs its own complete call-site review."
+  },
+  {
+    "path": "src/Core/src/Devices/YubiKeyConnectionExtensions.cs",
+    "source_sha256": "c5de6f57fc55f0286ab654ee8b8080bac69697eaf2f1f3b7a756e49cc6da366f",
+    "disposition": "RETAIN-DEPENDENCY-UNCHANGED",
+    "assigned_B6_units": [],
+    "coverage": "Dependency referral only; zero added B6 units",
+    "reason": "Public raw factory grammar and hidden connection ownership remain B1/B5; compile prepared tasks later.",
+    "candidate_ids": [
+      "CORE-B6-C007",
+      "CORE-B6-C015"
+    ],
+    "future_owner": "B1 / B5",
+    "reopening_trigger": "Accepted related Core concern or changed caller/ownership/profile contract; primary owner performs its own complete call-site review."
+  },
+  {
+    "path": "src/Core/src/Cryptography/ECPrivateKey.cs",
+    "source_sha256": "6a7c5d3ead97b189885e536d0d0a6b7dadfe1a73b4a26c1f13ee4b35d2cc16ab",
+    "disposition": "RETAIN-DEPENDENCY-UNCHANGED",
+    "assigned_B6_units": [],
+    "coverage": "Dependency referral only; zero added B6 units",
+    "reason": "Only clone/clear/CreateFromValue/ToECDiffieHellman dependencies read; other crypto findings remain C.",
+    "candidate_ids": [
+      "CORE-B6-C007",
+      "CORE-B6-C009",
+      "CORE-B6-C013"
+    ],
+    "future_owner": "C",
+    "reopening_trigger": "Accepted related Core concern or changed caller/ownership/profile contract; primary owner performs its own complete call-site review."
+  },
+  {
+    "path": "src/Core/src/Cryptography/ECPublicKey.cs",
+    "source_sha256": "82c326cbf96868e1b7b9b8490534450b81231794dd96fd64881c85daf39f29e9",
+    "disposition": "RETAIN-DEPENDENCY-UNCHANGED",
+    "assigned_B6_units": [],
+    "coverage": "Dependency referral only; zero added B6 units",
+    "reason": "Only public wrapper copy/Parameters dependencies read; read-only properties are not deep immutability.",
+    "candidate_ids": [
+      "CORE-B6-C007",
+      "CORE-B6-C009"
+    ],
+    "future_owner": "C",
+    "reopening_trigger": "Accepted related Core concern or changed caller/ownership/profile contract; primary owner performs its own complete call-site review."
+  },
+  {
+    "path": "src/Core/src/Cryptography/AsnUtilities.cs",
+    "source_sha256": "060bb85d2acc3d19528e4adbb73c7aaa7559b4be311081a5fc045dcf36188bc1",
+    "disposition": "RETAIN-DEPENDENCY-UNCHANGED",
+    "assigned_B6_units": [],
+    "coverage": "Dependency referral only; zero added B6 units",
+    "reason": "Narrow fixed scalar/coordinate admission read; corrected32-byte test literal supplies no failure finding.",
+    "candidate_ids": [
+      "CORE-B6-C009",
+      "CORE-B6-C013"
+    ],
+    "future_owner": "C",
+    "reopening_trigger": "Accepted related Core concern or changed caller/ownership/profile contract; primary owner performs its own complete call-site review."
+  },
+  {
+    "path": "src/Core/src/Cryptography/X963Kdf.cs",
+    "source_sha256": "19726ba3b2398fc710a15afd0af7d8202f96713d6ba782ea323b2384c5033a6d",
+    "disposition": "RETAIN-DEPENDENCY-UNCHANGED",
+    "assigned_B6_units": [],
+    "coverage": "Dependency referral only; zero added B6 units",
+    "reason": "Complete77-line dependency helper read for actual algorithm/order/truncation; secret digest cleanup remains C-owned.",
+    "candidate_ids": [
+      "CORE-B6-C006",
+      "CORE-B6-C009",
+      "CORE-B6-C013"
+    ],
+    "future_owner": "C",
+    "reopening_trigger": "Accepted related Core concern or changed caller/ownership/profile contract; primary owner performs its own complete call-site review."
+  },
+  {
+    "path": "src/SecurityDomain/README.md",
+    "source_sha256": "5633e809fe423abfddbb76db2f17453c04de201bd2f9f02281a051cf3be9a0a1",
+    "disposition": "RETAIN-DEPENDENCY-UNCHANGED",
+    "assigned_B6_units": [],
+    "coverage": "Dependency referral only; zero added B6 units",
+    "reason": "Trust role, retained parameters, authority, reset and exact final/draft applicability remain applet-boundary scope.",
+    "candidate_ids": [
+      "CORE-B6-C006",
+      "CORE-B6-C007",
+      "CORE-B6-C009",
+      "CORE-B6-C010",
+      "CORE-B6-C015"
+    ],
+    "future_owner": "BOUNDARY-SecurityDomain / SHARED",
+    "reopening_trigger": "Accepted related Core concern or changed caller/ownership/profile contract; primary owner performs its own complete call-site review."
+  },
+  {
+    "path": "src/SecurityDomain/CLAUDE.md",
+    "source_sha256": "2fb6f493041718623418bea7370f071700b7145c35dd0013e6d3ccd2a97dbdba",
+    "disposition": "RETAIN-DEPENDENCY-UNCHANGED",
+    "assigned_B6_units": [],
+    "coverage": "Dependency referral only; zero added B6 units",
+    "reason": "Contributor role/setup/ownership explanations reopen with accepted Core mechanism; preserve reset physical gap.",
+    "candidate_ids": [
+      "CORE-B6-C006",
+      "CORE-B6-C007",
+      "CORE-B6-C009",
+      "CORE-B6-C010",
+      "CORE-B6-C015"
+    ],
+    "future_owner": "BOUNDARY-SecurityDomain / SHARED",
+    "reopening_trigger": "Accepted related Core concern or changed caller/ownership/profile contract; primary owner performs its own complete call-site review."
+  },
+  {
+    "path": "src/SecurityDomain/src/SecurityDomainSession.cs",
+    "source_sha256": "cbd56f7fe8a2c2285178855d47f7e98dfc1ec95ec30c2ca903af99c79a27489a",
+    "disposition": "RETAIN-DEPENDENCY-UNCHANGED",
+    "assigned_B6_units": [],
+    "coverage": "Dependency referral only; zero added B6 units",
+    "reason": "Only constructor/factory/parameter retention and GetCertificates partial cleanup read narrowly; no whole applet disposition.",
+    "candidate_ids": [
+      "CORE-B6-C007",
+      "CORE-B6-C008",
+      "CORE-B6-C009",
+      "CORE-B6-C015"
+    ],
+    "future_owner": "BOUNDARY-SecurityDomain",
+    "reopening_trigger": "Accepted related Core concern or changed caller/ownership/profile contract; primary owner performs its own complete call-site review."
+  },
+  {
+    "path": "src/SecurityDomain/src/ISecurityDomainSession.cs",
+    "source_sha256": "d3c00fed7f2368d136b7646f9ccf48ce142f3f496b91cdb1adbef725eebc5705",
+    "disposition": "RETAIN-DEPENDENCY-UNCHANGED",
+    "assigned_B6_units": [],
+    "coverage": "Dependency referral only; zero added B6 units",
+    "reason": "Public authority/provisioning/result XML reopening referral; no B6 coverage added.",
+    "candidate_ids": [
+      "CORE-B6-C009",
+      "CORE-B6-C010",
+      "CORE-B6-C015"
+    ],
+    "future_owner": "BOUNDARY-SecurityDomain",
+    "reopening_trigger": "Accepted related Core concern or changed caller/ownership/profile contract; primary owner performs its own complete call-site review."
+  },
+  {
+    "path": "src/SecurityDomain/src/IYubiKeyExtensions.cs",
+    "source_sha256": "6b3adbaf0f02fe0535a5692b590135c67ea15cc2d970a7b8c878f001db4dd349",
+    "disposition": "RETAIN-DEPENDENCY-UNCHANGED",
+    "assigned_B6_units": [],
+    "coverage": "Dependency referral only; zero added B6 units",
+    "reason": "Actual session factory method read for prepared complete tasks; remaining extensions retain boundary ownership.",
+    "candidate_ids": [
+      "CORE-B6-C007",
+      "CORE-B6-C015"
+    ],
+    "future_owner": "BOUNDARY-SecurityDomain",
+    "reopening_trigger": "Accepted related Core concern or changed caller/ownership/profile contract; primary owner performs its own complete call-site review."
+  },
+  {
+    "path": "src/Core/tests/CLAUDE.md",
+    "source_sha256": "1e2b5f35b5389022368b664cb3334b8dafd9f79b6d3397b10aaf858ce0f33deb",
+    "disposition": "RETAIN-DEPENDENCY-UNCHANGED",
+    "assigned_B6_units": [],
+    "coverage": "Dependency referral only; zero added B6 units",
+    "reason": "Actual fake names are EnqueueResponse/TransmittedCommands; fix instructional fragments through single editor.",
+    "candidate_ids": [
+      "CORE-B6-C013"
+    ],
+    "future_owner": "SHARED / B5",
+    "reopening_trigger": "Accepted related Core concern or changed caller/ownership/profile contract; primary owner performs its own complete call-site review."
+  },
+  {
+    "path": "src/Piv/README.md",
+    "source_sha256": "d62600bc7ffa804d9ea11b91d2ab7b9e762482eedd7ac5df2e9e9b7ddf653e9f",
+    "disposition": "RETAIN-DEPENDENCY-UNCHANGED",
+    "assigned_B6_units": [],
+    "coverage": "Dependency referral only; zero added B6 units",
+    "reason": "PIVCORE-003 complete result/credential scopes are boundary-owned; retain physical deferral.",
+    "candidate_ids": [
+      "CORE-B6-C002",
+      "CORE-B6-C007",
+      "CORE-B6-C015"
+    ],
+    "future_owner": "BOUNDARY-Piv",
+    "reopening_trigger": "Accepted related Core concern or changed caller/ownership/profile contract; primary owner performs its own complete call-site review."
+  },
+  {
+    "path": "src/Piv/CLAUDE.md",
+    "source_sha256": "2e99713c84804abd7b28cf05ac1495a2f5ef488cb18c85478aa1784e5fe28ce3",
+    "disposition": "RETAIN-DEPENDENCY-UNCHANGED",
+    "assigned_B6_units": [],
+    "coverage": "Dependency referral only; zero added B6 units",
+    "reason": "Dependent ownership/setup guidance referral only, not a whole-module read.",
+    "candidate_ids": [
+      "CORE-B6-C002",
+      "CORE-B6-C007",
+      "CORE-B6-C015"
+    ],
+    "future_owner": "BOUNDARY-Piv",
+    "reopening_trigger": "Accepted related Core concern or changed caller/ownership/profile contract; primary owner performs its own complete call-site review."
+  },
+  {
+    "path": "src/YubiHsm/README.md",
+    "source_sha256": "50d40f99913862a997f51394feddfc07236ad639df2a456f9103cd57ee3ff1b1",
+    "disposition": "RETAIN-DEPENDENCY-UNCHANGED",
+    "assigned_B6_units": [],
+    "coverage": "Dependency referral only; zero added B6 units",
+    "reason": "HSM-DEP-003 response/TLV ownership is distinct from applet profile HSM-IMP-008.",
+    "candidate_ids": [
+      "CORE-B6-C002",
+      "CORE-B6-C007"
+    ],
+    "future_owner": "BOUNDARY-YubiHsm",
+    "reopening_trigger": "Accepted related Core concern or changed caller/ownership/profile contract; primary owner performs its own complete call-site review."
+  },
+  {
+    "path": "src/YubiHsm/CLAUDE.md",
+    "source_sha256": "4208d45ec534c31d80024fa09e60a717bbee272c5d1bd71bea8661c0f4b1b68d",
+    "disposition": "RETAIN-DEPENDENCY-UNCHANGED",
+    "assigned_B6_units": [],
+    "coverage": "Dependency referral only; zero added B6 units",
+    "reason": "Dependent copied-result/input cleanup explanation referral; no duplicate Core parser finding.",
+    "candidate_ids": [
+      "CORE-B6-C002",
+      "CORE-B6-C007"
+    ],
+    "future_owner": "BOUNDARY-YubiHsm",
+    "reopening_trigger": "Accepted related Core concern or changed caller/ownership/profile contract; primary owner performs its own complete call-site review."
+  }
+]

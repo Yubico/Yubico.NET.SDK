@@ -1,0 +1,498 @@
+{
+  ".github/workflows/build.yml": {
+    "note": "Workflow jobs/configuration read with actual toolchain gate and AOT host. Source matrix/required output labels establish intended checks, not a hosted run or every native function; preserve exact historical artifact gap Q002.",
+    "owner": "B4 support editor; coordinator assigns compilation/execution"
+  },
+  ".github/workflows/native-aot.yml": {
+    "note": "Workflow jobs/configuration read with actual toolchain gate and AOT host. Source matrix/required output labels establish intended checks, not a hosted run or every native function; preserve exact historical artifact gap Q002.",
+    "owner": "B4 support editor; coordinator assigns compilation/execution"
+  },
+  "Directory.Build.props": {
+    "note": "net10/language/warnings and package1.18.1 opt-in, late AOT metadata/analyzer/API AdditionalFiles/friend declarations reviewed together. Configuration is not evaluated compiler input or binary producer evidence. Historical multi-target wording and current static-AOT publication need scoped correction.",
+    "owner": "B4 support editor; coordinator assigns compilation/execution"
+  },
+  "Directory.Build.targets": {
+    "note": "net10/language/warnings and package1.18.1 opt-in, late AOT metadata/analyzer/API AdditionalFiles/friend declarations reviewed together. Configuration is not evaluated compiler input or binary producer evidence. Historical multi-target wording and current static-AOT publication need scoped correction.",
+    "owner": "B4 support editor; coordinator assigns compilation/execution"
+  },
+  "Directory.Packages.props": {
+    "note": "net10/language/warnings and package1.18.1 opt-in, late AOT metadata/analyzer/API AdditionalFiles/friend declarations reviewed together. Configuration is not evaluated compiler input or binary producer evidence. Historical multi-target wording and current static-AOT publication need scoped correction.",
+    "owner": "B4 support editor; coordinator assigns compilation/execution"
+  },
+  "src/Core/src/Yubico.YubiKit.Core.csproj": {
+    "note": "net10/language/warnings and package1.18.1 opt-in, late AOT metadata/analyzer/API AdditionalFiles/friend declarations reviewed together. Configuration is not evaluated compiler input or binary producer evidence. Historical multi-target wording and current static-AOT publication need scoped correction.",
+    "owner": "B4 support editor; coordinator assigns compilation/execution"
+  },
+  "global.json": {
+    "note": "SDK10.0.300 latestFeature and explicit public/private package sources/mapping read. Source selection/credential prohibition are declared intent; no restore, feed authentication, resolved SDK or package execution occurred.",
+    "owner": "B4 support editor; coordinator assigns compilation/execution"
+  },
+  "nuget.config": {
+    "note": "SDK10.0.300 latestFeature and explicit public/private package sources/mapping read. Source selection/credential prohibition are declared intent; no restore, feed authentication, resolved SDK or package execution occurred.",
+    "owner": "B4 support editor; coordinator assigns compilation/execution"
+  },
+  "PACKAGE_README.md": {
+    "note": "Assigned installation/requirements/package guidance read against project graph and current toolchain. Core transitive dependency is distinct from direct Core use; no feed/network install or all-platform acceptance inferred.",
+    "owner": "B4 support editor; coordinator assigns compilation/execution"
+  },
+  "README.md": {
+    "note": "Assigned installation/requirements/package guidance read against project graph and current toolchain. Core transitive dependency is distinct from direct Core use; no feed/network install or all-platform acceptance inferred.",
+    "owner": "B4 support editor; coordinator assigns compilation/execution"
+  },
+  "src/Core/PACKAGE_README.md": {
+    "note": "Assigned installation/requirements/package guidance read against project graph and current toolchain. Core transitive dependency is distinct from direct Core use; no feed/network install or all-platform acceptance inferred.",
+    "owner": "B4 support editor; coordinator assigns compilation/execution"
+  },
+  "TOOLCHAIN.md": {
+    "note": "Examples/options/dispatch/result semantics traced to parsed args and target registration. Bare invocation prints help; named default tests/publishes. RunLog stores raw argv (C007); every-project executed assertion exceeds gate (C008); substring selectors do not imply unique target.",
+    "owner": "B4 support editor; coordinator assigns compilation/execution"
+  },
+  "toolchain.cs": {
+    "note": "Examples/options/dispatch/result semantics traced to parsed args and target registration. Bare invocation prints help; named default tests/publishes. RunLog stores raw argv (C007); every-project executed assertion exceeds gate (C008); substring selectors do not imply unique target.",
+    "owner": "B4 support editor; coordinator assigns compilation/execution"
+  },
+  "docs/CRYPTO-APIS.md": {
+    "note": "Assigned policy/examples read: Span/Memory scope, borrowed input/result ownership, explicit zeroing and provider/logging responsibilities. Guidance is not proof every implementation cleans/redacts; C-C008/C011–C013/C017–C019 retain logging/provider/stale-example ownership. B4 nested Windows copies/raw argv are separate concrete facets.",
+    "owner": "SHARED documentation editor with C primary security/provider owners and B4 carrier context"
+  },
+  "docs/CSHARP-PATTERNS.md": {
+    "note": "Assigned policy/examples read: Span/Memory scope, borrowed input/result ownership, explicit zeroing and provider/logging responsibilities. Guidance is not proof every implementation cleans/redacts; C-C008/C011–C013/C017–C019 retain logging/provider/stale-example ownership. B4 nested Windows copies/raw argv are separate concrete facets.",
+    "owner": "SHARED documentation editor with C primary security/provider owners and B4 carrier context"
+  },
+  "docs/MEMORY-MANAGEMENT.md": {
+    "note": "Assigned policy/examples read: Span/Memory scope, borrowed input/result ownership, explicit zeroing and provider/logging responsibilities. Guidance is not proof every implementation cleans/redacts; C-C008/C011–C013/C017–C019 retain logging/provider/stale-example ownership. B4 nested Windows copies/raw argv are separate concrete facets.",
+    "owner": "SHARED documentation editor with C primary security/provider owners and B4 carrier context"
+  },
+  "docs/LOGGING.md": {
+    "note": "Assigned policy/examples read: Span/Memory scope, borrowed input/result ownership, explicit zeroing and provider/logging responsibilities. Guidance is not proof every implementation cleans/redacts; C-C008/C011–C013/C017–C019 retain logging/provider/stale-example ownership. B4 nested Windows copies/raw argv are separate concrete facets.",
+    "owner": "SHARED documentation editor with C primary security/provider owners and B4 carrier context"
+  },
+  "docs/SDK-HOUSE-STYLE.md": {
+    "note": "Assigned policy/examples read: Span/Memory scope, borrowed input/result ownership, explicit zeroing and provider/logging responsibilities. Guidance is not proof every implementation cleans/redacts; C-C008/C011–C013/C017–C019 retain logging/provider/stale-example ownership. B4 nested Windows copies/raw argv are separate concrete facets.",
+    "owner": "SHARED documentation editor with C primary security/provider owners and B4 carrier context"
+  },
+  "docs/DEV-GUIDE.md": {
+    "note": "Assigned policy/examples read: Span/Memory scope, borrowed input/result ownership, explicit zeroing and provider/logging responsibilities. Guidance is not proof every implementation cleans/redacts; C-C008/C011–C013/C017–C019 retain logging/provider/stale-example ownership. B4 nested Windows copies/raw argv are separate concrete facets.",
+    "owner": "SHARED documentation editor with C primary security/provider owners and B4 carrier context"
+  },
+  "docs/TESTING.md": {
+    "note": "Trait/runner/allow-list/filtering/transport/presence guidance compared with actual helpers. Filtering is not transport pinning or every-device iteration; old paths/examples and historical Windows result need qualification. Keep physical authorization, attended work and no-runtime boundary distinct.",
+    "owner": "B4 support editor; coordinator assigns compilation/execution"
+  },
+  "docs/TESTING_PLATFORM_FINDINGS.md": {
+    "note": "Trait/runner/allow-list/filtering/transport/presence guidance compared with actual helpers. Filtering is not transport pinning or every-device iteration; old paths/examples and historical Windows result need qualification. Keep physical authorization, attended work and no-runtime boundary distinct.",
+    "owner": "B4 support editor; coordinator assigns compilation/execution"
+  },
+  "docs/NATIVE-AOT.md": {
+    "note": "Current support envelope read against ten-type host, source contract discovery and published static targets. IsAotCompatible/link discovery is not all-function/native driver acceptance. Linux native-only checks retain B2 scope; Windows exact retained artifact/producer gap Q001/Q002 remains.",
+    "owner": "B4 support editor; coordinator assigns compilation/execution"
+  },
+  "docs/architecture/.state.yml": {
+    "note": "Watermarks are automation provenance a5881533, not current product source pins or proof automation ran in this audit. Preserve unchanged state; no migration/architecture gate executed.",
+    "owner": "B4 support editor; coordinator assigns compilation/execution"
+  },
+  "docs/migration/.state.yml": {
+    "note": "Watermarks are automation provenance a5881533, not current product source pins or proof automation ran in this audit. Preserve unchanged state; no migration/architecture gate executed.",
+    "owner": "B4 support editor; coordinator assigns compilation/execution"
+  },
+  "docs/architecture/architecture-docs-automation.md": {
+    "note": "Automation contract and source/image manifest read with actual scripts. Five assigned source-block/SVG/PNG digests reconcile independently and PNG labels visually match; freshness does not verify teaching claims (C010). No render/formatter/workflow ran.",
+    "owner": "B4 support editor; coordinator assigns compilation/execution"
+  },
+  "docs/architecture/images/image-manifest.txt": {
+    "note": "Automation contract and source/image manifest read with actual scripts. Five assigned source-block/SVG/PNG digests reconcile independently and PNG labels visually match; freshness does not verify teaching claims (C010). No render/formatter/workflow ran.",
+    "owner": "B4 support editor; coordinator assigns compilation/execution"
+  },
+  "docs/architecture/sdk-architecture-diagrams.md": {
+    "note": "Assigned diagram/appendix/map sections compared with graph and meaningful SVG/PNG labels: WebAuthn is indirect through Ctap2, ApduResponse is sealed class not record struct. Pedagogical pipelines are not native timing/wire conformance. C010 preserves exact source versus teaching-label distinctions.",
+    "owner": "B4 support editor; coordinator assigns compilation/execution"
+  },
+  "docs/architecture/sdk-architecture-map.yml": {
+    "note": "Assigned diagram/appendix/map sections compared with graph and meaningful SVG/PNG labels: WebAuthn is indirect through Ctap2, ApduResponse is sealed class not record struct. Pedagogical pipelines are not native timing/wire conformance. C010 preserves exact source versus teaching-label distinctions.",
+    "owner": "B4 support editor; coordinator assigns compilation/execution"
+  },
+  "docs/architecture/applet-public-api.md": {
+    "note": "Assigned creation/prompt/extension lifecycle read: snapshot options, sole retained caller-owned prompt, owned versus borrowed connection, per-attempt extension state and token lifetime. B4 caller-support context only; A/B1/B5 and applet owners retain actual session/policy/wire assurance; no full WebAuthn conformance inferred.",
+    "owner": "SHARED editor with A/B1/B5 and WebAuthn primary implementation owners"
+  },
+  "docs/architecture/webauthn-extension-processing.md": {
+    "note": "Assigned creation/prompt/extension lifecycle read: snapshot options, sole retained caller-owned prompt, owned versus borrowed connection, per-attempt extension state and token lifetime. B4 caller-support context only; A/B1/B5 and applet owners retain actual session/policy/wire assurance; no full WebAuthn conformance inferred.",
+    "owner": "SHARED editor with A/B1/B5 and WebAuthn primary implementation owners"
+  },
+  "docs/usage/user-interaction.md": {
+    "note": "Assigned creation/prompt/extension lifecycle read: snapshot options, sole retained caller-owned prompt, owned versus borrowed connection, per-attempt extension state and token lifetime. B4 caller-support context only; A/B1/B5 and applet owners retain actual session/policy/wire assurance; no full WebAuthn conformance inferred.",
+    "owner": "SHARED editor with A/B1/B5 and WebAuthn primary implementation owners"
+  },
+  "docs/migration/v1-to-v2.md": {
+    "note": "Every assigned section/map entry read as dated assisted/manual migration advice, not an automatic migration or implementation pass. PIV scalar line274 reproduces inherited DOC-002 ScannerError column488; assigned later entries still reviewed. B4 native/support claims use actual route/owner/error scopes; applet-specific parity stays with its primary owner.",
+    "owner": "SHARED migration editor; inherited DOC-002 owner; relevant A/B1/B5/C/applet investigators"
+  },
+  "docs/migration/v1-to-v2-map.yml": {
+    "note": "Every assigned section/map entry read as dated assisted/manual migration advice, not an automatic migration or implementation pass. PIV scalar line274 reproduces inherited DOC-002 ScannerError column488; assigned later entries still reviewed. B4 native/support claims use actual route/owner/error scopes; applet-specific parity stays with its primary owner.",
+    "owner": "SHARED migration editor; inherited DOC-002 owner; relevant A/B1/B5/C/applet investigators"
+  },
+  "docs/migration/v1-to-v2-gaps.md": {
+    "note": "Every assigned section/map entry read as dated assisted/manual migration advice, not an automatic migration or implementation pass. PIV scalar line274 reproduces inherited DOC-002 ScannerError column488; assigned later entries still reviewed. B4 native/support claims use actual route/owner/error scopes; applet-specific parity stays with its primary owner.",
+    "owner": "SHARED migration editor; inherited DOC-002 owner; relevant A/B1/B5/C/applet investigators"
+  },
+  "docs/migration/v1-to-v2-changelog.md": {
+    "note": "Every assigned section/map entry read as dated assisted/manual migration advice, not an automatic migration or implementation pass. PIV scalar line274 reproduces inherited DOC-002 ScannerError column488; assigned later entries still reviewed. B4 native/support claims use actual route/owner/error scopes; applet-specific parity stays with its primary owner.",
+    "owner": "SHARED migration editor; inherited DOC-002 owner; relevant A/B1/B5/C/applet investigators"
+  },
+  "docs/v1-to-v2-comparison.md": {
+    "note": "Assigned comparison/support claims read: async signature versus retained sync access, process claim versus cross-process sharing, sparse low-level surface. Shared-shim AOT copy and ordinary-SCardException contention text conflict with current targets/strict-sharing map; C008/C009/C010, not an all-product parity judgment.",
+    "owner": "B4 support editor; coordinator assigns compilation/execution"
+  },
+  "docs/v2-highlights.md": {
+    "note": "Assigned comparison/support claims read: async signature versus retained sync access, process claim versus cross-process sharing, sparse low-level surface. Shared-shim AOT copy and ordinary-SCardException contention text conflict with current targets/strict-sharing map; C008/C009/C010, not an all-product parity judgment.",
+    "owner": "B4 support editor; coordinator assigns compilation/execution"
+  },
+  "2026-09-21-yubikit-async-boundaries-ISA.md": {
+    "note": "Complete assigned historical/current plan ranges read, including assertions/pseudocode/decisions. Criteria/approvals/proposals and historical run reports are not current implementation acceptance. Preserve unimplemented multi-key scope, stale206/219/24 versus current218/23 counts, separate38JIT+38AOT native-only and43 serial103 physical checks, and unready Windows lane. No old command was rerun.",
+    "owner": "Async-program evidence owner/coordinator; B2/B3 platform owners; ready Windows handoff owner"
+  },
+  "docs/plans/yubikit-async-boundaries/00-status.md": {
+    "note": "Complete assigned historical/current plan ranges read, including assertions/pseudocode/decisions. Criteria/approvals/proposals and historical run reports are not current implementation acceptance. Preserve unimplemented multi-key scope, stale206/219/24 versus current218/23 counts, separate38JIT+38AOT native-only and43 serial103 physical checks, and unready Windows lane. No old command was rerun.",
+    "owner": "Async-program evidence owner/coordinator; B2/B3 platform owners; ready Windows handoff owner"
+  },
+  "docs/plans/yubikit-async-boundaries/01-product.md": {
+    "note": "Complete assigned historical/current plan ranges read, including assertions/pseudocode/decisions. Criteria/approvals/proposals and historical run reports are not current implementation acceptance. Preserve unimplemented multi-key scope, stale206/219/24 versus current218/23 counts, separate38JIT+38AOT native-only and43 serial103 physical checks, and unready Windows lane. No old command was rerun.",
+    "owner": "Async-program evidence owner/coordinator; B2/B3 platform owners; ready Windows handoff owner"
+  },
+  "docs/plans/yubikit-async-boundaries/02-architecture.md": {
+    "note": "Complete assigned historical/current plan ranges read, including assertions/pseudocode/decisions. Criteria/approvals/proposals and historical run reports are not current implementation acceptance. Preserve unimplemented multi-key scope, stale206/219/24 versus current218/23 counts, separate38JIT+38AOT native-only and43 serial103 physical checks, and unready Windows lane. No old command was rerun.",
+    "owner": "Async-program evidence owner/coordinator; B2/B3 platform owners; ready Windows handoff owner"
+  },
+  "docs/plans/yubikit-async-boundaries/03-program-design.md": {
+    "note": "Complete assigned historical/current plan ranges read, including assertions/pseudocode/decisions. Criteria/approvals/proposals and historical run reports are not current implementation acceptance. Preserve unimplemented multi-key scope, stale206/219/24 versus current218/23 counts, separate38JIT+38AOT native-only and43 serial103 physical checks, and unready Windows lane. No old command was rerun.",
+    "owner": "Async-program evidence owner/coordinator; B2/B3 platform owners; ready Windows handoff owner"
+  },
+  "docs/plans/yubikit-async-boundaries/addenda/earlier-multi-key-architecture.md": {
+    "note": "Complete assigned historical/current plan ranges read, including assertions/pseudocode/decisions. Criteria/approvals/proposals and historical run reports are not current implementation acceptance. Preserve unimplemented multi-key scope, stale206/219/24 versus current218/23 counts, separate38JIT+38AOT native-only and43 serial103 physical checks, and unready Windows lane. No old command was rerun.",
+    "owner": "Async-program evidence owner/coordinator; B2/B3 platform owners; ready Windows handoff owner"
+  },
+  "docs/plans/yubikit-async-boundaries/addenda/earlier-multi-key-program-design.md": {
+    "note": "Complete assigned historical/current plan ranges read, including assertions/pseudocode/decisions. Criteria/approvals/proposals and historical run reports are not current implementation acceptance. Preserve unimplemented multi-key scope, stale206/219/24 versus current218/23 counts, separate38JIT+38AOT native-only and43 serial103 physical checks, and unready Windows lane. No old command was rerun.",
+    "owner": "Async-program evidence owner/coordinator; B2/B3 platform owners; ready Windows handoff owner"
+  },
+  "docs/plans/yubikit-async-boundaries/addenda/multi-key-capacity.md": {
+    "note": "Complete assigned historical/current plan ranges read, including assertions/pseudocode/decisions. Criteria/approvals/proposals and historical run reports are not current implementation acceptance. Preserve unimplemented multi-key scope, stale206/219/24 versus current218/23 counts, separate38JIT+38AOT native-only and43 serial103 physical checks, and unready Windows lane. No old command was rerun.",
+    "owner": "Async-program evidence owner/coordinator; B2/B3 platform owners; ready Windows handoff owner"
+  },
+  "docs/research/native-aot-readiness.md": {
+    "note": "Assigned retained history read with current host/targets. Dated dynamic-loader/default-provider assertions and listed output do not prove every function ran. Integration4442/197 and38+38 retain exact historical populations/strict-live failures; B4 contributes zero runs or archive edits. Q001/Q002 preserve source/producer/artifact limits.",
+    "owner": "Coordinator and historical evidence owners; A-C020/B3-C008 aliases"
+  },
+  "docs/research/native-aot-readiness-data.md": {
+    "note": "Assigned retained history read with current host/targets. Dated dynamic-loader/default-provider assertions and listed output do not prove every function ran. Integration4442/197 and38+38 retain exact historical populations/strict-live failures; B4 contributes zero runs or archive edits. Q001/Q002 preserve source/producer/artifact limits.",
+    "owner": "Coordinator and historical evidence owners; A-C020/B3-C008 aliases"
+  },
+  "docs/research/documentation-audit/core.md": {
+    "note": "Assigned retained history read with current host/targets. Dated dynamic-loader/default-provider assertions and listed output do not prove every function ran. Integration4442/197 and38+38 retain exact historical populations/strict-live failures; B4 contributes zero runs or archive edits. Q001/Q002 preserve source/producer/artifact limits.",
+    "owner": "Coordinator and historical evidence owners; A-C020/B3-C008 aliases"
+  },
+  "scripts/architecture/architecture-images.env": {
+    "note": "Complete assigned script/config text read: ordered fenced blocks, pinned CLI version, source/artifact digests, path/symbol/project-edge and forbidden-edge checks, render versus check-only distinction. These lexical/XML/source gates cannot prove diagram semantics or runtime ownership. Scripts not executed.",
+    "owner": "B4 support editor; coordinator assigns compilation/execution"
+  },
+  "scripts/architecture/build-architecture-context.sh": {
+    "note": "Complete assigned script/config text read: ordered fenced blocks, pinned CLI version, source/artifact digests, path/symbol/project-edge and forbidden-edge checks, render versus check-only distinction. These lexical/XML/source gates cannot prove diagram semantics or runtime ownership. Scripts not executed.",
+    "owner": "B4 support editor; coordinator assigns compilation/execution"
+  },
+  "scripts/architecture/check-architecture-images.sh": {
+    "note": "Complete assigned script/config text read: ordered fenced blocks, pinned CLI version, source/artifact digests, path/symbol/project-edge and forbidden-edge checks, render versus check-only distinction. These lexical/XML/source gates cannot prove diagram semantics or runtime ownership. Scripts not executed.",
+    "owner": "B4 support editor; coordinator assigns compilation/execution"
+  },
+  "scripts/architecture/check-architecture-map.sh": {
+    "note": "Complete assigned script/config text read: ordered fenced blocks, pinned CLI version, source/artifact digests, path/symbol/project-edge and forbidden-edge checks, render versus check-only distinction. These lexical/XML/source gates cannot prove diagram semantics or runtime ownership. Scripts not executed.",
+    "owner": "B4 support editor; coordinator assigns compilation/execution"
+  },
+  "scripts/architecture/lib-architecture-blocks.sh": {
+    "note": "Complete assigned script/config text read: ordered fenced blocks, pinned CLI version, source/artifact digests, path/symbol/project-edge and forbidden-edge checks, render versus check-only distinction. These lexical/XML/source gates cannot prove diagram semantics or runtime ownership. Scripts not executed.",
+    "owner": "B4 support editor; coordinator assigns compilation/execution"
+  },
+  "scripts/architecture/mermaid.config.json": {
+    "note": "Complete assigned script/config text read: ordered fenced blocks, pinned CLI version, source/artifact digests, path/symbol/project-edge and forbidden-edge checks, render versus check-only distinction. These lexical/XML/source gates cannot prove diagram semantics or runtime ownership. Scripts not executed.",
+    "owner": "B4 support editor; coordinator assigns compilation/execution"
+  },
+  "scripts/architecture/render-architecture.sh": {
+    "note": "Complete assigned script/config text read: ordered fenced blocks, pinned CLI version, source/artifact digests, path/symbol/project-edge and forbidden-edge checks, render versus check-only distinction. These lexical/XML/source gates cannot prove diagram semantics or runtime ownership. Scripts not executed.",
+    "owner": "B4 support editor; coordinator assigns compilation/execution"
+  },
+  "scripts/toolchain/BenchmarkTargets.cs": {
+    "note": "All assigned implementation ranges read with omitted AOT discovery/validation and test execution/classification predicates. Runner-specific filters/count parsing, named targets, package key, artifact logs and exclusions traced. Exit-zero/null-count can pass; only all-no-tests is rejected; raw invocation is outside Exec.Mask. C007/C008; no target executed.",
+    "owner": "B4 support editor; coordinator assigns compilation/execution"
+  },
+  "scripts/toolchain/BuildTargets.cs": {
+    "note": "All assigned implementation ranges read with omitted AOT discovery/validation and test execution/classification predicates. Runner-specific filters/count parsing, named targets, package key, artifact logs and exclusions traced. Exit-zero/null-count can pass; only all-no-tests is rejected; raw invocation is outside Exec.Mask. C007/C008; no target executed.",
+    "owner": "B4 support editor; coordinator assigns compilation/execution"
+  },
+  "scripts/toolchain/Context.cs": {
+    "note": "All assigned implementation ranges read with omitted AOT discovery/validation and test execution/classification predicates. Runner-specific filters/count parsing, named targets, package key, artifact logs and exclusions traced. Exit-zero/null-count can pass; only all-no-tests is rejected; raw invocation is outside Exec.Mask. C007/C008; no target executed.",
+    "owner": "B4 support editor; coordinator assigns compilation/execution"
+  },
+  "scripts/toolchain/Conventions.cs": {
+    "note": "All assigned implementation ranges read with omitted AOT discovery/validation and test execution/classification predicates. Runner-specific filters/count parsing, named targets, package key, artifact logs and exclusions traced. Exit-zero/null-count can pass; only all-no-tests is rejected; raw invocation is outside Exec.Mask. C007/C008; no target executed.",
+    "owner": "B4 support editor; coordinator assigns compilation/execution"
+  },
+  "scripts/toolchain/CoverageTargets.cs": {
+    "note": "All assigned implementation ranges read with omitted AOT discovery/validation and test execution/classification predicates. Runner-specific filters/count parsing, named targets, package key, artifact logs and exclusions traced. Exit-zero/null-count can pass; only all-no-tests is rejected; raw invocation is outside Exec.Mask. C007/C008; no target executed.",
+    "owner": "B4 support editor; coordinator assigns compilation/execution"
+  },
+  "scripts/toolchain/DocsTargets.cs": {
+    "note": "All assigned implementation ranges read with omitted AOT discovery/validation and test execution/classification predicates. Runner-specific filters/count parsing, named targets, package key, artifact logs and exclusions traced. Exit-zero/null-count can pass; only all-no-tests is rejected; raw invocation is outside Exec.Mask. C007/C008; no target executed.",
+    "owner": "B4 support editor; coordinator assigns compilation/execution"
+  },
+  "scripts/toolchain/Options.cs": {
+    "note": "All assigned implementation ranges read with omitted AOT discovery/validation and test execution/classification predicates. Runner-specific filters/count parsing, named targets, package key, artifact logs and exclusions traced. Exit-zero/null-count can pass; only all-no-tests is rejected; raw invocation is outside Exec.Mask. C007/C008; no target executed.",
+    "owner": "B4 support editor; coordinator assigns compilation/execution"
+  },
+  "scripts/toolchain/Output.cs": {
+    "note": "All assigned implementation ranges read with omitted AOT discovery/validation and test execution/classification predicates. Runner-specific filters/count parsing, named targets, package key, artifact logs and exclusions traced. Exit-zero/null-count can pass; only all-no-tests is rejected; raw invocation is outside Exec.Mask. C007/C008; no target executed.",
+    "owner": "B4 support editor; coordinator assigns compilation/execution"
+  },
+  "scripts/toolchain/PackageTargets.cs": {
+    "note": "All assigned implementation ranges read with omitted AOT discovery/validation and test execution/classification predicates. Runner-specific filters/count parsing, named targets, package key, artifact logs and exclusions traced. Exit-zero/null-count can pass; only all-no-tests is rejected; raw invocation is outside Exec.Mask. C007/C008; no target executed.",
+    "owner": "B4 support editor; coordinator assigns compilation/execution"
+  },
+  "scripts/toolchain/Process.cs": {
+    "note": "All assigned implementation ranges read with omitted AOT discovery/validation and test execution/classification predicates. Runner-specific filters/count parsing, named targets, package key, artifact logs and exclusions traced. Exit-zero/null-count can pass; only all-no-tests is rejected; raw invocation is outside Exec.Mask. C007/C008; no target executed.",
+    "owner": "B4 support editor; coordinator assigns compilation/execution"
+  },
+  "scripts/toolchain/Results.cs": {
+    "note": "All assigned implementation ranges read with omitted AOT discovery/validation and test execution/classification predicates. Runner-specific filters/count parsing, named targets, package key, artifact logs and exclusions traced. Exit-zero/null-count can pass; only all-no-tests is rejected; raw invocation is outside Exec.Mask. C007/C008; no target executed.",
+    "owner": "B4 support editor; coordinator assigns compilation/execution"
+  },
+  "scripts/toolchain/RunLog.cs": {
+    "note": "All assigned implementation ranges read with omitted AOT discovery/validation and test execution/classification predicates. Runner-specific filters/count parsing, named targets, package key, artifact logs and exclusions traced. Exit-zero/null-count can pass; only all-no-tests is rejected; raw invocation is outside Exec.Mask. C007/C008; no target executed.",
+    "owner": "B4 support editor; coordinator assigns compilation/execution"
+  },
+  "scripts/toolchain/TargetRegistry.cs": {
+    "note": "All assigned implementation ranges read with omitted AOT discovery/validation and test execution/classification predicates. Runner-specific filters/count parsing, named targets, package key, artifact logs and exclusions traced. Exit-zero/null-count can pass; only all-no-tests is rejected; raw invocation is outside Exec.Mask. C007/C008; no target executed.",
+    "owner": "B4 support editor; coordinator assigns compilation/execution"
+  },
+  "scripts/toolchain/TestTargets.cs": {
+    "note": "All assigned implementation ranges read with omitted AOT discovery/validation and test execution/classification predicates. Runner-specific filters/count parsing, named targets, package key, artifact logs and exclusions traced. Exit-zero/null-count can pass; only all-no-tests is rejected; raw invocation is outside Exec.Mask. C007/C008; no target executed.",
+    "owner": "B4 support editor; coordinator assigns compilation/execution"
+  },
+  "scripts/toolchain/Usage.cs": {
+    "note": "All assigned implementation ranges read with omitted AOT discovery/validation and test execution/classification predicates. Runner-specific filters/count parsing, named targets, package key, artifact logs and exclusions traced. Exit-zero/null-count can pass; only all-no-tests is rejected; raw invocation is outside Exec.Mask. C007/C008; no target executed.",
+    "owner": "B4 support editor; coordinator assigns compilation/execution"
+  },
+  "src/Cli.Commands/src/Fido/FidoCommands.cs": {
+    "note": "Assigned caller bodies/exception-output/settings/helpers read: user input/owned session scopes, raw status versus friendly output and destructive/interactive prerequisites stay operation-specific. OTP password picks translator's32 non-whitespace ModHex cases (C010). No command, secret prompt, reset or device operation ran; applet wire semantics belong to respective primary owner.",
+    "owner": "CLI/support editor with relevant applet/C/B5 primary owners"
+  },
+  "src/Cli.Commands/src/Infrastructure/GlobalSettings.cs": {
+    "note": "Assigned caller bodies/exception-output/settings/helpers read: user input/owned session scopes, raw status versus friendly output and destructive/interactive prerequisites stay operation-specific. OTP password picks translator's32 non-whitespace ModHex cases (C010). No command, secret prompt, reset or device operation ran; applet wire semantics belong to respective primary owner.",
+    "owner": "CLI/support editor with relevant applet/C/B5 primary owners"
+  },
+  "src/Cli.Commands/src/Infrastructure/YkCommandBase.cs": {
+    "note": "Assigned caller bodies/exception-output/settings/helpers read: user input/owned session scopes, raw status versus friendly output and destructive/interactive prerequisites stay operation-specific. OTP password picks translator's32 non-whitespace ModHex cases (C010). No command, secret prompt, reset or device operation ran; applet wire semantics belong to respective primary owner.",
+    "owner": "CLI/support editor with relevant applet/C/B5 primary owners"
+  },
+  "src/Cli.Commands/src/Management/ManagementResetCommand.cs": {
+    "note": "Assigned caller bodies/exception-output/settings/helpers read: user input/owned session scopes, raw status versus friendly output and destructive/interactive prerequisites stay operation-specific. OTP password picks translator's32 non-whitespace ModHex cases (C010). No command, secret prompt, reset or device operation ran; applet wire semantics belong to respective primary owner.",
+    "owner": "CLI/support editor with relevant applet/C/B5 primary owners"
+  },
+  "src/Cli.Commands/src/OpenPgp/OpenPgpAccessCommands.cs": {
+    "note": "Assigned caller bodies/exception-output/settings/helpers read: user input/owned session scopes, raw status versus friendly output and destructive/interactive prerequisites stay operation-specific. OTP password picks translator's32 non-whitespace ModHex cases (C010). No command, secret prompt, reset or device operation ran; applet wire semantics belong to respective primary owner.",
+    "owner": "CLI/support editor with relevant applet/C/B5 primary owners"
+  },
+  "src/Cli.Commands/src/OpenPgp/OpenPgpCertificatesCommands.cs": {
+    "note": "Assigned caller bodies/exception-output/settings/helpers read: user input/owned session scopes, raw status versus friendly output and destructive/interactive prerequisites stay operation-specific. OTP password picks translator's32 non-whitespace ModHex cases (C010). No command, secret prompt, reset or device operation ran; applet wire semantics belong to respective primary owner.",
+    "owner": "CLI/support editor with relevant applet/C/B5 primary owners"
+  },
+  "src/Cli.Commands/src/OpenPgp/OpenPgpHelpers.cs": {
+    "note": "Assigned caller bodies/exception-output/settings/helpers read: user input/owned session scopes, raw status versus friendly output and destructive/interactive prerequisites stay operation-specific. OTP password picks translator's32 non-whitespace ModHex cases (C010). No command, secret prompt, reset or device operation ran; applet wire semantics belong to respective primary owner.",
+    "owner": "CLI/support editor with relevant applet/C/B5 primary owners"
+  },
+  "src/Cli.Commands/src/OpenPgp/OpenPgpInfoCommand.cs": {
+    "note": "Assigned caller bodies/exception-output/settings/helpers read: user input/owned session scopes, raw status versus friendly output and destructive/interactive prerequisites stay operation-specific. OTP password picks translator's32 non-whitespace ModHex cases (C010). No command, secret prompt, reset or device operation ran; applet wire semantics belong to respective primary owner.",
+    "owner": "CLI/support editor with relevant applet/C/B5 primary owners"
+  },
+  "src/Cli.Commands/src/OpenPgp/OpenPgpKeysCommands.cs": {
+    "note": "Assigned caller bodies/exception-output/settings/helpers read: user input/owned session scopes, raw status versus friendly output and destructive/interactive prerequisites stay operation-specific. OTP password picks translator's32 non-whitespace ModHex cases (C010). No command, secret prompt, reset or device operation ran; applet wire semantics belong to respective primary owner.",
+    "owner": "CLI/support editor with relevant applet/C/B5 primary owners"
+  },
+  "src/Cli.Commands/src/OpenPgp/OpenPgpResetCommand.cs": {
+    "note": "Assigned caller bodies/exception-output/settings/helpers read: user input/owned session scopes, raw status versus friendly output and destructive/interactive prerequisites stay operation-specific. OTP password picks translator's32 non-whitespace ModHex cases (C010). No command, secret prompt, reset or device operation ran; applet wire semantics belong to respective primary owner.",
+    "owner": "CLI/support editor with relevant applet/C/B5 primary owners"
+  },
+  "src/Cli.Commands/src/Otp/OtpCommands.cs": {
+    "note": "Assigned caller bodies/exception-output/settings/helpers read: user input/owned session scopes, raw status versus friendly output and destructive/interactive prerequisites stay operation-specific. OTP password picks translator's32 non-whitespace ModHex cases (C010). No command, secret prompt, reset or device operation ran; applet wire semantics belong to respective primary owner.",
+    "owner": "CLI/support editor with relevant applet/C/B5 primary owners"
+  },
+  "src/Cli.Commands/src/Piv/PivCommands.cs": {
+    "note": "Assigned caller bodies/exception-output/settings/helpers read: user input/owned session scopes, raw status versus friendly output and destructive/interactive prerequisites stay operation-specific. OTP password picks translator's32 non-whitespace ModHex cases (C010). No command, secret prompt, reset or device operation ran; applet wire semantics belong to respective primary owner.",
+    "owner": "CLI/support editor with relevant applet/C/B5 primary owners"
+  },
+  "src/Cli.Commands/tests/Yubico.YubiKit.Cli.Commands.UnitTests/Oath/OathHelpersTests.cs": {
+    "note": "Assigned caller bodies/exception-output/settings/helpers read: user input/owned session scopes, raw status versus friendly output and destructive/interactive prerequisites stay operation-specific. OTP password picks translator's32 non-whitespace ModHex cases (C010). No command, secret prompt, reset or device operation ran; applet wire semantics belong to respective primary owner.",
+    "owner": "CLI/support editor with relevant applet/C/B5 primary owners"
+  },
+  "src/Cli.Commands/src/Yubico.YubiKit.Cli.Commands.csproj": {
+    "note": "Project/runner declarations read: nonpackable tooling, xUnitv2 shared/integration versus v3MTP executable units, direct xUnit-free retry source link, per-reference generated shipping metadata and disabled integration parallelism. No evaluated build or actual test selection/runtime qualification inferred.",
+    "owner": "B4 support editor; coordinator assigns compilation/execution"
+  },
+  "src/Cli.Shared/src/Yubico.YubiKit.Cli.Shared.csproj": {
+    "note": "Project/runner declarations read: nonpackable tooling, xUnitv2 shared/integration versus v3MTP executable units, direct xUnit-free retry source link, per-reference generated shipping metadata and disabled integration parallelism. No evaluated build or actual test selection/runtime qualification inferred.",
+    "owner": "B4 support editor; coordinator assigns compilation/execution"
+  },
+  "src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/Yubico.YubiKit.PublicApi.UnitTests.csproj": {
+    "note": "Project/runner declarations read: nonpackable tooling, xUnitv2 shared/integration versus v3MTP executable units, direct xUnit-free retry source link, per-reference generated shipping metadata and disabled integration parallelism. No evaluated build or actual test selection/runtime qualification inferred.",
+    "owner": "B4 support editor; coordinator assigns compilation/execution"
+  },
+  "src/Tests.Shared/Yubico.YubiKit.Tests.Shared.csproj": {
+    "note": "Project/runner declarations read: nonpackable tooling, xUnitv2 shared/integration versus v3MTP executable units, direct xUnit-free retry source link, per-reference generated shipping metadata and disabled integration parallelism. No evaluated build or actual test selection/runtime qualification inferred.",
+    "owner": "B4 support editor; coordinator assigns compilation/execution"
+  },
+  "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Yubico.YubiKit.Core.IntegrationTests.csproj": {
+    "note": "Project/runner declarations read: nonpackable tooling, xUnitv2 shared/integration versus v3MTP executable units, direct xUnit-free retry source link, per-reference generated shipping metadata and disabled integration parallelism. No evaluated build or actual test selection/runtime qualification inferred.",
+    "owner": "B4 support editor; coordinator assigns compilation/execution"
+  },
+  "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/xunit.runner.json": {
+    "note": "Project/runner declarations read: nonpackable tooling, xUnitv2 shared/integration versus v3MTP executable units, direct xUnit-free retry source link, per-reference generated shipping metadata and disabled integration parallelism. No evaluated build or actual test selection/runtime qualification inferred.",
+    "owner": "B4 support editor; coordinator assigns compilation/execution"
+  },
+  "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj": {
+    "note": "Project/runner declarations read: nonpackable tooling, xUnitv2 shared/integration versus v3MTP executable units, direct xUnit-free retry source link, per-reference generated shipping metadata and disabled integration parallelism. No evaluated build or actual test selection/runtime qualification inferred.",
+    "owner": "B4 support editor; coordinator assigns compilation/execution"
+  },
+  "src/Core/tests/Yubico.YubiKit.Core.UnitTests/xunit.runner.json": {
+    "note": "Project/runner declarations read: nonpackable tooling, xUnitv2 shared/integration versus v3MTP executable units, direct xUnit-free retry source link, per-reference generated shipping metadata and disabled integration parallelism. No evaluated build or actual test selection/runtime qualification inferred.",
+    "owner": "B4 support editor; coordinator assigns compilation/execution"
+  },
+  "CLAUDE.md": {
+    "note": "All assigned support/instruction/example ranges read separately from obeying orientation. Scoped discovery/session/direct ownership, logging/security and test helper contracts compared with current bodies. Stale state.YubiKey/scanner/SafeLibraryHandle examples and runner commands are C010; C-C017/C018 and A/B1/B5 retain semantic aliases. No examples compiled or instruction commands run.",
+    "owner": "SHARED/Core/test-support editors with A/B1/B5/C primary owners"
+  },
+  "src/Core/CLAUDE.md": {
+    "note": "All assigned support/instruction/example ranges read separately from obeying orientation. Scoped discovery/session/direct ownership, logging/security and test helper contracts compared with current bodies. Stale state.YubiKey/scanner/SafeLibraryHandle examples and runner commands are C010; C-C017/C018 and A/B1/B5 retain semantic aliases. No examples compiled or instruction commands run.",
+    "owner": "SHARED/Core/test-support editors with A/B1/B5/C primary owners"
+  },
+  "src/Core/README.md": {
+    "note": "All assigned support/instruction/example ranges read separately from obeying orientation. Scoped discovery/session/direct ownership, logging/security and test helper contracts compared with current bodies. Stale state.YubiKey/scanner/SafeLibraryHandle examples and runner commands are C010; C-C017/C018 and A/B1/B5 retain semantic aliases. No examples compiled or instruction commands run.",
+    "owner": "SHARED/Core/test-support editors with A/B1/B5/C primary owners"
+  },
+  "src/Core/tests/CLAUDE.md": {
+    "note": "All assigned support/instruction/example ranges read separately from obeying orientation. Scoped discovery/session/direct ownership, logging/security and test helper contracts compared with current bodies. Stale state.YubiKey/scanner/SafeLibraryHandle examples and runner commands are C010; C-C017/C018 and A/B1/B5 retain semantic aliases. No examples compiled or instruction commands run.",
+    "owner": "SHARED/Core/test-support editors with A/B1/B5/C primary owners"
+  },
+  "src/PublicApi/CLAUDE.md": {
+    "note": "All assigned support/instruction/example ranges read separately from obeying orientation. Scoped discovery/session/direct ownership, logging/security and test helper contracts compared with current bodies. Stale state.YubiKey/scanner/SafeLibraryHandle examples and runner commands are C010; C-C017/C018 and A/B1/B5 retain semantic aliases. No examples compiled or instruction commands run.",
+    "owner": "SHARED/Core/test-support editors with A/B1/B5/C primary owners"
+  },
+  "src/Tests.Shared/CLAUDE.md": {
+    "note": "All assigned support/instruction/example ranges read separately from obeying orientation. Scoped discovery/session/direct ownership, logging/security and test helper contracts compared with current bodies. Stale state.YubiKey/scanner/SafeLibraryHandle examples and runner commands are C010; C-C017/C018 and A/B1/B5 retain semantic aliases. No examples compiled or instruction commands run.",
+    "owner": "SHARED/Core/test-support editors with A/B1/B5/C primary owners"
+  },
+  "src/Tests.Shared/README.md": {
+    "note": "All assigned support/instruction/example ranges read separately from obeying orientation. Scoped discovery/session/direct ownership, logging/security and test helper contracts compared with current bodies. Stale state.YubiKey/scanner/SafeLibraryHandle examples and runner commands are C010; C-C017/C018 and A/B1/B5 retain semantic aliases. No examples compiled or instruction commands run.",
+    "owner": "SHARED/Core/test-support editors with A/B1/B5/C primary owners"
+  },
+  "src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/AsyncSurfaceConventionTests.cs": {
+    "note": "Assigned assertion/scanner bodies plus full selected allowlist, factory predicate and shipping-assembly loader context read. Recursive inheritance/member/generic/array/task shapes, cycle guards and negative fixtures provide bounded API-shape oracles, not disposal/native timing/semantic conformance. Reflection tests remain unrun.",
+    "owner": "PublicApi test owner and relevant primary implementation owners; B4 support context"
+  },
+  "src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/FactoryShapeTests.cs": {
+    "note": "Assigned assertion/scanner bodies plus full selected allowlist, factory predicate and shipping-assembly loader context read. Recursive inheritance/member/generic/array/task shapes, cycle guards and negative fixtures provide bounded API-shape oracles, not disposal/native timing/semantic conformance. Reflection tests remain unrun.",
+    "owner": "PublicApi test owner and relevant primary implementation owners; B4 support context"
+  },
+  "src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/PublicReturnContractScanner.cs": {
+    "note": "Assigned assertion/scanner bodies plus full selected allowlist, factory predicate and shipping-assembly loader context read. Recursive inheritance/member/generic/array/task shapes, cycle guards and negative fixtures provide bounded API-shape oracles, not disposal/native timing/semantic conformance. Reflection tests remain unrun.",
+    "owner": "PublicApi test owner and relevant primary implementation owners; B4 support context"
+  },
+  "src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/PublicReturnContractScannerTests.cs": {
+    "note": "Assigned assertion/scanner bodies plus full selected allowlist, factory predicate and shipping-assembly loader context read. Recursive inheritance/member/generic/array/task shapes, cycle guards and negative fixtures provide bounded API-shape oracles, not disposal/native timing/semantic conformance. Reflection tests remain unrun.",
+    "owner": "PublicApi test owner and relevant primary implementation owners; B4 support context"
+  },
+  "src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/PublicReturnContractTests.cs": {
+    "note": "Assigned assertion/scanner bodies plus full selected allowlist, factory predicate and shipping-assembly loader context read. Recursive inheritance/member/generic/array/task shapes, cycle guards and negative fixtures provide bounded API-shape oracles, not disposal/native timing/semantic conformance. Reflection tests remain unrun.",
+    "owner": "PublicApi test owner and relevant primary implementation owners; B4 support context"
+  },
+  "src/Tests.Shared/Infrastructure/AllowList.cs": {
+    "note": "Assigned configuration/state/helper/filter bodies and exact retry saturation predicate read. Output appsettings is sole allow-list source; unknown serials false; placeholders bind first eligible cached key, filter does not pin transport. Retry is finite exact type/message, not arbitrary failure replay. Management helper owns hidden session and passes cached metadata. No discovery, authorization mutation or test executed.",
+    "owner": "Tests.Shared support owner; A metadata/filter and applet helper primary owners"
+  },
+  "src/Tests.Shared/Infrastructure/AppSettingsAllowListProvider.cs": {
+    "note": "Assigned configuration/state/helper/filter bodies and exact retry saturation predicate read. Output appsettings is sole allow-list source; unknown serials false; placeholders bind first eligible cached key, filter does not pin transport. Retry is finite exact type/message, not arbitrary failure replay. Management helper owns hidden session and passes cached metadata. No discovery, authorization mutation or test executed.",
+    "owner": "Tests.Shared support owner; A metadata/filter and applet helper primary owners"
+  },
+  "src/Tests.Shared/Infrastructure/IAllowListProvider.cs": {
+    "note": "Assigned configuration/state/helper/filter bodies and exact retry saturation predicate read. Output appsettings is sole allow-list source; unknown serials false; placeholders bind first eligible cached key, filter does not pin transport. Retry is finite exact type/message, not arbitrary failure replay. Management helper owns hidden session and passes cached metadata. No discovery, authorization mutation or test executed.",
+    "owner": "Tests.Shared support owner; A metadata/filter and applet helper primary owners"
+  },
+  "src/Tests.Shared/Infrastructure/TestCategories.cs": {
+    "note": "Assigned configuration/state/helper/filter bodies and exact retry saturation predicate read. Output appsettings is sole allow-list source; unknown serials false; placeholders bind first eligible cached key, filter does not pin transport. Retry is finite exact type/message, not arbitrary failure replay. Management helper owns hidden session and passes cached metadata. No discovery, authorization mutation or test executed.",
+    "owner": "Tests.Shared support owner; A metadata/filter and applet helper primary owners"
+  },
+  "src/Tests.Shared/Infrastructure/TransientScanRetry.cs": {
+    "note": "Assigned configuration/state/helper/filter bodies and exact retry saturation predicate read. Output appsettings is sole allow-list source; unknown serials false; placeholders bind first eligible cached key, filter does not pin transport. Retry is finite exact type/message, not arbitrary failure replay. Management helper owns hidden session and passes cached metadata. No discovery, authorization mutation or test executed.",
+    "owner": "Tests.Shared support owner; A metadata/filter and applet helper primary owners"
+  },
+  "src/Tests.Shared/Infrastructure/WithYubiKeyAttribute.cs": {
+    "note": "Assigned configuration/state/helper/filter bodies and exact retry saturation predicate read. Output appsettings is sole allow-list source; unknown serials false; placeholders bind first eligible cached key, filter does not pin transport. Retry is finite exact type/message, not arbitrary failure replay. Management helper owns hidden session and passes cached metadata. No discovery, authorization mutation or test executed.",
+    "owner": "Tests.Shared support owner; A metadata/filter and applet helper primary owners"
+  },
+  "src/Tests.Shared/Infrastructure/YubiKeyTestInfrastructure.cs": {
+    "note": "Assigned configuration/state/helper/filter bodies and exact retry saturation predicate read. Output appsettings is sole allow-list source; unknown serials false; placeholders bind first eligible cached key, filter does not pin transport. Retry is finite exact type/message, not arbitrary failure replay. Management helper owns hidden session and passes cached metadata. No discovery, authorization mutation or test executed.",
+    "owner": "Tests.Shared support owner; A metadata/filter and applet helper primary owners"
+  },
+  "src/Tests.Shared/YubiKeyTestState.cs": {
+    "note": "Assigned configuration/state/helper/filter bodies and exact retry saturation predicate read. Output appsettings is sole allow-list source; unknown serials false; placeholders bind first eligible cached key, filter does not pin transport. Retry is finite exact type/message, not arbitrary failure replay. Management helper owns hidden session and passes cached metadata. No discovery, authorization mutation or test executed.",
+    "owner": "Tests.Shared support owner; A metadata/filter and applet helper primary owners"
+  },
+  "src/Tests.Shared/YubiKeyTestStateExtensions.cs": {
+    "note": "Assigned configuration/state/helper/filter bodies and exact retry saturation predicate read. Output appsettings is sole allow-list source; unknown serials false; placeholders bind first eligible cached key, filter does not pin transport. Retry is finite exact type/message, not arbitrary failure replay. Management helper owns hidden session and passes cached metadata. No discovery, authorization mutation or test executed.",
+    "owner": "Tests.Shared support owner; A metadata/filter and applet helper primary owners"
+  },
+  "src/Tests.Shared/appsettings.json": {
+    "note": "Assigned configuration/state/helper/filter bodies and exact retry saturation predicate read. Output appsettings is sole allow-list source; unknown serials false; placeholders bind first eligible cached key, filter does not pin transport. Retry is finite exact type/message, not arbitrary failure replay. Management helper owns hidden session and passes cached metadata. No discovery, authorization mutation or test executed.",
+    "owner": "Tests.Shared support owner; A metadata/filter and applet helper primary owners"
+  },
+  "src/Tests.Shared/Infrastructure/OperatorCue.cs": {
+    "note": "Announce console/echo lie outside speech catch; WaitForExit15s result ignored. Outcome-neutral/finished-speech wording exceeds actual failure/timeout behavior, C008. No child/speech launched.",
+    "owner": "Tests.Shared support editor; separately assigned test implementation reviewer"
+  },
+  "docs/architecture/images/L0-context.svg": {
+    "note": "L0-context: PNG visually inspected and SVG meaningful text labels independently extracted/compared with Mermaid. All three source/SVG/PNG manifest digests match. Binary unit character ranges are administrative identities, not visual semantics. C010 teaching scope still applies.",
+    "owner": "B4 support editor; coordinator assigns compilation/execution"
+  },
+  "docs/architecture/images/png/L0-context.png": {
+    "note": "L0-context: PNG visually inspected and SVG meaningful text labels independently extracted/compared with Mermaid. All three source/SVG/PNG manifest digests match. Binary unit character ranges are administrative identities, not visual semantics. C010 teaching scope still applies.",
+    "owner": "B4 support editor; coordinator assigns compilation/execution"
+  },
+  "docs/architecture/images/L1-assembly-deps.svg": {
+    "note": "L1-assembly-deps: PNG visually inspected and SVG meaningful text labels independently extracted/compared with Mermaid. All three source/SVG/PNG manifest digests match. Binary unit character ranges are administrative identities, not visual semantics. C010 teaching scope still applies.",
+    "owner": "B4 support editor; coordinator assigns compilation/execution"
+  },
+  "docs/architecture/images/png/L1-assembly-deps.png": {
+    "note": "L1-assembly-deps: PNG visually inspected and SVG meaningful text labels independently extracted/compared with Mermaid. All three source/SVG/PNG manifest digests match. Binary unit character ranges are administrative identities, not visual semantics. C010 teaching scope still applies.",
+    "owner": "B4 support editor; coordinator assigns compilation/execution"
+  },
+  "docs/architecture/images/L2-layered-stack.svg": {
+    "note": "L2-layered-stack: PNG visually inspected and SVG meaningful text labels independently extracted/compared with Mermaid. All three source/SVG/PNG manifest digests match. Binary unit character ranges are administrative identities, not visual semantics. C010 teaching scope still applies.",
+    "owner": "B4 support editor; coordinator assigns compilation/execution"
+  },
+  "docs/architecture/images/png/L2-layered-stack.png": {
+    "note": "L2-layered-stack: PNG visually inspected and SVG meaningful text labels independently extracted/compared with Mermaid. All three source/SVG/PNG manifest digests match. Binary unit character ranges are administrative identities, not visual semantics. C010 teaching scope still applies.",
+    "owner": "B4 support editor; coordinator assigns compilation/execution"
+  },
+  "docs/architecture/images/L3-apdu-sequence.svg": {
+    "note": "L3-apdu-sequence: PNG visually inspected and SVG meaningful text labels independently extracted/compared with Mermaid. All three source/SVG/PNG manifest digests match. Binary unit character ranges are administrative identities, not visual semantics. C010 teaching scope still applies.",
+    "owner": "B4 support editor; coordinator assigns compilation/execution"
+  },
+  "docs/architecture/images/png/L3-apdu-sequence.png": {
+    "note": "L3-apdu-sequence: PNG visually inspected and SVG meaningful text labels independently extracted/compared with Mermaid. All three source/SVG/PNG manifest digests match. Binary unit character ranges are administrative identities, not visual semantics. C010 teaching scope still applies.",
+    "owner": "B4 support editor; coordinator assigns compilation/execution"
+  },
+  "docs/architecture/images/L3b-fido2-ctap-sequence.svg": {
+    "note": "L3b-fido2-ctap-sequence: PNG visually inspected and SVG meaningful text labels independently extracted/compared with Mermaid. All three source/SVG/PNG manifest digests match. Binary unit character ranges are administrative identities, not visual semantics. C010 teaching scope still applies.",
+    "owner": "B4 support editor; coordinator assigns compilation/execution"
+  },
+  "docs/architecture/images/png/L3b-fido2-ctap-sequence.png": {
+    "note": "L3b-fido2-ctap-sequence: PNG visually inspected and SVG meaningful text labels independently extracted/compared with Mermaid. All three source/SVG/PNG manifest digests match. Binary unit character ranges are administrative identities, not visual semantics. C010 teaching scope still applies.",
+    "owner": "B4 support editor; coordinator assigns compilation/execution"
+  }
+}

@@ -1,0 +1,73 @@
+[
+  {
+    "name": "scp03-1.1.2.pdf",
+    "url": "https://globalplatform.org/wp-content/uploads/2014/07/GPC_2.3_D_SCP03_v1.1.2_PublicRelease.pdf",
+    "requested_utc": "2026-11-11T23:28:58.587395+00:00",
+    "final_url": "https://globalplatform.org/wp-content/uploads/2014/07/GPC_2.3_D_SCP03_v1.1.2_PublicRelease.pdf",
+    "status": 200,
+    "bytes": 487598,
+    "sha256": "973a10834f7fe8befd98da9af65393622234b80745092bd85248804c57b648dd"
+  },
+  {
+    "name": "scp11-public-review-1.3.0.13.pdf",
+    "url": "https://globalplatform.org/wp-content/uploads/2023/08/GPC_2.3_F_SCP11_v1.3.0.13_PublicRvw.pdf",
+    "requested_utc": "2026-11-11T23:28:59.790398+00:00",
+    "final_url": "https://globalplatform.org/wp-content/uploads/2023/08/GPC_2.3_F_SCP11_v1.3.0.13_PublicRvw.pdf",
+    "status": 200,
+    "bytes": 799930,
+    "sha256": "5db47b3df3c4e565a5ad91257395604f3482ed5db70c64853544c3b0e289fde0"
+  },
+  {
+    "name": "scp11-catalogue.html",
+    "url": "https://globalplatform.org/specs-library/secure-channel-protocol-11-amendment-f/",
+    "requested_utc": "2026-11-11T23:29:00.843133+00:00",
+    "final_url": "https://globalplatform.org/specs-library/secure-channel-protocol-11-amendment-f/",
+    "status": 200,
+    "bytes": 125639,
+    "sha256": "6219c1139a5c4f41f39ed27a6c95633ffdb55d1a9824ef877de6b087fb2b61a5",
+    "download_links": [
+      "https://www.microsoft.com/software-download/windows10",
+      "javascript:download_spec(13818, ",
+      "javascript:download_spec(34377, ",
+      "javascript:download_spec(4806, ",
+      "javascript:download_spec(4807, ",
+      "javascript:download_spec(53958, ",
+      "javascript:download_spec(7310, "
+    ]
+  },
+  {
+    "name": "scp03-catalogue.html",
+    "url": "https://globalplatform.org/specs-library/secure-channel-protocol-03-amendment-d-v1-2/",
+    "requested_utc": "2026-11-11T23:29:01.727126+00:00",
+    "final_url": "https://globalplatform.org/specs-library/secure-channel-protocol-03-amendment-d-v1-2/",
+    "status": 200,
+    "bytes": 122441,
+    "sha256": "86fa3f52729c26bcb3aa35eb9ecd50473ef074c56cb3dca0c2ce63d47b1434b8",
+    "download_links": [
+      "https://www.microsoft.com/software-download/windows10",
+      "javascript:download_spec(12915, ",
+      "javascript:download_spec(13845, ",
+      "javascript:download_spec(22832, ",
+      "javascript:download_spec(5396, "
+    ]
+  },
+  {
+    "name": "yubico-profile.html",
+    "url": "https://docs.yubico.com/hardware/yubikey/yk-tech-manual/yk5-apps-scp.html",
+    "requested_utc": "2026-11-11T23:29:02.592213+00:00",
+    "final_url": "https://docs.yubico.com/hardware/yubikey/yk-tech-manual/yk5-apps-scp.html",
+    "status": 200,
+    "bytes": 60313,
+    "sha256": "4314cfaa8c56f27c684d5323f386f830da95897bc678c0b96209a9245460b0c0",
+    "download_links": [
+      "https://globalplatform.org/wp-content/uploads/2014/07/GPC_2.3_D_SCP03_v1.1.2_PublicRelease.pdf",
+      "https://globalplatform.org/wp-content/uploads/2017/09/GPC_2_3_F_SCP11_v1.2_PublicRelease.pdf"
+    ]
+  },
+  {
+    "name": "arraybufferwriter-v10.cs",
+    "url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.0/src/libraries/System.Memory/src/System/Buffers/ArrayBufferWriter.cs",
+    "requested_utc": "2026-11-11T23:29:02.745789+00:00",
+    "error": "HTTP Error 404: Not Found"
+  }
+]

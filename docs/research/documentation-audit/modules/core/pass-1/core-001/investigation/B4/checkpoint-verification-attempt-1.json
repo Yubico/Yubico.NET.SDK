@@ -1,0 +1,12 @@
+{
+  "status": "FAILED",
+  "packet_completion": "CONTINUATION-REQUIRED",
+  "assigned_units": 2350,
+  "outstanding_units": 1462,
+  "source_capture_count": 29,
+  "failures": [
+    "local link investigation-B4.md: investigation/B4/checkpoint-verification.json"
+  ],
+  "qualification": "Static record/identity verification only; no semantic completeness, independent review, compiler/native/device result or installed native producer attestation.",
+  "cause": "The first check validated the report's link to its result before writing that result file. The result was then written. The next verification independently checks the now-present output and all source identities; this tooling failure supplies no semantic/source/native result."
+}

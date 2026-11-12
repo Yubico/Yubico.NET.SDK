@@ -1,0 +1,37 @@
+{
+  "source_pin": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "observed_metadata_head": "bb94f0884f63f260156227957d4cc112d984e300",
+  "state": "CHECKPOINT-INCOMPLETE",
+  "primary_files_assigned": 50,
+  "primary_lines_assigned": 9441,
+  "primary_files_read_completely": 48,
+  "primary_lines_read": 7551,
+  "primary_unit_count": 668,
+  "shared_unit_count": 16,
+  "unit_dispositions": {
+    "READ-RELATED-CANDIDATE-CONTEXT": 662,
+    "READ-CLEAN": 18,
+    "UNREAD": 2,
+    "READ-HISTORICAL-CONTEXT": 2
+  },
+  "primary_dispositions": {
+    "READ-RELATED-CANDIDATE-CONTEXT": 652,
+    "READ-CLEAN": 14,
+    "UNREAD": 2
+  },
+  "shared_dispositions": {
+    "READ-RELATED-CANDIDATE-CONTEXT": 10,
+    "READ-CLEAN": 4,
+    "READ-HISTORICAL-CONTEXT": 2
+  },
+  "identity_checks": "All assigned raw/range hashes and all selected pinned-file normalized identities matched; hashes do not supply semantic coverage",
+  "unread_paths": [
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/SmartCard/Scp/ansx963_2001.rsp",
+    "src/Core/tests/Yubico.YubiKit.Core.UnitTests/SmartCard/Scp/ansx963_2001.txt"
+  ],
+  "new_sdk_builds": 0,
+  "new_sdk_test_executions": 0,
+  "new_native_device_executions": 0,
+  "accepted_core_ids_allocated": 0,
+  "next": "Read two complete fixture files; finish narrow dependency/history/original ISO/oracle provenance and per-unit candidate triage; retain bounded GP-final gaps; coordinator owns execution and acceptance."
+}

@@ -1,0 +1,713 @@
+[
+  {
+    "key": "ctap2-001:CTAP-XREF-003",
+    "dedup_group": "credential-length-units",
+    "authority": {
+      "handoff": "docs/research/documentation-audit/ctap2.md",
+      "ledger": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/triage-addendum.md",
+      "review": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/review-closeout-followup.md",
+      "source_run": "ctap2-001"
+    },
+    "historical_definition": {
+      "path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/triage-addendum.md",
+      "start_line": 216,
+      "end_line": 216,
+      "text": "- **CTAP-XREF-003 (proposed, no separate Core bug count):** C-012/B-04/F-10;"
+    },
+    "registry_current_state_preserved": "reproducible-from-source",
+    "registry_current_conclusion_preserved": "ConsoleCredentialReader applies MinLength/MaxLength to UTF-16 char counts before Encoding.GetByteCount/GetBytes. Ctap2's 4..63 preset therefore differs from UTF-8 bytes/code-point/NFC/device-minimum policy. Allocation of enforcement is still a decision; preserve CTAP-IMP-006.",
+    "boundary_outcome": "Current CTAP preset already documents UTF16 versus bytes/code points; actual Core reader/ClientPin call path confirms the allocation decision. Preserve XREF003 and IMP006; OpenPGP retains its own profile owner.",
+    "local_candidates": [
+      "CORE-CTAP-X003"
+    ],
+    "documentation": "Retain accurate current qualifications; exact new/reopening paths in candidates.md; independent review pending.",
+    "implementation": "Source-backed scoped observation or explicit policy gap; no repair authorized or executed.",
+    "qualification": "No new runtime/native/device execution; source/provider/platform/hardware gaps retained.",
+    "next_owner": "C plus CTAP2/BOUNDARY-OpenPgp and maintainer",
+    "independent_review": "PENDING"
+  },
+  {
+    "key": "ctap2-001:CTAP-IMP-004",
+    "dedup_group": "ctap-response-ownership",
+    "authority": {
+      "handoff": "docs/research/documentation-audit/ctap2.md",
+      "ledger": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/triage.md",
+      "review": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/review-closeout-followup.md",
+      "source_run": "ctap2-001"
+    },
+    "historical_definition": {
+      "path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/triage.md",
+      "start_line": 44,
+      "end_line": 44,
+      "text": "| CTAP-IMP-004 | A-008/B-08: builder retains secret-bearing clones; generic request/response ownership lacks end-to-end cleanup. | Design explicit byte lifetime/cleanup without assuming read-only views are owners. Reopen builder/raw API, PIN/admin/extension consumers and WA-IMP-013 dependencies. |"
+    },
+    "registry_current_state_preserved": "still-candidate-boundary-review",
+    "registry_current_conclusion_preserved": "Request-builder secret clones and raw request/response lifetime need applet-to-Core tracing; read-only views convey access rather than cleanup ownership.",
+    "boundary_outcome": "Current factory/backend/raw/model trace confirms multiple independent response/request owners and successful slices/copies. StoredCredentialInfo private-clone cleanup has exact scope; WA callers receive a separate mandatory follow-up.",
+    "local_candidates": [
+      "CORE-CTAP-X004",
+      "CORE-CTAP-X016"
+    ],
+    "documentation": "Retain accurate current qualifications; exact new/reopening paths in candidates.md; independent review pending.",
+    "implementation": "Source-backed scoped observation or explicit policy gap; no repair authorized or executed.",
+    "qualification": "No new runtime/native/device execution; source/provider/platform/hardware gaps retained.",
+    "next_owner": "CTAP2 plus B6/C; BOUNDARY-WebAuthn for WA aliases",
+    "independent_review": "PENDING"
+  },
+  {
+    "key": "ctap2-001:CTAP-IMP-005",
+    "dedup_group": "ctap-crypto-cleanup",
+    "authority": {
+      "handoff": "docs/research/documentation-audit/ctap2.md",
+      "ledger": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/triage.md",
+      "review": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/review-closeout-followup.md",
+      "source_run": "ctap2-001"
+    },
+    "historical_definition": {
+      "path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/triage.md",
+      "start_line": 45,
+      "end_line": 45,
+      "text": "| CTAP-IMP-005 | B-08: failed decryption outputs, V1 full MAC stack buffer and post-ECDH allocation failure leave specific clearing gaps. | Verify exceptional paths and scoped clearing. Reopen protocol/helper XML, security notes and hmac-secret/PRF callers; no observed exploit/provider erasure claim. |"
+    },
+    "registry_current_state_preserved": "still-candidate-boundary-review",
+    "registry_current_conclusion_preserved": "PIN protocol decryption/MAC/ECDH exceptional cleanup remains CTAP-owned; provider and Core helper copies require narrow lifetime tracing.",
+    "boundary_outcome": "Specific local crypto output/Z/MAC, blob probe/compression and salt/metadata failure scopes remain separate. Core provider/native residuals retain C/B4 ownership; do not merge independent sites.",
+    "local_candidates": [
+      "CORE-CTAP-X005",
+      "CORE-CTAP-X013",
+      "CORE-CTAP-X014",
+      "CORE-CTAP-X015"
+    ],
+    "documentation": "Retain accurate current qualifications; exact new/reopening paths in candidates.md; independent review pending.",
+    "implementation": "Source-backed scoped observation or explicit policy gap; no repair authorized or executed.",
+    "qualification": "No new runtime/native/device execution; source/provider/platform/hardware gaps retained.",
+    "next_owner": "CTAP2 and C/B4 for actual delegated helpers",
+    "independent_review": "PENDING"
+  },
+  {
+    "key": "ctap2-001:CTAP-IMP-006",
+    "dedup_group": "credential-length-units",
+    "authority": {
+      "handoff": "docs/research/documentation-audit/ctap2.md",
+      "ledger": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/triage.md",
+      "review": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/review-closeout-followup.md",
+      "source_run": "ctap2-001"
+    },
+    "historical_definition": {
+      "path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/triage.md",
+      "start_line": 46,
+      "end_line": 46,
+      "text": "| CTAP-IMP-006 | B-04: PIN validation checks only 4–63 bytes, not UTF-8/NFC/code points/device minimum/final NUL. | Decide input-layer versus SDK enforcement without unsafe silent normalization; add meaningful byte/Unicode/state tests. Reopen PIN params/errors, prompts and both layer guides. |"
+    },
+    "registry_current_state_preserved": "needs-decision",
+    "registry_current_conclusion_preserved": "CTAP PIN byte checks and Unicode/code-point/final-NUL rules remain an input-layer allocation decision; a Core reader preset alone cannot enforce the full authenticator policy.",
+    "boundary_outcome": "Current CTAP preset already documents UTF16 versus bytes/code points; actual Core reader/ClientPin call path confirms the allocation decision. Preserve XREF003 and IMP006; OpenPGP retains its own profile owner.",
+    "local_candidates": [
+      "CORE-CTAP-X003"
+    ],
+    "documentation": "Retain accurate current qualifications; exact new/reopening paths in candidates.md; independent review pending.",
+    "implementation": "Source-backed scoped observation or explicit policy gap; no repair authorized or executed.",
+    "qualification": "No new runtime/native/device execution; source/provider/platform/hardware gaps retained.",
+    "next_owner": "C plus CTAP2/BOUNDARY-OpenPgp and maintainer",
+    "independent_review": "PENDING"
+  },
+  {
+    "key": "ctap2-001:CTAP-IMP-007",
+    "dedup_group": "ctap-peer-key-profile",
+    "authority": {
+      "handoff": "docs/research/documentation-audit/ctap2.md",
+      "ledger": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/triage.md",
+      "review": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/review-closeout-followup.md",
+      "source_run": "ctap2-001"
+    },
+    "historical_definition": {
+      "path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/triage.md",
+      "start_line": 47,
+      "end_line": 47,
+      "text": "| CTAP-IMP-007 | B-07: peer key agreement checks coordinates but not required kty/crv/alg labels; tests omit alg. | Enforce security-critical key structure and verify actual exception boundaries. Reopen helper/Encapsulate/COSE/forward-compatibility and hmac-secret/PRF claims together. |"
+    },
+    "registry_current_state_preserved": "still-candidate-boundary-review",
+    "registry_current_conclusion_preserved": "Core catalog kty/crv metadata stays distinct from the strict CTAP PIN peer-key kty/crv/alg validation boundary.",
+    "boundary_outcome": "CTAP helper checks coordinate type/length and forces provider P256; required labels/optional restrictions remain missing. Core metadata/structural catalog offers no implicit fix.",
+    "local_candidates": [
+      "CORE-CTAP-X006"
+    ],
+    "documentation": "Retain accurate current qualifications; exact new/reopening paths in candidates.md; independent review pending.",
+    "implementation": "Source-backed scoped observation or explicit policy gap; no repair authorized or executed.",
+    "qualification": "No new runtime/native/device execution; source/provider/platform/hardware gaps retained.",
+    "next_owner": "CTAP2 profile owner",
+    "independent_review": "PENDING"
+  },
+  {
+    "key": "ctap2-001:CTAP-IMP-025",
+    "dedup_group": "ctap-aaguid-portability",
+    "authority": {
+      "handoff": "docs/research/documentation-audit/ctap2.md",
+      "ledger": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/triage.md",
+      "review": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/review-closeout-followup.md",
+      "source_run": "ctap2-001"
+    },
+    "historical_definition": {
+      "path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/triage.md",
+      "start_line": 65,
+      "end_line": 65,
+      "text": "| CTAP-IMP-025 | A-014 / framework probe: default Guid serialization is architecture-independent mixed-endian, while converter swaps only on little-endian hosts. | Code-inferred big-endian portability defect; current little-endian fixture passed, no big-endian execution. Correct serialization explanation now; defer conversion/test changes and avoid claiming unsupported platform qualification. Reopen AAGUID API/internal conversion and platform guidance. |"
+    },
+    "registry_current_state_preserved": "still-candidate-boundary-review",
+    "registry_current_conclusion_preserved": "Historical mixed-endian Guid source/probe settled its inference only on the recorded little-endian host. Keep code-inferred big-endian issue and missing execution separate.",
+    "boundary_outcome": "CTAP converter host-conditioned mixed-endian reversal and WA default-value/equality are distinct source-visible concerns. Existing little-endian probe remains historical; no new big-endian execution.",
+    "local_candidates": [
+      "CORE-CTAP-X023"
+    ],
+    "documentation": "Retain accurate current qualifications; exact new/reopening paths in candidates.md; independent review pending.",
+    "implementation": "Source-backed scoped observation or explicit policy gap; no repair authorized or executed.",
+    "qualification": "No new runtime/native/device execution; source/provider/platform/hardware gaps retained.",
+    "next_owner": "CTAP2 converter; BOUNDARY-WebAuthn default-value owner",
+    "independent_review": "PENDING"
+  },
+  {
+    "key": "ctap2-001:CTAP-IMP-027",
+    "dedup_group": "ctap-response-ownership",
+    "authority": {
+      "handoff": "docs/research/documentation-audit/ctap2.md",
+      "ledger": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/triage-addendum.md",
+      "review": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/review-closeout-followup.md",
+      "source_run": "ctap2-001"
+    },
+    "historical_definition": {
+      "path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/triage-addendum.md",
+      "start_line": 174,
+      "end_line": 174,
+      "text": "| CTAP-IMP-027 — ownership design gap; C-004/E-08 | S`Credentials/MakeCredentialResponse.cs:170–223` borrows statement/unsigned slices; get/make/authenticator/attested parsers and S`Extensions/Shared/ExtensionOutput.cs` materialize independent arrays, including largeBlobKey/secret-derived outputs, without disposable result owner. | Choose coherent explicit owner/view/failure lifetime, not a non-disposable RawData clone or advice to zero only one view. Dependencies IMP-004/030/034, B/E/F/G and WA-IMP-006/013. Reopen both response Decode/Raw/outputs/key XML, AuthenticatorData/AttestedCredentialData, attestation slices, all byte-bearing extension DTO/getter ownership and both-layer result-cleanup examples after ownership changes. |"
+    },
+    "registry_current_state_preserved": "still-candidate-boundary-review",
+    "registry_current_conclusion_preserved": "CTAP response/extension DTOs materialize independent owned arrays and borrow other slices; Core ApduResponse.Clear clears only its own copy. Full response ownership is an applet design question.",
+    "boundary_outcome": "Current factory/backend/raw/model trace confirms multiple independent response/request owners and successful slices/copies. StoredCredentialInfo private-clone cleanup has exact scope; WA callers receive a separate mandatory follow-up.",
+    "local_candidates": [
+      "CORE-CTAP-X004",
+      "CORE-CTAP-X016"
+    ],
+    "documentation": "Retain accurate current qualifications; exact new/reopening paths in candidates.md; independent review pending.",
+    "implementation": "Source-backed scoped observation or explicit policy gap; no repair authorized or executed.",
+    "qualification": "No new runtime/native/device execution; source/provider/platform/hardware gaps retained.",
+    "next_owner": "CTAP2 plus B6/C; BOUNDARY-WebAuthn for WA aliases",
+    "independent_review": "PENDING"
+  },
+  {
+    "key": "ctap2-001:CTAP-IMP-028",
+    "dedup_group": "ctap-decoder-envelope",
+    "authority": {
+      "handoff": "docs/research/documentation-audit/ctap2.md",
+      "ledger": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/triage-addendum.md",
+      "review": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/review-closeout-followup.md",
+      "source_run": "ctap2-001"
+    },
+    "historical_definition": {
+      "path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/triage-addendum.md",
+      "start_line": 175,
+      "end_line": 175,
+      "text": "| CTAP-IMP-028 — bugs plus decoder decisions; C-002/006 | S`Credentials/AuthenticatorData.cs:149–173` accepts ED remainder without one-map check, ignores trailing bytes without ED; `AttestedCredentialData.cs:122–127` skips any CBOR value; Make response lacks AT check; Get count uint→int can overflow and key length/conditional fields lack checks. Standalone decoders lack request/version context. | Set strict structural/full-envelope boundaries versus context-aware conditional validation and open COSE identifiers; nested readers must not be indiscriminately forced to exhaust parent input. Dependencies IMP-001/007/030, framework trailing-map evidence, A/E/F/G, WA-IMP-010 remains separate recovery. Reopen all named parser XML/errors, response field/default tables, flag/raw/extensions/COSE docs and parser fixtures after selected validation/range changes. No SDK decoder executed here. |"
+    },
+    "registry_current_state_preserved": "still-candidate-boundary-review",
+    "registry_current_conclusion_preserved": "Structural/complete-envelope checks remain CTAP-owned; nested COSE readers can share a parent and need context-specific consumption rules.",
+    "boundary_outcome": "Structural ED/AT/count/full-envelope/request-version validation remains CTAP-owned. Raw framing validates another domain; preserve full-parent versus nested-reader distinction.",
+    "local_candidates": [
+      "CORE-CTAP-X011"
+    ],
+    "documentation": "Retain accurate current qualifications; exact new/reopening paths in candidates.md; independent review pending.",
+    "implementation": "Source-backed scoped observation or explicit policy gap; no repair authorized or executed.",
+    "qualification": "No new runtime/native/device execution; source/provider/platform/hardware gaps retained.",
+    "next_owner": "CTAP2; BOUNDARY-WebAuthn recovery separately",
+    "independent_review": "PENDING"
+  },
+  {
+    "key": "ctap2-001:CTAP-IMP-029",
+    "dedup_group": "ctap-arkg-profile",
+    "authority": {
+      "handoff": "docs/research/documentation-audit/ctap2.md",
+      "ledger": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/triage-addendum.md",
+      "review": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/review-closeout-followup.md",
+      "source_run": "ctap2-001"
+    },
+    "historical_definition": {
+      "path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/triage-addendum.md",
+      "start_line": 176,
+      "end_line": 176,
+      "text": "| CTAP-IMP-029 — experimental compatibility/security decision; C-009/E-12 | S`Cose/CoseArkgP256SeedKey.cs:95–167` emits wrapped maps with kty2/alg-65700, accepts outer99 and padded coordinates without nested curve=1 check; expired draft-10 specifies different outer/direct-map profile. | Choose pinned vendor profile vs draft target and security-critical key checks; do not treat sibling agreement as authoritative or authorize production use. Dependencies DEC-003, Core delegated ARKG, E/G. Reopen CoseAlgorithm seed/signing identifiers, seed Encode/Decode/reconstruction XML, CoseKey dispatch, ARKG fixtures, PreviewSignCbor/GeneratedKey/DerivedKey and experimental support claims after profile/validation changes. |"
+    },
+    "registry_current_state_preserved": "needs-decision",
+    "registry_current_conclusion_preserved": "Expired ARKG draft-10 agrees on seed marker -65700 after the reviewer erratum. Outer kty/wrapped/direct maps/dkalg/curve/profile questions remain. Core mathematical reconstruction is separate from selecting the applet profile.",
+    "boundary_outcome": "Preserve draft10 -65700 erratum and remaining outer/nested/dkalg/profile questions; separate actual algorithm-propagation defect from profile choice and Core math. WA empty-handle policy receives its own boundary follow-up.",
+    "local_candidates": [
+      "CORE-CTAP-X007",
+      "CORE-CTAP-X008"
+    ],
+    "documentation": "Retain accurate current qualifications; exact new/reopening paths in candidates.md; independent review pending.",
+    "implementation": "Source-backed scoped observation or explicit policy gap; no repair authorized or executed.",
+    "qualification": "No new runtime/native/device execution; source/provider/platform/hardware gaps retained.",
+    "next_owner": "CTAP2/maintainer plus C and BOUNDARY-WebAuthn",
+    "independent_review": "PENDING"
+  },
+  {
+    "key": "ctap2-001:CTAP-IMP-030",
+    "dedup_group": "ctap-unsigned-outputs",
+    "authority": {
+      "handoff": "docs/research/documentation-audit/ctap2.md",
+      "ledger": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/triage-addendum.md",
+      "review": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/review-closeout-followup.md",
+      "source_run": "ctap2-001"
+    },
+    "historical_definition": {
+      "path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/triage-addendum.md",
+      "start_line": 177,
+      "end_line": 177,
+      "text": "| CTAP-IMP-030 — support/raw-preservation decision; C-010 | S`Credentials/MakeCredentialResponse.cs` models unsigned key6 but drops unknown outer fields; S`Credentials/GetAssertionResponse.cs` drops S23 key8 and has no complete raw envelope. | Decide unsigned-output/raw escape hatch with IMP-027 ownership, not mandatory support for every optional extension. Dependencies E/G, IMP-032/034. Reopen both response field tables/Decode/unsigned/raw guarantees, module forward-compatibility doctrine, extension raw codecs and WebAuthn boundary after support changes. Introduction-history claim remains unverified. |"
+    },
+    "registry_current_state_preserved": "still-candidate-boundary-review",
+    "registry_current_conclusion_preserved": "Unsigned getAssertion key8/raw-envelope support remains a CTAP response API decision. Reuse old audit #4 identity rather than count its reobservation again.",
+    "boundary_outcome": "GetAssertion still skips unsigned key8; Make models key6 slices. Old #4 retained without additive bug count. Direct-extension support choice and WA route remain separate from transport framing.",
+    "local_candidates": [
+      "CORE-CTAP-X010"
+    ],
+    "documentation": "Retain accurate current qualifications; exact new/reopening paths in candidates.md; independent review pending.",
+    "implementation": "Source-backed scoped observation or explicit policy gap; no repair authorized or executed.",
+    "qualification": "No new runtime/native/device execution; source/provider/platform/hardware gaps retained.",
+    "next_owner": "CTAP2 plus BOUNDARY-WebAuthn",
+    "independent_review": "PENDING"
+  },
+  {
+    "key": "ctap2-001:CTAP-IMP-035",
+    "dedup_group": "ctap-crypto-cleanup",
+    "authority": {
+      "handoff": "docs/research/documentation-audit/ctap2.md",
+      "ledger": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/triage-addendum.md",
+      "review": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/review-closeout-followup.md",
+      "source_run": "ctap2-001"
+    },
+    "historical_definition": {
+      "path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/triage-addendum.md",
+      "start_line": 182,
+      "end_line": 182,
+      "text": "| CTAP-IMP-035 — shipping cleanup gaps; E-09/19/G-005 | S`LargeBlobs/LargeBlobStorage.cs:225,268,397–448` discards probe plaintext and retains auth/payload/request copies; `LargeBlobData.cs:274–280` does not explicitly clear MemoryStream backing storage; `Extensions/Shared/ExtensionBuilder.cs:183–208` lacks saltData/failure finally; metadata failure outputs need ownership review. | Clear SDK-owned sensitive buffers on success/failure within chosen ownership. Dependencies IMP-004/005/024/027, WA-IMP-013, B/F/G. Reopen storage/entry Encrypt/TryDecrypt/FindAndDecrypt/Get/Set/Delete lifetime/temporaries, helper BuildHmacSecretInput cleanup, metadata decrypt ownership/errors and both-layer blob/PRF cleanup examples after changes. No provider-wide erasure proof. |"
+    },
+    "registry_current_state_preserved": "still-candidate-boundary-review",
+    "registry_current_conclusion_preserved": "Storage/probe/plaintext/salt/failure buffers retain their CTAP-owned cleanup questions; Core transport copies have independent scopes.",
+    "boundary_outcome": "Specific local crypto output/Z/MAC, blob probe/compression and salt/metadata failure scopes remain separate. Core provider/native residuals retain C/B4 ownership; do not merge independent sites.",
+    "local_candidates": [
+      "CORE-CTAP-X005",
+      "CORE-CTAP-X013",
+      "CORE-CTAP-X014",
+      "CORE-CTAP-X015"
+    ],
+    "documentation": "Retain accurate current qualifications; exact new/reopening paths in candidates.md; independent review pending.",
+    "implementation": "Source-backed scoped observation or explicit policy gap; no repair authorized or executed.",
+    "qualification": "No new runtime/native/device execution; source/provider/platform/hardware gaps retained.",
+    "next_owner": "CTAP2 and C/B4 for actual delegated helpers",
+    "independent_review": "PENDING"
+  },
+  {
+    "key": "ctap2-001:CTAP-IMP-037",
+    "dedup_group": "ctap-blob-format",
+    "authority": {
+      "handoff": "docs/research/documentation-audit/ctap2.md",
+      "ledger": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/triage-addendum.md",
+      "review": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/review-closeout-followup.md",
+      "source_run": "ctap2-001"
+    },
+    "historical_definition": {
+      "path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/triage-addendum.md",
+      "start_line": 184,
+      "end_line": 184,
+      "text": "| CTAP-IMP-037 — uint handling bug / cap and preservation decisions; E-11 | S`LargeBlobs/LargeBlobData.cs` uses signed long for protocol uint/unknown integer keys, reconstructs modeled entries; TryDecrypt origSize>1MiB returns null while Encrypt accepts larger plaintext. | Decide full uint/preserved-slice behavior and explicit read/write-cap policy; no all-client interoperability claim. Dependencies IMP-035/036, C/G. Reopen LargeBlobEntry/Array ctor/Deserialize/TryDecode/TryDecrypt/Encrypt borrowing, exceptions, unknown preservation and cap guidance plus SpecFormatTests foreign-entry/seam comments after format/cap changes. |"
+    },
+    "registry_current_state_preserved": "still-candidate-boundary-review",
+    "registry_current_conclusion_preserved": "Signed origSize/integer-key ranges and read/write cap are distinct from preserved unknown encoded value slices, which borrow input. Preserve the accepted review correction.",
+    "boundary_outcome": "Signed origSize/key ranges, read cap versus uncapped writes and unknown encoded-slice preservation retain separate policy/implementation facets; no Core transaction inferred.",
+    "local_candidates": [
+      "CORE-CTAP-X012"
+    ],
+    "documentation": "Retain accurate current qualifications; exact new/reopening paths in candidates.md; independent review pending.",
+    "implementation": "Source-backed scoped observation or explicit policy gap; no repair authorized or executed.",
+    "qualification": "No new runtime/native/device execution; source/provider/platform/hardware gaps retained.",
+    "next_owner": "CTAP2 blob format/maintainer",
+    "independent_review": "PENDING"
+  },
+  {
+    "key": "ctap2-001:CTAP-IMP-039",
+    "dedup_group": "ctap-arkg-profile",
+    "authority": {
+      "handoff": "docs/research/documentation-audit/ctap2.md",
+      "ledger": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/triage-addendum.md",
+      "review": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/review-closeout-followup.md",
+      "source_run": "ctap2-001"
+    },
+    "historical_definition": {
+      "path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/triage-addendum.md",
+      "start_line": 186,
+      "end_line": 186,
+      "text": "| CTAP-IMP-039 — actual algorithm propagation bug; E-14 | S`Extensions/PreviewSign/PreviewSignRegistrationOutput.cs:91–95` passes seed Algorithm(-65700) as DerivedKeyAlgorithm; PreviewSignCbor extraction passes actual derived alg; verifier always P256/SHA256. | Correct propagation and settle supported dispatch with meaningful both-accessor assertions. Dependencies IMP-029/041, C/G. Reopen both generated-key accessor XML, GeneratedKey.DerivedKeyAlgorithm/DerivePublicKey, DerivedKey.VerifySignature, seed/derived/signing identifiers and G generated-output mapping after change. |"
+    },
+    "registry_current_state_preserved": "still-candidate-boundary-review",
+    "registry_current_conclusion_preserved": "Seed versus derived algorithm propagation remains a CTAP previewSign result issue, separate from Core catalog identity.",
+    "boundary_outcome": "Preserve draft10 -65700 erratum and remaining outer/nested/dkalg/profile questions; separate actual algorithm-propagation defect from profile choice and Core math. WA empty-handle policy receives its own boundary follow-up.",
+    "local_candidates": [
+      "CORE-CTAP-X007",
+      "CORE-CTAP-X008"
+    ],
+    "documentation": "Retain accurate current qualifications; exact new/reopening paths in candidates.md; independent review pending.",
+    "implementation": "Source-backed scoped observation or explicit policy gap; no repair authorized or executed.",
+    "qualification": "No new runtime/native/device execution; source/provider/platform/hardware gaps retained.",
+    "next_owner": "CTAP2/maintainer plus C and BOUNDARY-WebAuthn",
+    "independent_review": "PENDING"
+  },
+  {
+    "key": "ctap2-001:CTAP-IMP-041",
+    "dedup_group": "ctap-preview-der",
+    "authority": {
+      "handoff": "docs/research/documentation-audit/ctap2.md",
+      "ledger": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/triage-addendum.md",
+      "review": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/review-closeout-followup.md",
+      "source_run": "ctap2-001"
+    },
+    "historical_definition": {
+      "path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/triage-addendum.md",
+      "start_line": 188,
+      "end_line": 188,
+      "text": "| CTAP-IMP-041 — experimental verifier structural/test gap; E-16 | S`Extensions/PreviewSign/PreviewSignDerivedKey.cs:151–163` reads two ASN.1 INTEGERs without explicit root/sequence exhaustion or positivity/bounds checks; VerifySignature hashes raw message, not prehashed TBS. No malformed/trailing DER unit evidence. | Review strict DER/algorithm contract and downstream provider rejection before claiming actual acceptance/security impact; meaningful positive/negative evidence required. Dependencies IMP-039, G. Reopen VerifySignature/converter, GeneratedKey cross-reference and preview integration raw-vs-digest comments after verifier/algorithm changes. No exploit, hardware or production qualification. |"
+    },
+    "registry_current_state_preserved": "still-candidate-boundary-review",
+    "registry_current_conclusion_preserved": "Preview DER root/sequence exhaustion, integer bounds and provider behavior need selected validation; retain experimental scope without claiming exploitability.",
+    "boundary_outcome": "Local signature converter exhaustion/INTEGER admission and raw-message fixed verifier remain distinct from Core key ASN1. Actual provider acceptance/impact remains unexecuted.",
+    "local_candidates": [
+      "CORE-CTAP-X009"
+    ],
+    "documentation": "Retain accurate current qualifications; exact new/reopening paths in candidates.md; independent review pending.",
+    "implementation": "Source-backed scoped observation or explicit policy gap; no repair authorized or executed.",
+    "qualification": "No new runtime/native/device execution; source/provider/platform/hardware gaps retained.",
+    "next_owner": "CTAP2 experimental verifier",
+    "independent_review": "PENDING"
+  },
+  {
+    "key": "ctap2-001:CTAP-IMP-043",
+    "dedup_group": "ctap-metadata-wrapper",
+    "authority": {
+      "handoff": "docs/research/documentation-audit/ctap2.md",
+      "ledger": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/triage-addendum.md",
+      "review": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/review-closeout-followup.md",
+      "source_run": "ctap2-001"
+    },
+    "historical_definition": {
+      "path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/triage-addendum.md",
+      "start_line": 190,
+      "end_line": 190,
+      "text": "| CTAP-IMP-043 — strict-wrapper versus generic-helper decision; E-19 | S`Crypto/EncryptedMetadataDecryptor.cs` accepts IV-only/arbitrary block ciphertext and any nonempty PPUAT; standard GetInfo fields IV16+ct16. CBC can return wrong-token bytes, not authenticate them. Generic tests use longer plaintext/token. | Decide strict protocol wrapper vs documented generic crypto helper; preserve wrong-token/unauthenticated distinction, do not invent credential identity interpretation. Dependencies B IMP-010, A EncIdentifier/EncCredStoreState, IMP-035, F/G. Reopen all decrypt/DeriveKey XML, metadata fixtures' Java/protocol labels, two-session/freshness claims, persistent-token/capability and GetInfo field docs after length/token/failure changes. |"
+    },
+    "registry_current_state_preserved": "needs-decision",
+    "registry_current_conclusion_preserved": "Protocol-specific encrypted metadata IV/token/length rules need a wrapper-versus-generic-helper contract; CBC output alone supplies no authentication claim.",
+    "boundary_outcome": "IV-only/generic blocks/nonempty token acceptance remains explicit wrapper-versus-generic choice, distinct from secret output cleanup and authenticator PPUAT state.",
+    "local_candidates": [
+      "CORE-CTAP-X015"
+    ],
+    "documentation": "Retain accurate current qualifications; exact new/reopening paths in candidates.md; independent review pending.",
+    "implementation": "Source-backed scoped observation or explicit policy gap; no repair authorized or executed.",
+    "qualification": "No new runtime/native/device execution; source/provider/platform/hardware gaps retained.",
+    "next_owner": "CTAP2/maintainer",
+    "independent_review": "PENDING"
+  },
+  {
+    "key": "ctap2-001:CTAP-XREF-001",
+    "dedup_group": "assertion-user-docs",
+    "authority": {
+      "handoff": "docs/research/documentation-audit/ctap2.md",
+      "ledger": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/boundary-final.md",
+      "review": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/review-closeout-followup.md",
+      "source_run": "ctap2-001"
+    },
+    "historical_definition": {
+      "path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/boundary-final.md",
+      "start_line": null,
+      "end_line": null,
+      "text": "Grouped source definition: consult this ledger and the module investigation; no exact-ID heading found."
+    },
+    "registry_current_state_preserved": "resolved-docs-recheck-boundary",
+    "registry_current_conclusion_preserved": "The final CTAP/WebAuthn review accepted the User id/display-field and version-specific descriptor correction. Native output representation/privacy and descriptor recovery retain separate open IDs.",
+    "boundary_outcome": "Documentation resolution retained for User opaque-ID/display fields and version-specific credential descriptor. No automatic stripping and no closure of WA-IMP010 recovery or DEC002 actor policy.",
+    "local_candidates": [],
+    "documentation": "Retain accurate current qualifications; exact new/reopening paths in candidates.md; independent review pending.",
+    "implementation": "Source-backed scoped observation or explicit policy gap; no repair authorized or executed.",
+    "qualification": "No new runtime/native/device execution; source/provider/platform/hardware gaps retained.",
+    "next_owner": "BOUNDARY-WebAuthn for distinct engineering/actor follow-ups",
+    "independent_review": "PENDING"
+  },
+  {
+    "key": "ctap2-001:CTAP-DEC-002",
+    "dedup_group": "native-selected-user-actor",
+    "authority": {
+      "handoff": "docs/research/documentation-audit/ctap2.md",
+      "ledger": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/triage.md",
+      "review": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/review-closeout-followup.md",
+      "source_run": "ctap2-001"
+    },
+    "historical_definition": {
+      "path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/triage.md",
+      "start_line": 76,
+      "end_line": 76,
+      "text": "- **CTAP-DEC-002:** G-011 selected native AuthenticationResponse display-field retention needs an actor/"
+    },
+    "registry_current_state_preserved": "needs-decision",
+    "registry_current_conclusion_preserved": "Decide whether native selected AuthenticationResponse/User is a browser-equivalent result or an RP-serialization boundary. The original decision authorizes neither automatic display-field stripping nor a new vulnerability assertion.",
+    "boundary_outcome": "Native selected AuthenticationResponse.User is retained; actor/privacy/serializer choice remains open before any filtering decision. No field removed or vulnerability asserted.",
+    "local_candidates": [],
+    "documentation": "Retain accurate current qualifications; exact new/reopening paths in candidates.md; independent review pending.",
+    "implementation": "Source-backed scoped observation or explicit policy gap; no repair authorized or executed.",
+    "qualification": "No new runtime/native/device execution; source/provider/platform/hardware gaps retained.",
+    "next_owner": "BOUNDARY-WebAuthn plus maintainer/Astra",
+    "independent_review": "PENDING"
+  },
+  {
+    "key": "ctap2-001:CTAP-DEC-003",
+    "dedup_group": "ctap-profile-evidence",
+    "authority": {
+      "handoff": "docs/research/documentation-audit/ctap2.md",
+      "ledger": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/triage.md",
+      "review": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/review-closeout-followup.md",
+      "source_run": "ctap2-001"
+    },
+    "historical_definition": {
+      "path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/triage.md",
+      "start_line": 78,
+      "end_line": 78,
+      "text": "- **CTAP-DEC-003:** exact SKU/firmware/prototype support, reset product-window gap (5.5.2/5.5.3), and vendor"
+    },
+    "registry_current_state_preserved": "missing-evidence",
+    "registry_current_conclusion_preserved": "Keep product/preview firmware origins, reset 5.5.2/5.5.3 interval, vendor ARKG/bio profile and unsigned-output introduction history bounded. The BE/BS citation gap was resolved by the pinned L3 Recommendation; other gaps retain their own scope.",
+    "boundary_outcome": "Preserve exact SKU/earliest-support/reset5.5.2/5.5.3/vendor-profile/unsigned-introduction gaps; current Core version policy and published shim source add no missing hardware/producer evidence.",
+    "local_candidates": [
+      "CORE-CTAP-X007",
+      "CORE-CTAP-X017",
+      "CORE-CTAP-X022"
+    ],
+    "documentation": "Retain accurate current qualifications; exact new/reopening paths in candidates.md; independent review pending.",
+    "implementation": "Source-backed scoped observation or explicit policy gap; no repair authorized or executed.",
+    "qualification": "No new runtime/native/device execution; source/provider/platform/hardware gaps retained.",
+    "next_owner": "Maintainer/vendor profile evidence; B4/B6 and BOUNDARY-WebAuthn as applicable",
+    "independent_review": "PENDING"
+  },
+  {
+    "key": "webauthn-001:WA-IMP-006",
+    "dedup_group": "ctap-response-ownership",
+    "authority": {
+      "handoff": "docs/research/documentation-audit/webauthn.md",
+      "ledger": "docs/research/documentation-audit/records/runs/webauthn-001/triage.md",
+      "review": "docs/research/documentation-audit/records/runs/webauthn-001/review-a-followup.md",
+      "source_run": "webauthn-001"
+    },
+    "historical_definition": {
+      "path": "docs/research/documentation-audit/records/runs/webauthn-001/triage.md",
+      "start_line": 71,
+      "end_line": 71,
+      "text": "| WA-IMP-006 | A-013: borrowed attestation CBOR can diverge from parsed data if mutated | Decoder snapshot/ownership change; Decode/RawCbor/Encode and generated-key attestation guidance |"
+    },
+    "registry_current_state_preserved": "retained-applet-finding-current-rebaseline-pending",
+    "registry_current_conclusion_preserved": "Preserve the authoritative WebAuthn finding and its CTAP boundary relationship. This registry reads historical definition and maps current source locations; its family/boundary owner still needs the exact current applet behavior and regression assertions before accepting a current defect or resolution.",
+    "boundary_outcome": "Current factory/backend/raw/model trace confirms multiple independent response/request owners and successful slices/copies. StoredCredentialInfo private-clone cleanup has exact scope; WA callers receive a separate mandatory follow-up.",
+    "local_candidates": [
+      "CORE-CTAP-X004",
+      "CORE-CTAP-X016"
+    ],
+    "documentation": "Retain accurate current qualifications; exact new/reopening paths in candidates.md; independent review pending.",
+    "implementation": "Source-backed scoped observation or explicit policy gap; no repair authorized or executed.",
+    "qualification": "No new runtime/native/device execution; source/provider/platform/hardware gaps retained.",
+    "next_owner": "CTAP2 plus B6/C; BOUNDARY-WebAuthn for WA aliases",
+    "independent_review": "PENDING"
+  },
+  {
+    "key": "webauthn-001:WA-IMP-007",
+    "dedup_group": "ctap-aaguid-portability",
+    "authority": {
+      "handoff": "docs/research/documentation-audit/webauthn.md",
+      "ledger": "docs/research/documentation-audit/records/runs/webauthn-001/triage.md",
+      "review": "docs/research/documentation-audit/records/runs/webauthn-001/review-a-followup.md",
+      "source_run": "webauthn-001"
+    },
+    "historical_definition": {
+      "path": "docs/research/documentation-audit/records/runs/webauthn-001/triage.md",
+      "start_line": 72,
+      "end_line": 72,
+      "text": "| WA-IMP-007 | A-014: default Aaguid empty span and nonreflexive equality | Zero/default semantics fix; Aaguid docs and equality/default regression evidence |"
+    },
+    "registry_current_state_preserved": "retained-applet-finding-current-rebaseline-pending",
+    "registry_current_conclusion_preserved": "Preserve the authoritative WebAuthn finding and its CTAP boundary relationship. This registry reads historical definition and maps current source locations; its family/boundary owner still needs the exact current applet behavior and regression assertions before accepting a current defect or resolution.",
+    "boundary_outcome": "CTAP converter host-conditioned mixed-endian reversal and WA default-value/equality are distinct source-visible concerns. Existing little-endian probe remains historical; no new big-endian execution.",
+    "local_candidates": [
+      "CORE-CTAP-X023"
+    ],
+    "documentation": "Retain accurate current qualifications; exact new/reopening paths in candidates.md; independent review pending.",
+    "implementation": "Source-backed scoped observation or explicit policy gap; no repair authorized or executed.",
+    "qualification": "No new runtime/native/device execution; source/provider/platform/hardware gaps retained.",
+    "next_owner": "CTAP2 converter; BOUNDARY-WebAuthn default-value owner",
+    "independent_review": "PENDING"
+  },
+  {
+    "key": "webauthn-001:WA-IMP-013",
+    "dedup_group": "ctap-response-ownership",
+    "authority": {
+      "handoff": "docs/research/documentation-audit/webauthn.md",
+      "ledger": "docs/research/documentation-audit/records/runs/webauthn-001/triage.md",
+      "review": "docs/research/documentation-audit/records/runs/webauthn-001/review-a-followup.md",
+      "source_run": "webauthn-001"
+    },
+    "historical_definition": {
+      "path": "docs/research/documentation-audit/records/runs/webauthn-001/triage.md",
+      "start_line": 78,
+      "end_line": 78,
+      "text": "| WA-IMP-013 | B-003: sensitive result ownership/zeroing absent, PRF intermediate copies/input salt temporary uncleared | Ownership API/cleanup pass with narrow CTAP dependencies; all PRF/blob/result/client lifetime docs and examples |"
+    },
+    "registry_current_state_preserved": "retained-applet-finding-current-rebaseline-pending",
+    "registry_current_conclusion_preserved": "Preserve the authoritative WebAuthn finding and its CTAP boundary relationship. This registry reads historical definition and maps current source locations; its family/boundary owner still needs the exact current applet behavior and regression assertions before accepting a current defect or resolution.",
+    "boundary_outcome": "Current factory/backend/raw/model trace confirms multiple independent response/request owners and successful slices/copies. StoredCredentialInfo private-clone cleanup has exact scope; WA callers receive a separate mandatory follow-up.",
+    "local_candidates": [
+      "CORE-CTAP-X004",
+      "CORE-CTAP-X016"
+    ],
+    "documentation": "Retain accurate current qualifications; exact new/reopening paths in candidates.md; independent review pending.",
+    "implementation": "Source-backed scoped observation or explicit policy gap; no repair authorized or executed.",
+    "qualification": "No new runtime/native/device execution; source/provider/platform/hardware gaps retained.",
+    "next_owner": "CTAP2 plus B6/C; BOUNDARY-WebAuthn for WA aliases",
+    "independent_review": "PENDING"
+  },
+  {
+    "key": "webauthn-001:WA-IMP-017",
+    "dedup_group": "ctap-unsigned-outputs",
+    "authority": {
+      "handoff": "docs/research/documentation-audit/webauthn.md",
+      "ledger": "docs/research/documentation-audit/records/runs/webauthn-001/triage.md",
+      "review": "docs/research/documentation-audit/records/runs/webauthn-001/review-a-followup.md",
+      "source_run": "webauthn-001"
+    },
+    "historical_definition": {
+      "path": "docs/research/documentation-audit/records/runs/webauthn-001/triage.md",
+      "start_line": 82,
+      "end_line": 82,
+      "text": "| WA-IMP-017 | B-008: direct largeBlob route/pinless writes unsupported by current SDK path | Feature support decision, not automatically a required implementation; capability/permissions/storage/UV guidance |"
+    },
+    "registry_current_state_preserved": "retained-applet-finding-current-rebaseline-pending",
+    "registry_current_conclusion_preserved": "Preserve the authoritative WebAuthn finding and its CTAP boundary relationship. This registry reads historical definition and maps current source locations; its family/boundary owner still needs the exact current applet behavior and regression assertions before accepting a current defect or resolution.",
+    "boundary_outcome": "GetAssertion still skips unsigned key8; Make models key6 slices. Old #4 retained without additive bug count. Direct-extension support choice and WA route remain separate from transport framing.",
+    "local_candidates": [
+      "CORE-CTAP-X010"
+    ],
+    "documentation": "Retain accurate current qualifications; exact new/reopening paths in candidates.md; independent review pending.",
+    "implementation": "Source-backed scoped observation or explicit policy gap; no repair authorized or executed.",
+    "qualification": "No new runtime/native/device execution; source/provider/platform/hardware gaps retained.",
+    "next_owner": "CTAP2 plus BOUNDARY-WebAuthn",
+    "independent_review": "PENDING"
+  },
+  {
+    "key": "webauthn-001:WA-IMP-019",
+    "dedup_group": "ctap-arkg-profile",
+    "authority": {
+      "handoff": "docs/research/documentation-audit/webauthn.md",
+      "ledger": "docs/research/documentation-audit/records/runs/webauthn-001/triage.md",
+      "review": "docs/research/documentation-audit/records/runs/webauthn-001/review-a-followup.md",
+      "source_run": "webauthn-001"
+    },
+    "historical_definition": {
+      "path": "docs/research/documentation-audit/records/runs/webauthn-001/triage.md",
+      "start_line": 84,
+      "end_line": 84,
+      "text": "| WA-IMP-019 | B-013: valid empty generated previewSign handles rejected by signing params | Constructor/round-trip policy; generated key/params/exception docs and tests |"
+    },
+    "registry_current_state_preserved": "retained-applet-finding-current-rebaseline-pending",
+    "registry_current_conclusion_preserved": "Preserve the authoritative WebAuthn finding and its CTAP boundary relationship. This registry reads historical definition and maps current source locations; its family/boundary owner still needs the exact current applet behavior and regression assertions before accepting a current defect or resolution.",
+    "boundary_outcome": "Preserve draft10 -65700 erratum and remaining outer/nested/dkalg/profile questions; separate actual algorithm-propagation defect from profile choice and Core math. WA empty-handle policy receives its own boundary follow-up.",
+    "local_candidates": [
+      "CORE-CTAP-X007",
+      "CORE-CTAP-X008"
+    ],
+    "documentation": "Retain accurate current qualifications; exact new/reopening paths in candidates.md; independent review pending.",
+    "implementation": "Source-backed scoped observation or explicit policy gap; no repair authorized or executed.",
+    "qualification": "No new runtime/native/device execution; source/provider/platform/hardware gaps retained.",
+    "next_owner": "CTAP2/maintainer plus C and BOUNDARY-WebAuthn",
+    "independent_review": "PENDING"
+  },
+  {
+    "key": "webauthn-001:WA-XREF-001",
+    "dedup_group": "assertion-user-docs",
+    "authority": {
+      "handoff": "docs/research/documentation-audit/webauthn.md",
+      "ledger": "docs/research/documentation-audit/records/runs/webauthn-001/triage.md",
+      "review": "docs/research/documentation-audit/records/runs/webauthn-001/review-a-followup.md",
+      "source_run": "webauthn-001"
+    },
+    "historical_definition": {
+      "path": "docs/research/documentation-audit/records/runs/webauthn-001/triage.md",
+      "start_line": 87,
+      "end_line": 87,
+      "text": "| WA-XREF-001 | A-002: CTAP2 GetAssertionResponse.User repeats inaccurate UV/discoverable restriction | Future CTAP2 documentation cycle; User entity/handle/display fields |"
+    },
+    "registry_current_state_preserved": "resolved-docs-recheck-boundary",
+    "registry_current_conclusion_preserved": "The active handoff and CTAP final independent boundary review resolve this documentation dependency only. WA-IMP-010 recovery and CTAP-DEC-002 privacy actor remain open.",
+    "boundary_outcome": "Documentation resolution retained for User opaque-ID/display fields and version-specific credential descriptor. No automatic stripping and no closure of WA-IMP010 recovery or DEC002 actor policy.",
+    "local_candidates": [],
+    "documentation": "Retain accurate current qualifications; exact new/reopening paths in candidates.md; independent review pending.",
+    "implementation": "Source-backed scoped observation or explicit policy gap; no repair authorized or executed.",
+    "qualification": "No new runtime/native/device execution; source/provider/platform/hardware gaps retained.",
+    "next_owner": "BOUNDARY-WebAuthn for distinct engineering/actor follow-ups",
+    "independent_review": "PENDING"
+  },
+  {
+    "key": "openpgp-001:PGP-CORE-001",
+    "dedup_group": "credential-length-units",
+    "authority": {
+      "handoff": "docs/research/documentation-audit/openpgp.md",
+      "ledger": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/findings.md",
+      "review": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/review-closeout.md",
+      "source_run": "openpgp-001"
+    },
+    "historical_definition": {
+      "path": "docs/research/documentation-audit/modules/openpgp/pass-1/openpgp-001/findings.md",
+      "start_line": 88,
+      "end_line": 88,
+      "text": "| PGP-CORE-001 | Credential reader limits/units and credential-option factories versus device-profile requirements (C001/C018). | PIN/options XML and user-input examples |"
+    },
+    "registry_current_state_preserved": "source-mapped-review-pending",
+    "registry_current_conclusion_preserved": "Core text lengths count UTF-16 chars before encoding. OpenPGP credential-option factories and each card-profile byte limit need the boundary check; no blanket CTAP PIN policy transfers to PW1/PW3/reset code.",
+    "boundary_outcome": "Current CTAP preset already documents UTF16 versus bytes/code points; actual Core reader/ClientPin call path confirms the allocation decision. Preserve XREF003 and IMP006; OpenPGP retains its own profile owner.",
+    "local_candidates": [
+      "CORE-CTAP-X003"
+    ],
+    "documentation": "Retain accurate current qualifications; exact new/reopening paths in candidates.md; independent review pending.",
+    "implementation": "Source-backed scoped observation or explicit policy gap; no repair authorized or executed.",
+    "qualification": "No new runtime/native/device execution; source/provider/platform/hardware gaps retained.",
+    "next_owner": "C plus CTAP2/BOUNDARY-OpenPgp and maintainer",
+    "independent_review": "PENDING"
+  },
+  {
+    "key": "audit-v2-20261022-20261031:#4",
+    "dedup_group": "ctap-unsigned-outputs",
+    "authority": {
+      "source_run": "audit-v2-20261022-20261031",
+      "handoff": "docs/research/audit-v2-close-out.md",
+      "ledger": "docs/research/audit-v2-closeout-review.md",
+      "review": "docs/research/audit-v2-execution.md"
+    },
+    "historical_definition": {
+      "path": "docs/research/audit-v2-closeout-review.md",
+      "start_line": 17,
+      "end_line": 17,
+      "text": "| #4 / YESDK-1612 — dropped unsigned assertion outputs | Results of an unsupported direct largeBlob mechanism are discarded by the response decoder. | Deferred spec gap, not a completed fix; tested YubiKeys did not produce it. |"
+    },
+    "registry_current_state_preserved": "still-candidate-applet-profile",
+    "registry_current_conclusion_preserved": "The old key8 unsigned assertion output deferral maps to CTAP-IMP-030 and WA-IMP-017. Removing the old direct-extension API and deleted repro did not establish response-key8 handling. Supported-producer/profile clarification remains separate from Core framing.",
+    "boundary_outcome": "GetAssertion still skips unsigned key8; Make models key6 slices. Old #4 retained without additive bug count. Direct-extension support choice and WA route remain separate from transport framing.",
+    "local_candidates": [
+      "CORE-CTAP-X010"
+    ],
+    "documentation": "Retain accurate current qualifications; exact new/reopening paths in candidates.md; independent review pending.",
+    "implementation": "Source-backed scoped observation or explicit policy gap; no repair authorized or executed.",
+    "qualification": "No new runtime/native/device execution; source/provider/platform/hardware gaps retained.",
+    "next_owner": "CTAP2 plus BOUNDARY-WebAuthn",
+    "independent_review": "PENDING"
+  }
+]

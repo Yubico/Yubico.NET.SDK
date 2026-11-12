@@ -183,3 +183,75 @@ the structural roll-up; incomplete or mutable returns remain uncredited.
 C's original SEC 2 and X.690 PDFs and ISO-8859-1 X.690 metadata page are registered by exact source
 identity. The HTML's original encoding declaration is retained; it is encoded text, not an executable
 binary. Original bytes are preserved rather than silently transcoded for archive validation.
+
+## Session completion and first boundary packet
+
+B5 completed all 43 files, 893 primary units and 39 shared units: 716 clean, 212 candidate-linked,
+four explicit exclusions and zero unread. Its nine local candidate groups and 15 inherited provenance
+keys are ready for B6 and the boundary reviewers. No runtime or device verification was performed.
+
+B4 returned an incomplete checkpoint (77/106 files; 1,462 outstanding/context-pending IDs) and was
+explicitly sent back to finish. Its partial progress is not credited as a completed return.
+
+Fresh Sol `ses_e3305b41fffe4nq6c2dNMG6QUL` owns the exact Management/Core boundary packet under
+`boundaries/Management/` and `boundary-Management.md`. It reviews actual caller/resource/metadata/
+rediscovery/cancellation contracts, with any B4/B6-dependent conclusion left explicit until those
+owners return. B4, B6 and this boundary are the three active source investigators.
+
+A separate records-only triage owner is preparing a provisional map of the five earlier completed
+families. It assigns no accepted Core finding IDs or editing authority. The latest structural roll-up
+credits 7,135 units across A/B1/B2/B3/C; B5 and later completions will be added by exact ID reconciliation.
+
+## Bound checker accepted
+
+The third checker build passed with zero warnings. The late hook now observes Source Link after its
+SDK producer, and the argument parser retains the complete comma-containing embedded filename.
+Both earlier failed attempts remain preserved. Astra verified the accepted profile, successful build,
+214 actual compiler arguments and 585 captured input/output identities, then accepted seal
+`4618133ddeccbc07b1b8ab583611775bd29e8f93b97a806c98b146d8ba1e3101`.
+
+Bound selfcheck, source-token and API modes passed with matching original command receipts and
+before/after binding sidecars. The token guard compared **1,320 C# files** to `fe342fb0`, preserving
+executable structure, directives and import order; all **20 API snapshots** remain unchanged. These
+are preservation/tool checks, not new SDK test or semantic-audit completion claims.
+
+## Boundary and triage progression
+
+The Management/Core static pass returned all 331 assigned units (204 clean, 127 candidate-context),
+55 candidate-file dispositions, nine inherited provenance rows and three local candidates. Its B4
+Windows and B6 SCP follow-ups remain mandatory, so the boundary is not yet closed independently.
+
+Fresh Sol `ses_e32f872d8ffeNF6qGssDheSRKG` now owns `boundaries/Ctap2/` and `boundary-Ctap2.md`.
+B4, B6 and CTAP2 are the three active source investigators. B6's 48/50-file checkpoint was explicitly
+returned for its two vector files, provenance checks and final per-unit refinement; no incomplete
+packet receives completion credit.
+
+The provisional five-family triage maps 68 local candidates to 67 proposal groups, with no accepted
+IDs or editing release. New C and B1 owner addenda clarify final source authority while preserving
+original checkpoint/candidate bytes and the triage map's input hashes.
+
+## All family returns available; boundary queue advanced
+
+B6 completed all 50 files / 684 IDs, including both vector files: 278 clean, 137 candidate,
+267 finalized-context and two historical dispositions. No vector outputs were recomputed. Its 16
+local concerns and source-version qualifications remain provisional inputs for triage and review.
+
+B4 completed all 2,350 IDs with zero unread/context-pending outcomes. Its read scope is **105 full
+primary-file reads plus one qualified support/type reconciliation of the whole API snapshot**, not
+a claim that B4 semantically reviewed every other family's signature. Its ten local concerns,
+conditional PCI producer/header route and five external gaps remain explicit.
+
+Management's B4 and B6 follow-ups are now source-reconciled, completing that boundary's pinned
+source investigation. Independent review, implementation/hardware qualification and the user's new
+Windows delta remain open. CTAP2's B4/B6 follow-ups are also source-reconciled; its mandatory
+WebAuthn handoff remains open.
+
+Three boundary investigators are active:
+- Security Domain: `ses_e32e5600affexw699602ZAfc4M`.
+- OATH: `ses_e32ddb8bdffezxUBhleYJWKH3x`.
+- WebAuthn: `ses_e32dd3ac8ffejgNVAu7UVltiqp`.
+
+The inventory owner is extending exact coverage accounting to all completed families and returned
+boundary units, keeping read depth and closure status separate. The triage owner is extending the
+ledger-only proposal map to all Core families; accepted finding IDs and editing remain later gates.
+Four additional original USB/GlobalPlatform PDFs are registered without upgrading draft/final claims.

@@ -1,0 +1,2762 @@
+[
+  {
+    "path": ".github/workflows/build.yml",
+    "current_raw_sha256": "a0b482f374f129a994cb343725c42925ba0cf48e1d3971bc2f6f5db14448eb76",
+    "inventory_source_sha256": [
+      "a0b482f374f129a994cb343725c42925ba0cf48e1d3971bc2f6f5db14448eb76"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "17fd1280b3d0bef7692abc902ffe03fc6b82ea3d",
+    "pinned_content_sha256": "a0b482f374f129a994cb343725c42925ba0cf48e1d3971bc2f6f5db14448eb76",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": ".github/workflows/native-aot.yml",
+    "current_raw_sha256": "dc29a3ae3d83fa326f83189e8af30dabca278cb7f95b925b6745b98628246a01",
+    "inventory_source_sha256": [
+      "dc29a3ae3d83fa326f83189e8af30dabca278cb7f95b925b6745b98628246a01"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "00c76ee4cb88f4ae2d74162bd1dc6e1a6720a1af",
+    "pinned_content_sha256": "dc29a3ae3d83fa326f83189e8af30dabca278cb7f95b925b6745b98628246a01",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "2026-09-21-yubikit-async-boundaries-ISA.md",
+    "current_raw_sha256": "ec34005c0d1e7ae9d7c5b1aa6afd1dc9f8b0608451e4bd1b9a831166894a7ceb",
+    "inventory_source_sha256": [
+      "ec34005c0d1e7ae9d7c5b1aa6afd1dc9f8b0608451e4bd1b9a831166894a7ceb"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "63a755f136602b407374fcbf5aabd2d9722cf4e6",
+    "pinned_content_sha256": "ec34005c0d1e7ae9d7c5b1aa6afd1dc9f8b0608451e4bd1b9a831166894a7ceb",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "CLAUDE.md",
+    "current_raw_sha256": "cd607c969909e2b0e605e98bf155bb6ca071dfbbfc432f225f67d5293f40bff8",
+    "inventory_source_sha256": [
+      "cd607c969909e2b0e605e98bf155bb6ca071dfbbfc432f225f67d5293f40bff8"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "88019472ff5b12480fd6fca88b6a1c1ae2e8cfd2",
+    "pinned_content_sha256": "cd607c969909e2b0e605e98bf155bb6ca071dfbbfc432f225f67d5293f40bff8",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "Directory.Build.props",
+    "current_raw_sha256": "df3cdc4095e94f1d2d4f7144980e7bb4450560531a6e2f4ae9ec92e4c0ae5100",
+    "inventory_source_sha256": [
+      "df3cdc4095e94f1d2d4f7144980e7bb4450560531a6e2f4ae9ec92e4c0ae5100"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "2be8628df6d9c90936e576054fe840f8d7fcfbf8",
+    "pinned_content_sha256": "e27951c0c26be8796b9bdbe9b80454efb58fc5d3894f757dd0beb67d4e49952c",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "Directory.Build.targets",
+    "current_raw_sha256": "bc9308c9c2fd2f71515467678ba43d89845e17db810d7eb80a1e642f843fd59e",
+    "inventory_source_sha256": [
+      "bc9308c9c2fd2f71515467678ba43d89845e17db810d7eb80a1e642f843fd59e"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "b0cdf0bc20659c291df80c0f2c0fc4c84b37b638",
+    "pinned_content_sha256": "bc9308c9c2fd2f71515467678ba43d89845e17db810d7eb80a1e642f843fd59e",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "Directory.Packages.props",
+    "current_raw_sha256": "12fdb96d359e19121bc57718413b4608e4a12a0339a1eebb56751e4cbb7c410f",
+    "inventory_source_sha256": [
+      "12fdb96d359e19121bc57718413b4608e4a12a0339a1eebb56751e4cbb7c410f"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "63899e85eac7c60e24e836c114a16f0b7f54c9cb",
+    "pinned_content_sha256": "b23da80b99da850555f2eea923994e748c35e725c1f9d79630df789a89bf3054",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "PACKAGE_README.md",
+    "current_raw_sha256": "a49c70bbd887ca38015f1c223f64536d3da3f5983838b3cfd1800cee31e06b40",
+    "inventory_source_sha256": [
+      "a49c70bbd887ca38015f1c223f64536d3da3f5983838b3cfd1800cee31e06b40"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "274d1e4cf3f2c0efa2f093a9cba6596439a357a1",
+    "pinned_content_sha256": "a49c70bbd887ca38015f1c223f64536d3da3f5983838b3cfd1800cee31e06b40",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "README.md",
+    "current_raw_sha256": "64e9b92eae3bb689f364f6a13fef2b35bdc7d954b7636b0f5275a616d5314543",
+    "inventory_source_sha256": [
+      "64e9b92eae3bb689f364f6a13fef2b35bdc7d954b7636b0f5275a616d5314543"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "cb5c70e089d80dcd24fcba3a8a2111079083e88f",
+    "pinned_content_sha256": "64e9b92eae3bb689f364f6a13fef2b35bdc7d954b7636b0f5275a616d5314543",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "TOOLCHAIN.md",
+    "current_raw_sha256": "d6db52dd984f8e8a8d30fb2de97fb24ea3bc868ae286a99febf8084137bbfdac",
+    "inventory_source_sha256": [
+      "d6db52dd984f8e8a8d30fb2de97fb24ea3bc868ae286a99febf8084137bbfdac"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "606a28e76c886510f3ea3198ac49075bd89eaf21",
+    "pinned_content_sha256": "d6db52dd984f8e8a8d30fb2de97fb24ea3bc868ae286a99febf8084137bbfdac",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "benchmarks/Yubico.YubiKit.PerformanceBenchmarks/AsyncBoundaryBaseline.cs",
+    "current_raw_sha256": "2e373a04174e82f0ebc714d168be409e98cfaa2bf52b16afa98f3977fec2cded",
+    "inventory_source_sha256": [
+      "2e373a04174e82f0ebc714d168be409e98cfaa2bf52b16afa98f3977fec2cded"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "f7f58be6bf0841e76955fecd29af6b4f350e726b",
+    "pinned_content_sha256": "2e373a04174e82f0ebc714d168be409e98cfaa2bf52b16afa98f3977fec2cded",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "benchmarks/Yubico.YubiKit.PerformanceBenchmarks/BoundarySelfTest.cs",
+    "current_raw_sha256": "c9968e49ebac2e9bbff6533c68c4d3d417659d92499723b23062837ef53d10c7",
+    "inventory_source_sha256": [
+      "c9968e49ebac2e9bbff6533c68c4d3d417659d92499723b23062837ef53d10c7"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "3f98f1ab6249453af1cbc2848aead5ac8b8c4c58",
+    "pinned_content_sha256": "c9968e49ebac2e9bbff6533c68c4d3d417659d92499723b23062837ef53d10c7",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "benchmarks/Yubico.YubiKit.PerformanceBenchmarks/Program.cs",
+    "current_raw_sha256": "10b528c73f9a235a4ecb5535eee1f96124cd9dcd62ab876f3db855a9513dafc0",
+    "inventory_source_sha256": [
+      "10b528c73f9a235a4ecb5535eee1f96124cd9dcd62ab876f3db855a9513dafc0"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "fd2f8b641a2b0f3c7aa6e3caffe71646d8db8ba1",
+    "pinned_content_sha256": "10b528c73f9a235a4ecb5535eee1f96124cd9dcd62ab876f3db855a9513dafc0",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "benchmarks/Yubico.YubiKit.PerformanceBenchmarks/Yubico.YubiKit.PerformanceBenchmarks.csproj",
+    "current_raw_sha256": "422b3e8a23f2258972f8d2e7602eee4e45e8d7946ed19d07d6eba81ae2c9e0f3",
+    "inventory_source_sha256": [
+      "422b3e8a23f2258972f8d2e7602eee4e45e8d7946ed19d07d6eba81ae2c9e0f3"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "3c22fc59b6ac56e3902b7340f0e8d0c57e7c4679",
+    "pinned_content_sha256": "1fcc6f9d64e0635e750dfe3fd5346e9cef4abfa027a6da71690f459a05543270",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "docs/CRYPTO-APIS.md",
+    "current_raw_sha256": "75ce8e83fd598143a34625be40fd548737f6a9940edd4022c96368fb41104311",
+    "inventory_source_sha256": [
+      "75ce8e83fd598143a34625be40fd548737f6a9940edd4022c96368fb41104311"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "2dde728409ed8d2b9f6e6e800bd00da9b2b116a2",
+    "pinned_content_sha256": "75ce8e83fd598143a34625be40fd548737f6a9940edd4022c96368fb41104311",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "docs/CSHARP-PATTERNS.md",
+    "current_raw_sha256": "e96af24746804bed802b897349127090b72a99ef1a6ca3fbf5d0eb15abab77bd",
+    "inventory_source_sha256": [
+      "e96af24746804bed802b897349127090b72a99ef1a6ca3fbf5d0eb15abab77bd"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "330302519e4725ca0fbff29f38b0b9ce9833fb76",
+    "pinned_content_sha256": "e96af24746804bed802b897349127090b72a99ef1a6ca3fbf5d0eb15abab77bd",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "docs/DEV-GUIDE.md",
+    "current_raw_sha256": "3d900ab69f2d253bd96676f45b1c34c79ca4e9b6a85854c368b3c9688bb31655",
+    "inventory_source_sha256": [
+      "3d900ab69f2d253bd96676f45b1c34c79ca4e9b6a85854c368b3c9688bb31655"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "7b3ceae7dd91e3ffded0a73e1ee3d04dd50657e7",
+    "pinned_content_sha256": "3d900ab69f2d253bd96676f45b1c34c79ca4e9b6a85854c368b3c9688bb31655",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "docs/LOGGING.md",
+    "current_raw_sha256": "346c054ab2660decffcc20b5713755e812524531901d8afecd3d6d70ad2d6a2f",
+    "inventory_source_sha256": [
+      "346c054ab2660decffcc20b5713755e812524531901d8afecd3d6d70ad2d6a2f"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "3f049a70e481fb4a3783571345d9a238889f7369",
+    "pinned_content_sha256": "346c054ab2660decffcc20b5713755e812524531901d8afecd3d6d70ad2d6a2f",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "docs/MEMORY-MANAGEMENT.md",
+    "current_raw_sha256": "8b86a03aa55fc10c7259cd4c8982c1735c0f2bfe79365774c9637a183bc7c20b",
+    "inventory_source_sha256": [
+      "8b86a03aa55fc10c7259cd4c8982c1735c0f2bfe79365774c9637a183bc7c20b"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "53f1a9946b0507dae45fb7aaaac6ff1b4e74e182",
+    "pinned_content_sha256": "8b86a03aa55fc10c7259cd4c8982c1735c0f2bfe79365774c9637a183bc7c20b",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "docs/NATIVE-AOT.md",
+    "current_raw_sha256": "f486bf67d4162bb3c0143eebeda0c38963cd4dfc92a60d15ac2f79ef598ee7a3",
+    "inventory_source_sha256": [
+      "f486bf67d4162bb3c0143eebeda0c38963cd4dfc92a60d15ac2f79ef598ee7a3"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "0d81e700ee39950c64d871e80bb8e0594b19355e",
+    "pinned_content_sha256": "f486bf67d4162bb3c0143eebeda0c38963cd4dfc92a60d15ac2f79ef598ee7a3",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "docs/SDK-HOUSE-STYLE.md",
+    "current_raw_sha256": "6374792a819c60abe4336ab4b552515b9d900c7d8fca97088543845eb38d2a20",
+    "inventory_source_sha256": [
+      "6374792a819c60abe4336ab4b552515b9d900c7d8fca97088543845eb38d2a20"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "31fe858d5cd83fdcf385dacd4375c79f2ca449d2",
+    "pinned_content_sha256": "6374792a819c60abe4336ab4b552515b9d900c7d8fca97088543845eb38d2a20",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "docs/TESTING.md",
+    "current_raw_sha256": "98b09a6679923c95f86a7e8f4c82f50954cc0eb48d3f2900b3140db4f5625619",
+    "inventory_source_sha256": [
+      "98b09a6679923c95f86a7e8f4c82f50954cc0eb48d3f2900b3140db4f5625619"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "39470688fea556e62af140535ffe5d250a4c04f8",
+    "pinned_content_sha256": "98b09a6679923c95f86a7e8f4c82f50954cc0eb48d3f2900b3140db4f5625619",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "docs/TESTING_PLATFORM_FINDINGS.md",
+    "current_raw_sha256": "fa3274b97c86b6dec0f147fbab9cc4071ca4ead4621fd64822c660d7e22fb3ff",
+    "inventory_source_sha256": [
+      "fa3274b97c86b6dec0f147fbab9cc4071ca4ead4621fd64822c660d7e22fb3ff"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "ec1e740b4ecb43520a7ebd3b3f65a4d7d2bad0f7",
+    "pinned_content_sha256": "fa3274b97c86b6dec0f147fbab9cc4071ca4ead4621fd64822c660d7e22fb3ff",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "docs/architecture/.state.yml",
+    "current_raw_sha256": "ff7687feaea0bbac074614290c7e069c9de8e617bc8e723d205e257183277b96",
+    "inventory_source_sha256": [
+      "ff7687feaea0bbac074614290c7e069c9de8e617bc8e723d205e257183277b96"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "a0c7884da2805e99c9481d596d87af649f95d6f5",
+    "pinned_content_sha256": "ff7687feaea0bbac074614290c7e069c9de8e617bc8e723d205e257183277b96",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "docs/architecture/applet-public-api.md",
+    "current_raw_sha256": "2b67dac4c283899258c3c0ff93abe1e8703a51ca98b6683b135260454b0c963c",
+    "inventory_source_sha256": [
+      "2b67dac4c283899258c3c0ff93abe1e8703a51ca98b6683b135260454b0c963c"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "10e37f507fd447750f6e75aa8d95589178220b32",
+    "pinned_content_sha256": "2b67dac4c283899258c3c0ff93abe1e8703a51ca98b6683b135260454b0c963c",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "docs/architecture/architecture-docs-automation.md",
+    "current_raw_sha256": "092dfb5a15868b7a97c8d674e1e98d388acb49a519f6e4c4fa515ec28a6b9e39",
+    "inventory_source_sha256": [
+      "092dfb5a15868b7a97c8d674e1e98d388acb49a519f6e4c4fa515ec28a6b9e39"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "0bb2ff98a13c67a5168576dac175297d3c6d6bc0",
+    "pinned_content_sha256": "092dfb5a15868b7a97c8d674e1e98d388acb49a519f6e4c4fa515ec28a6b9e39",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "docs/architecture/images/L0-context.svg",
+    "current_raw_sha256": "2edb2dc9a9630ff0280dd7e440e0d70a4e597d57ef9e041491a3473cd6f2b1ab",
+    "inventory_source_sha256": [
+      "2edb2dc9a9630ff0280dd7e440e0d70a4e597d57ef9e041491a3473cd6f2b1ab"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "cda599d1b3224b6681abb6a50fada3a77902f29c",
+    "pinned_content_sha256": "2edb2dc9a9630ff0280dd7e440e0d70a4e597d57ef9e041491a3473cd6f2b1ab",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "docs/architecture/images/L1-assembly-deps.svg",
+    "current_raw_sha256": "f286b4fe2a51864b1cca02433e8ae878eda9560f3b94b88bcbcf0d4ad4187763",
+    "inventory_source_sha256": [
+      "f286b4fe2a51864b1cca02433e8ae878eda9560f3b94b88bcbcf0d4ad4187763"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "7ef9cd6d31e354b903bbdff19ed89f6e8b422fd2",
+    "pinned_content_sha256": "f286b4fe2a51864b1cca02433e8ae878eda9560f3b94b88bcbcf0d4ad4187763",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "docs/architecture/images/L2-layered-stack.svg",
+    "current_raw_sha256": "ad43de95fbcc62aca2b7c715bdd6f8e526d95d7c745dc81cddd1bd86cf314ec3",
+    "inventory_source_sha256": [
+      "ad43de95fbcc62aca2b7c715bdd6f8e526d95d7c745dc81cddd1bd86cf314ec3"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "094cb08e6f49858410cc5cab1f1103652c81d6fb",
+    "pinned_content_sha256": "ad43de95fbcc62aca2b7c715bdd6f8e526d95d7c745dc81cddd1bd86cf314ec3",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "docs/architecture/images/L3-apdu-sequence.svg",
+    "current_raw_sha256": "ee4e01847dd20fb3dd3d444df9167c67cc9e0e646cf7412a7eb0b68810cffa50",
+    "inventory_source_sha256": [
+      "ee4e01847dd20fb3dd3d444df9167c67cc9e0e646cf7412a7eb0b68810cffa50"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "08e0d11a6fcaad0d7e55ef6f47b2a7b74517c908",
+    "pinned_content_sha256": "ee4e01847dd20fb3dd3d444df9167c67cc9e0e646cf7412a7eb0b68810cffa50",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "docs/architecture/images/L3b-fido2-ctap-sequence.svg",
+    "current_raw_sha256": "339ab23dd5bb4c84fca35ba937bed79066afe8036956a6be81a85bcc2244d20b",
+    "inventory_source_sha256": [
+      "339ab23dd5bb4c84fca35ba937bed79066afe8036956a6be81a85bcc2244d20b"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "72c76a53b711a3d1cb18a6f0367121b4a007ee09",
+    "pinned_content_sha256": "339ab23dd5bb4c84fca35ba937bed79066afe8036956a6be81a85bcc2244d20b",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "docs/architecture/images/image-manifest.txt",
+    "current_raw_sha256": "af1a531bd5b60514162d0da3573803c631e3ddd72cbdfb486fa79d4115d48d59",
+    "inventory_source_sha256": [
+      "af1a531bd5b60514162d0da3573803c631e3ddd72cbdfb486fa79d4115d48d59"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "3d33caae0454502b568b201bfae66ce75ece9802",
+    "pinned_content_sha256": "af1a531bd5b60514162d0da3573803c631e3ddd72cbdfb486fa79d4115d48d59",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "docs/architecture/images/png/L0-context.png",
+    "current_raw_sha256": "3930f1c2a2436db8ff1d6e424ab909069620ac1781659e6d282fa3e264fad5a2",
+    "inventory_source_sha256": [
+      "3930f1c2a2436db8ff1d6e424ab909069620ac1781659e6d282fa3e264fad5a2"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "65c4a218f0abe86489ea99f840ebe4b449c2e278",
+    "pinned_content_sha256": "3930f1c2a2436db8ff1d6e424ab909069620ac1781659e6d282fa3e264fad5a2",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "docs/architecture/images/png/L1-assembly-deps.png",
+    "current_raw_sha256": "d73935e67bbfca807bb6ba8b240be9a895cb3c1a367ce072630421986791757c",
+    "inventory_source_sha256": [
+      "d73935e67bbfca807bb6ba8b240be9a895cb3c1a367ce072630421986791757c"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "102c10784578f31649a41682273f20dcb439d2a4",
+    "pinned_content_sha256": "d73935e67bbfca807bb6ba8b240be9a895cb3c1a367ce072630421986791757c",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "docs/architecture/images/png/L2-layered-stack.png",
+    "current_raw_sha256": "0aff328433833ca33445b6411e3e485f4070bc145f07b528a86fb1a127f95f7c",
+    "inventory_source_sha256": [
+      "0aff328433833ca33445b6411e3e485f4070bc145f07b528a86fb1a127f95f7c"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "c9419c7fb893f7b96c9ad59ef9a1913edbaa396e",
+    "pinned_content_sha256": "0aff328433833ca33445b6411e3e485f4070bc145f07b528a86fb1a127f95f7c",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "docs/architecture/images/png/L3-apdu-sequence.png",
+    "current_raw_sha256": "6cb539a8cf7bea2f52649329cd7e86b72b75e7a5d640965d77190065cf5905a2",
+    "inventory_source_sha256": [
+      "6cb539a8cf7bea2f52649329cd7e86b72b75e7a5d640965d77190065cf5905a2"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "887fe297e54c68bd52a8262705525ddbffbdf926",
+    "pinned_content_sha256": "6cb539a8cf7bea2f52649329cd7e86b72b75e7a5d640965d77190065cf5905a2",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "docs/architecture/images/png/L3b-fido2-ctap-sequence.png",
+    "current_raw_sha256": "259cd79a6503bd6d21222799f746390c436e7e90eda38ea58eb451cb843c9a36",
+    "inventory_source_sha256": [
+      "259cd79a6503bd6d21222799f746390c436e7e90eda38ea58eb451cb843c9a36"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "3eecdbfe018570f309dc12ea0d61c9164e261482",
+    "pinned_content_sha256": "259cd79a6503bd6d21222799f746390c436e7e90eda38ea58eb451cb843c9a36",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "docs/architecture/sdk-architecture-diagrams.md",
+    "current_raw_sha256": "0c7f77bcf201cd67eea12dcf3d89d321ece7d696ae930ea3ae90e904f91e379d",
+    "inventory_source_sha256": [
+      "0c7f77bcf201cd67eea12dcf3d89d321ece7d696ae930ea3ae90e904f91e379d"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "c638d56b2e2ff0fe9a75b6f28807a6ecfcff52bc",
+    "pinned_content_sha256": "0c7f77bcf201cd67eea12dcf3d89d321ece7d696ae930ea3ae90e904f91e379d",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "docs/architecture/sdk-architecture-map.yml",
+    "current_raw_sha256": "6b06e4786df7b4e8fddc2a621c450a6ccba9b727fd0d3c72d76d2c0ec571e852",
+    "inventory_source_sha256": [
+      "6b06e4786df7b4e8fddc2a621c450a6ccba9b727fd0d3c72d76d2c0ec571e852"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "aba2d8df0c848ab546a9bef06e6bcad230759b97",
+    "pinned_content_sha256": "6b06e4786df7b4e8fddc2a621c450a6ccba9b727fd0d3c72d76d2c0ec571e852",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "docs/architecture/webauthn-extension-processing.md",
+    "current_raw_sha256": "56ce5bf608fa1452402100b3d6e51af6b8a3b8277d0f3ada1e8b4b342bffe09c",
+    "inventory_source_sha256": [
+      "56ce5bf608fa1452402100b3d6e51af6b8a3b8277d0f3ada1e8b4b342bffe09c"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "8f49190d7045845588520308e7ebbe5dc5e97b14",
+    "pinned_content_sha256": "56ce5bf608fa1452402100b3d6e51af6b8a3b8277d0f3ada1e8b4b342bffe09c",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "docs/migration/.state.yml",
+    "current_raw_sha256": "0c444760a8a56199b35f656943f502b7ba7bb02f8a13ec3a3b2cb7a0cafc3958",
+    "inventory_source_sha256": [
+      "0c444760a8a56199b35f656943f502b7ba7bb02f8a13ec3a3b2cb7a0cafc3958"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "e8c852365bfb9be4dee3948c4297b9fa02ade5d1",
+    "pinned_content_sha256": "0c444760a8a56199b35f656943f502b7ba7bb02f8a13ec3a3b2cb7a0cafc3958",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "docs/migration/v1-to-v2-changelog.md",
+    "current_raw_sha256": "250fa9763bd3ec3ffe98ad8732ae832620d9b72fd62c24da1b3fdace3ff56600",
+    "inventory_source_sha256": [
+      "250fa9763bd3ec3ffe98ad8732ae832620d9b72fd62c24da1b3fdace3ff56600"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "16ed68c645a56315bc3b7dd555d81bb6a116ea0d",
+    "pinned_content_sha256": "250fa9763bd3ec3ffe98ad8732ae832620d9b72fd62c24da1b3fdace3ff56600",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "docs/migration/v1-to-v2-gaps.md",
+    "current_raw_sha256": "827ced7b8e4055b98b2cc2b1738086494437c169ba88e92af3ee27488fac177a",
+    "inventory_source_sha256": [
+      "827ced7b8e4055b98b2cc2b1738086494437c169ba88e92af3ee27488fac177a"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "6eb3aee891f95e55dd051ff615ccd4d8ad33cb16",
+    "pinned_content_sha256": "827ced7b8e4055b98b2cc2b1738086494437c169ba88e92af3ee27488fac177a",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "docs/migration/v1-to-v2-map.yml",
+    "current_raw_sha256": "74d2ab9d0c3427c784dec7374fdf71c3469c0ab5e37ed6c518b18757b718fdf1",
+    "inventory_source_sha256": [
+      "74d2ab9d0c3427c784dec7374fdf71c3469c0ab5e37ed6c518b18757b718fdf1"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "5539ffd7c357aaea0bcc73a80d5a28341b71294d",
+    "pinned_content_sha256": "74d2ab9d0c3427c784dec7374fdf71c3469c0ab5e37ed6c518b18757b718fdf1",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "docs/migration/v1-to-v2.md",
+    "current_raw_sha256": "79413a6e09402598c4059a7a5196a8c50995bc93642392cb3e9d880196809280",
+    "inventory_source_sha256": [
+      "79413a6e09402598c4059a7a5196a8c50995bc93642392cb3e9d880196809280"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "d692a2ad8231bf818d3d150be9e4d1c9b5de3b7c",
+    "pinned_content_sha256": "79413a6e09402598c4059a7a5196a8c50995bc93642392cb3e9d880196809280",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "docs/plans/yubikit-async-boundaries/00-status.md",
+    "current_raw_sha256": "17b0acad86ef58117a2f69db0d8d7f59cf4ed2447888f60d6908e3e0cd71bfae",
+    "inventory_source_sha256": [
+      "17b0acad86ef58117a2f69db0d8d7f59cf4ed2447888f60d6908e3e0cd71bfae"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "7b98f69fa90af998560af726d20837712fe9df64",
+    "pinned_content_sha256": "17b0acad86ef58117a2f69db0d8d7f59cf4ed2447888f60d6908e3e0cd71bfae",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "docs/plans/yubikit-async-boundaries/01-product.md",
+    "current_raw_sha256": "413a73047489f7bd1975e303f25a0816b85b7ddc19cce1c5f82c47456a666019",
+    "inventory_source_sha256": [
+      "413a73047489f7bd1975e303f25a0816b85b7ddc19cce1c5f82c47456a666019"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "af292b99aa36d4fe0617868a0be2fec10066d071",
+    "pinned_content_sha256": "413a73047489f7bd1975e303f25a0816b85b7ddc19cce1c5f82c47456a666019",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "docs/plans/yubikit-async-boundaries/02-architecture.md",
+    "current_raw_sha256": "8ab7497dc8431cf98b5b3e2f4ca8306af4d70d6dea2eac2c276e8aae19b6b68e",
+    "inventory_source_sha256": [
+      "8ab7497dc8431cf98b5b3e2f4ca8306af4d70d6dea2eac2c276e8aae19b6b68e"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "af0f3d49c90ee56bdbaf2471eb5eba62d2680539",
+    "pinned_content_sha256": "8ab7497dc8431cf98b5b3e2f4ca8306af4d70d6dea2eac2c276e8aae19b6b68e",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "docs/plans/yubikit-async-boundaries/03-program-design.md",
+    "current_raw_sha256": "e42c9ab750793f2f798a1be0888357ba144b27fed7b414238515e43742e051a9",
+    "inventory_source_sha256": [
+      "e42c9ab750793f2f798a1be0888357ba144b27fed7b414238515e43742e051a9"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "eb7dc203dd3d45bb7001ce222d20a7b0a385b500",
+    "pinned_content_sha256": "e42c9ab750793f2f798a1be0888357ba144b27fed7b414238515e43742e051a9",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "docs/plans/yubikit-async-boundaries/addenda/earlier-multi-key-architecture.md",
+    "current_raw_sha256": "5f4ef8fc640152c4b7f2fefcbbab82cf7707421891b1703a323be8bc1efaa667",
+    "inventory_source_sha256": [
+      "5f4ef8fc640152c4b7f2fefcbbab82cf7707421891b1703a323be8bc1efaa667"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "50c1de2c735285064315a9f7d7793c75872f7315",
+    "pinned_content_sha256": "5f4ef8fc640152c4b7f2fefcbbab82cf7707421891b1703a323be8bc1efaa667",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "docs/plans/yubikit-async-boundaries/addenda/earlier-multi-key-program-design.md",
+    "current_raw_sha256": "b46036c41eede990c96f95eb35c271d52330b536127bb74d99febf28b34df7cc",
+    "inventory_source_sha256": [
+      "b46036c41eede990c96f95eb35c271d52330b536127bb74d99febf28b34df7cc"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "9a692b99b5078ac0b353ec8b753846af6d2f47cf",
+    "pinned_content_sha256": "b46036c41eede990c96f95eb35c271d52330b536127bb74d99febf28b34df7cc",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "docs/plans/yubikit-async-boundaries/addenda/multi-key-capacity.md",
+    "current_raw_sha256": "c76ff436476670231e4dc47545a4c57a8b3447b2e1e1546859a6a5b53254f654",
+    "inventory_source_sha256": [
+      "c76ff436476670231e4dc47545a4c57a8b3447b2e1e1546859a6a5b53254f654"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "88f87d6305acaf3e44223f7cf2ba9064c063f649",
+    "pinned_content_sha256": "c76ff436476670231e4dc47545a4c57a8b3447b2e1e1546859a6a5b53254f654",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "docs/research/documentation-audit/core.md",
+    "current_raw_sha256": "d846cd3d0e39a1cade4f54de2d4c514c87e0243c0b7ba045bd7c63302a4e466a",
+    "inventory_source_sha256": [
+      "d846cd3d0e39a1cade4f54de2d4c514c87e0243c0b7ba045bd7c63302a4e466a"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": null,
+    "pinned_content_sha256": null,
+    "lf_equal_to_pin": false,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "docs/research/native-aot-readiness-data.md",
+    "current_raw_sha256": "e4b1a84c6b314b5d7e8ac957c3db3e0f98fff408e1a6c095658cf4df0898eecc",
+    "inventory_source_sha256": [
+      "e4b1a84c6b314b5d7e8ac957c3db3e0f98fff408e1a6c095658cf4df0898eecc"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "1abedfd832900e3ed3d9d287cd65a6f24a99b054",
+    "pinned_content_sha256": "e4b1a84c6b314b5d7e8ac957c3db3e0f98fff408e1a6c095658cf4df0898eecc",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "docs/research/native-aot-readiness.md",
+    "current_raw_sha256": "8a20fd47ab967bb81fc99c66c30104045e1718ba851c19b8b2d0cefa9bda802a",
+    "inventory_source_sha256": [
+      "8a20fd47ab967bb81fc99c66c30104045e1718ba851c19b8b2d0cefa9bda802a"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "a14460472fbc01a97c7129a52c8062c280606809",
+    "pinned_content_sha256": "8a20fd47ab967bb81fc99c66c30104045e1718ba851c19b8b2d0cefa9bda802a",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "docs/usage/user-interaction.md",
+    "current_raw_sha256": "80e7367c865514f47d1348ba58b42de3bf722fbb1bd91108c2aabce69cf37831",
+    "inventory_source_sha256": [
+      "80e7367c865514f47d1348ba58b42de3bf722fbb1bd91108c2aabce69cf37831"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "463b4ea474e81b7eb7880994c31b2b49ab3937fc",
+    "pinned_content_sha256": "80e7367c865514f47d1348ba58b42de3bf722fbb1bd91108c2aabce69cf37831",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "docs/v1-to-v2-comparison.md",
+    "current_raw_sha256": "0afb068ff486dd6abea71acd56d2c2575284bfb0fae6af79d5055e0109dcc1f2",
+    "inventory_source_sha256": [
+      "0afb068ff486dd6abea71acd56d2c2575284bfb0fae6af79d5055e0109dcc1f2"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "859a1d2215f39cd327cb720e5cad1d1e168d8c4b",
+    "pinned_content_sha256": "0afb068ff486dd6abea71acd56d2c2575284bfb0fae6af79d5055e0109dcc1f2",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "docs/v2-highlights.md",
+    "current_raw_sha256": "c867924a199f6be44ba5f9048768cc39ceaf9a4f2477241bbe2549191eed2085",
+    "inventory_source_sha256": [
+      "c867924a199f6be44ba5f9048768cc39ceaf9a4f2477241bbe2549191eed2085"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "64b606d7e5db5c3ae57fcb38cd1e08793cd6b128",
+    "pinned_content_sha256": "c867924a199f6be44ba5f9048768cc39ceaf9a4f2477241bbe2549191eed2085",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "global.json",
+    "current_raw_sha256": "bcead32f2fb187a53e01ffc96128e09798dbdc8a981b17adb4276b0e8da840d7",
+    "inventory_source_sha256": [
+      "bcead32f2fb187a53e01ffc96128e09798dbdc8a981b17adb4276b0e8da840d7"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "34cc7a14df9be0d7076b3d864fc67530c487050b",
+    "pinned_content_sha256": "bcead32f2fb187a53e01ffc96128e09798dbdc8a981b17adb4276b0e8da840d7",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "nuget.config",
+    "current_raw_sha256": "ffc43c158fd2a4a415ebf08014326110018539fa61c10842e3ff39b80be24327",
+    "inventory_source_sha256": [
+      "ffc43c158fd2a4a415ebf08014326110018539fa61c10842e3ff39b80be24327"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "272f7be00be8633c3770c4d15a85a975f2c91155",
+    "pinned_content_sha256": "ffc43c158fd2a4a415ebf08014326110018539fa61c10842e3ff39b80be24327",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "scripts/architecture/architecture-images.env",
+    "current_raw_sha256": "781e63b8d1500e15004a08b8ddbf92420fa6b06ac72faea21569d6b68d8353b2",
+    "inventory_source_sha256": [
+      "781e63b8d1500e15004a08b8ddbf92420fa6b06ac72faea21569d6b68d8353b2"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "d81bd19d398f98df34b92d0340a58f0c835a6b27",
+    "pinned_content_sha256": "781e63b8d1500e15004a08b8ddbf92420fa6b06ac72faea21569d6b68d8353b2",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "scripts/architecture/build-architecture-context.sh",
+    "current_raw_sha256": "253c0117d38988178af2ab448fd9bbc717864be0345ebfce54eea16433b5ec19",
+    "inventory_source_sha256": [
+      "253c0117d38988178af2ab448fd9bbc717864be0345ebfce54eea16433b5ec19"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "7eddaecd12d092a8168c10d3779afdd45a316b4a",
+    "pinned_content_sha256": "253c0117d38988178af2ab448fd9bbc717864be0345ebfce54eea16433b5ec19",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "scripts/architecture/check-architecture-images.sh",
+    "current_raw_sha256": "523bca13a29488e6ccf31569139be15cbb7ba96e5feba332a1d670ed499a3369",
+    "inventory_source_sha256": [
+      "523bca13a29488e6ccf31569139be15cbb7ba96e5feba332a1d670ed499a3369"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "87d0c6ddebb38fc372d8b6f15b681af36d812bbc",
+    "pinned_content_sha256": "523bca13a29488e6ccf31569139be15cbb7ba96e5feba332a1d670ed499a3369",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "scripts/architecture/check-architecture-map.sh",
+    "current_raw_sha256": "3efef57b848324b396f3080ec1412d7e7ca89a28c05a4871f35dcd31ac4f1cb8",
+    "inventory_source_sha256": [
+      "3efef57b848324b396f3080ec1412d7e7ca89a28c05a4871f35dcd31ac4f1cb8"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "b5fbe7ea3df0ef91ed76d321261c3d16c3d7e9e9",
+    "pinned_content_sha256": "3efef57b848324b396f3080ec1412d7e7ca89a28c05a4871f35dcd31ac4f1cb8",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "scripts/architecture/lib-architecture-blocks.sh",
+    "current_raw_sha256": "8936081309bf0a6142d9bb8ef2764965b9f259738a5191397b86310ec23b817a",
+    "inventory_source_sha256": [
+      "8936081309bf0a6142d9bb8ef2764965b9f259738a5191397b86310ec23b817a"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "6a7a6c8cd318330b11a4d3c4f51719a4069a3f88",
+    "pinned_content_sha256": "8936081309bf0a6142d9bb8ef2764965b9f259738a5191397b86310ec23b817a",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "scripts/architecture/mermaid.config.json",
+    "current_raw_sha256": "c746686ba5d973a7688056747ae97ace4052ad52115b4862fad48219a03bbbfc",
+    "inventory_source_sha256": [
+      "c746686ba5d973a7688056747ae97ace4052ad52115b4862fad48219a03bbbfc"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "c1ff8b4cb5d3a6678ab5a4fdfffaf2e198d72352",
+    "pinned_content_sha256": "c746686ba5d973a7688056747ae97ace4052ad52115b4862fad48219a03bbbfc",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "scripts/architecture/render-architecture.sh",
+    "current_raw_sha256": "18f92afd5299eaca5f868e32d5fb4b5e304821327a4cd453164d011245c94d64",
+    "inventory_source_sha256": [
+      "18f92afd5299eaca5f868e32d5fb4b5e304821327a4cd453164d011245c94d64"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "f75176a59b7defa2073a1aa6ba0dd43489b5a235",
+    "pinned_content_sha256": "18f92afd5299eaca5f868e32d5fb4b5e304821327a4cd453164d011245c94d64",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "scripts/toolchain/BenchmarkTargets.cs",
+    "current_raw_sha256": "9f0ac35466e257e28816f473b14c18d26a2a86edf8fa72c519c043cff62d6162",
+    "inventory_source_sha256": [
+      "9f0ac35466e257e28816f473b14c18d26a2a86edf8fa72c519c043cff62d6162"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "6f9aa3ee767a5452f60bc1f13af1f4ace3a23c6a",
+    "pinned_content_sha256": "9f0ac35466e257e28816f473b14c18d26a2a86edf8fa72c519c043cff62d6162",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "scripts/toolchain/BuildTargets.cs",
+    "current_raw_sha256": "f96c0e766d31463d31aba9254ecb5f4d8a9534a6c1f6bc3422e2811f3173c867",
+    "inventory_source_sha256": [
+      "f96c0e766d31463d31aba9254ecb5f4d8a9534a6c1f6bc3422e2811f3173c867"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "238a28b8b093e621b96c8f372aacde977a270ba8",
+    "pinned_content_sha256": "f96c0e766d31463d31aba9254ecb5f4d8a9534a6c1f6bc3422e2811f3173c867",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "scripts/toolchain/Context.cs",
+    "current_raw_sha256": "92e841eab1223646e550d6a23143e9869de2b457b001d4eefb5c7236b962102e",
+    "inventory_source_sha256": [
+      "92e841eab1223646e550d6a23143e9869de2b457b001d4eefb5c7236b962102e"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "7bcd27f3546dbcc982fbc38598ae84b9ae3ad9d8",
+    "pinned_content_sha256": "92e841eab1223646e550d6a23143e9869de2b457b001d4eefb5c7236b962102e",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "scripts/toolchain/Conventions.cs",
+    "current_raw_sha256": "b00075531f302fa3465dece24150b5efac563ccb8071a834df74424fb187ed89",
+    "inventory_source_sha256": [
+      "b00075531f302fa3465dece24150b5efac563ccb8071a834df74424fb187ed89"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "cd698247bceab2647b031732f8f3bcf67ad3f1c5",
+    "pinned_content_sha256": "b00075531f302fa3465dece24150b5efac563ccb8071a834df74424fb187ed89",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "scripts/toolchain/CoverageTargets.cs",
+    "current_raw_sha256": "e74c214a84e994132d8f780a98fb718e48759904fe3041f893ba452733a0a831",
+    "inventory_source_sha256": [
+      "e74c214a84e994132d8f780a98fb718e48759904fe3041f893ba452733a0a831"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "81eaffa520cb98dec285854d2c9706780b72cf83",
+    "pinned_content_sha256": "e74c214a84e994132d8f780a98fb718e48759904fe3041f893ba452733a0a831",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "scripts/toolchain/DocsTargets.cs",
+    "current_raw_sha256": "d7855dae1c710022a945896092530d59ca9a3dedee0448dcfc1e486c631a0c95",
+    "inventory_source_sha256": [
+      "d7855dae1c710022a945896092530d59ca9a3dedee0448dcfc1e486c631a0c95"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "025a559807ec2bcdce6c179e46a46d6ccd4084d0",
+    "pinned_content_sha256": "d7855dae1c710022a945896092530d59ca9a3dedee0448dcfc1e486c631a0c95",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "scripts/toolchain/Options.cs",
+    "current_raw_sha256": "e71fad63d400053ca3f7806d0b8cb8954d79957e213e518025298edf8277ad77",
+    "inventory_source_sha256": [
+      "e71fad63d400053ca3f7806d0b8cb8954d79957e213e518025298edf8277ad77"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "53e622b56f71ed124fc38c1960cecde44cae174b",
+    "pinned_content_sha256": "e71fad63d400053ca3f7806d0b8cb8954d79957e213e518025298edf8277ad77",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "scripts/toolchain/Output.cs",
+    "current_raw_sha256": "05711d0f2f2f44fe2674084408b92ee680711d52ec8dc2caff7d32bc8e2ff937",
+    "inventory_source_sha256": [
+      "05711d0f2f2f44fe2674084408b92ee680711d52ec8dc2caff7d32bc8e2ff937"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "52022fbffe129d27eb2e6606efa8ae60a41843f8",
+    "pinned_content_sha256": "05711d0f2f2f44fe2674084408b92ee680711d52ec8dc2caff7d32bc8e2ff937",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "scripts/toolchain/PackageTargets.cs",
+    "current_raw_sha256": "2c7c2fc225d15201b058ddd40990179868b3e6aeebed1d3d2d7348220a666003",
+    "inventory_source_sha256": [
+      "2c7c2fc225d15201b058ddd40990179868b3e6aeebed1d3d2d7348220a666003"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "b9703aa4dac318de36323ff9746d95b0da2f79e5",
+    "pinned_content_sha256": "2c7c2fc225d15201b058ddd40990179868b3e6aeebed1d3d2d7348220a666003",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "scripts/toolchain/Process.cs",
+    "current_raw_sha256": "70fbc9d528f094fc098ff6aa58bdc2ca33817445b0d529393fabd971d53b4f90",
+    "inventory_source_sha256": [
+      "70fbc9d528f094fc098ff6aa58bdc2ca33817445b0d529393fabd971d53b4f90"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "dd2f180babd46710f135e10ac885ec384082526f",
+    "pinned_content_sha256": "70fbc9d528f094fc098ff6aa58bdc2ca33817445b0d529393fabd971d53b4f90",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "scripts/toolchain/Results.cs",
+    "current_raw_sha256": "80fe8ba0557664469545ea1e709e1a755cc6da546024c48f1e171088795b6279",
+    "inventory_source_sha256": [
+      "80fe8ba0557664469545ea1e709e1a755cc6da546024c48f1e171088795b6279"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "a8d9ac1d73dd64f893f8f1583320629e2d506cfc",
+    "pinned_content_sha256": "80fe8ba0557664469545ea1e709e1a755cc6da546024c48f1e171088795b6279",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "scripts/toolchain/RunLog.cs",
+    "current_raw_sha256": "d9abd5b742c4fd4c2b97d0c6b99a1df4fefb7d872fa267f81fe6e694875bc6fa",
+    "inventory_source_sha256": [
+      "d9abd5b742c4fd4c2b97d0c6b99a1df4fefb7d872fa267f81fe6e694875bc6fa"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "0afa0f0319c25766a2222c0df694945c73057774",
+    "pinned_content_sha256": "d9abd5b742c4fd4c2b97d0c6b99a1df4fefb7d872fa267f81fe6e694875bc6fa",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "scripts/toolchain/TargetRegistry.cs",
+    "current_raw_sha256": "32c8de70539d89ef6c5ac35b785f21fb62bf75acfb749622f471200aba07faba",
+    "inventory_source_sha256": [
+      "32c8de70539d89ef6c5ac35b785f21fb62bf75acfb749622f471200aba07faba"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "d34c4e210d1bb77dc367d3f374c40372eeb3a539",
+    "pinned_content_sha256": "32c8de70539d89ef6c5ac35b785f21fb62bf75acfb749622f471200aba07faba",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "scripts/toolchain/TestTargets.cs",
+    "current_raw_sha256": "4d6ce786a5fde41dbc66fafa6190daccc19f1bcd6c534cd789590413513cc1d5",
+    "inventory_source_sha256": [
+      "4d6ce786a5fde41dbc66fafa6190daccc19f1bcd6c534cd789590413513cc1d5"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "1cff20cb5edcf5943f3640c883a3070f45337120",
+    "pinned_content_sha256": "4d6ce786a5fde41dbc66fafa6190daccc19f1bcd6c534cd789590413513cc1d5",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "scripts/toolchain/Usage.cs",
+    "current_raw_sha256": "68174a956f4af4d56d3502514ff9834a40e0337f76069d01308cc5f546426861",
+    "inventory_source_sha256": [
+      "68174a956f4af4d56d3502514ff9834a40e0337f76069d01308cc5f546426861"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "0cadefe0078e39d6755d1c6716bebce648580692",
+    "pinned_content_sha256": "68174a956f4af4d56d3502514ff9834a40e0337f76069d01308cc5f546426861",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Cli.Commands/src/Fido/FidoCommands.cs",
+    "current_raw_sha256": "5d923798282b4b4d01fe2932777fbe54b0ab60f3073fbd2c49e732c89025abe8",
+    "inventory_source_sha256": [
+      "5d923798282b4b4d01fe2932777fbe54b0ab60f3073fbd2c49e732c89025abe8"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "df3b28ec9fb0d2b2cbc775a55bd8d1f46719f8f7",
+    "pinned_content_sha256": "5d923798282b4b4d01fe2932777fbe54b0ab60f3073fbd2c49e732c89025abe8",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Cli.Commands/src/Infrastructure/GlobalSettings.cs",
+    "current_raw_sha256": "547f257bba536605ab7f4e271b7792fee118e46b3bd17dc2d8f30bc7cd67dfb0",
+    "inventory_source_sha256": [
+      "547f257bba536605ab7f4e271b7792fee118e46b3bd17dc2d8f30bc7cd67dfb0"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "34925591837af41de989645724ced3f1a1cd772a",
+    "pinned_content_sha256": "547f257bba536605ab7f4e271b7792fee118e46b3bd17dc2d8f30bc7cd67dfb0",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Cli.Commands/src/Infrastructure/YkCommandBase.cs",
+    "current_raw_sha256": "939539934beb7561cff5e8a038a002a1b738ded003f6e04fc7ac88a6e9a9b79e",
+    "inventory_source_sha256": [
+      "939539934beb7561cff5e8a038a002a1b738ded003f6e04fc7ac88a6e9a9b79e"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "a00b858216339afd1444001c6e35e43de7246a61",
+    "pinned_content_sha256": "939539934beb7561cff5e8a038a002a1b738ded003f6e04fc7ac88a6e9a9b79e",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Cli.Commands/src/Management/ManagementResetCommand.cs",
+    "current_raw_sha256": "7e7ddcb65cf0afb5afc5ba9d317de3914f096085e662400d863ab56c1498007e",
+    "inventory_source_sha256": [
+      "7e7ddcb65cf0afb5afc5ba9d317de3914f096085e662400d863ab56c1498007e"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "2168fcda73282e6c9bd35220607f8a451357fdc8",
+    "pinned_content_sha256": "7e7ddcb65cf0afb5afc5ba9d317de3914f096085e662400d863ab56c1498007e",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Cli.Commands/src/OpenPgp/OpenPgpAccessCommands.cs",
+    "current_raw_sha256": "46ebfecf9d717522ae0c602c3fe0c6c2b60ccb5e05da6a9dda6509762570dec6",
+    "inventory_source_sha256": [
+      "46ebfecf9d717522ae0c602c3fe0c6c2b60ccb5e05da6a9dda6509762570dec6"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "10dd49d50a6baa9cb116f037118dc059ffc1dc2e",
+    "pinned_content_sha256": "46ebfecf9d717522ae0c602c3fe0c6c2b60ccb5e05da6a9dda6509762570dec6",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Cli.Commands/src/OpenPgp/OpenPgpCertificatesCommands.cs",
+    "current_raw_sha256": "39a4dd33e9fb593e1658c4e25efbee5146b2ce4c3dcb36129f47f77b74342199",
+    "inventory_source_sha256": [
+      "39a4dd33e9fb593e1658c4e25efbee5146b2ce4c3dcb36129f47f77b74342199"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "b2e8ef8e904878b2f6db4f28122936dd4b9896d4",
+    "pinned_content_sha256": "39a4dd33e9fb593e1658c4e25efbee5146b2ce4c3dcb36129f47f77b74342199",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Cli.Commands/src/OpenPgp/OpenPgpHelpers.cs",
+    "current_raw_sha256": "96c9dfba64090184921f9eab663715c8b1ae3f6ab824a9582d4429947f155728",
+    "inventory_source_sha256": [
+      "96c9dfba64090184921f9eab663715c8b1ae3f6ab824a9582d4429947f155728"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "a9fcc64c51faac32509afec863d6270062adafb5",
+    "pinned_content_sha256": "96c9dfba64090184921f9eab663715c8b1ae3f6ab824a9582d4429947f155728",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Cli.Commands/src/OpenPgp/OpenPgpInfoCommand.cs",
+    "current_raw_sha256": "da2d48cda7d9272dbef97240ad16dd1fd144fc7492b7a51a31ba22d4b8cc45bf",
+    "inventory_source_sha256": [
+      "da2d48cda7d9272dbef97240ad16dd1fd144fc7492b7a51a31ba22d4b8cc45bf"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "d59524ea5ab077725cfb03018e59382db04f99bd",
+    "pinned_content_sha256": "da2d48cda7d9272dbef97240ad16dd1fd144fc7492b7a51a31ba22d4b8cc45bf",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Cli.Commands/src/OpenPgp/OpenPgpKeysCommands.cs",
+    "current_raw_sha256": "167e5234ae5703ba2084455611b0bab81a3cb627aee6c9d994cb944a5612037e",
+    "inventory_source_sha256": [
+      "167e5234ae5703ba2084455611b0bab81a3cb627aee6c9d994cb944a5612037e"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "0f27e4e04ac725c2cdfe9356bd129306b691d7aa",
+    "pinned_content_sha256": "167e5234ae5703ba2084455611b0bab81a3cb627aee6c9d994cb944a5612037e",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Cli.Commands/src/OpenPgp/OpenPgpResetCommand.cs",
+    "current_raw_sha256": "8fe40526d880432c6dd24a90cc813a15371cb34e11e0a438e8c06baa0eb4d886",
+    "inventory_source_sha256": [
+      "8fe40526d880432c6dd24a90cc813a15371cb34e11e0a438e8c06baa0eb4d886"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "5091e8df94722eec7cf07757bd9fe33d733b993f",
+    "pinned_content_sha256": "8fe40526d880432c6dd24a90cc813a15371cb34e11e0a438e8c06baa0eb4d886",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Cli.Commands/src/Otp/OtpCommands.cs",
+    "current_raw_sha256": "ed6ba5d91314eb226d83fac9724ff2d4b22fcf1caa7332bd516e30d6d1d83bb9",
+    "inventory_source_sha256": [
+      "ed6ba5d91314eb226d83fac9724ff2d4b22fcf1caa7332bd516e30d6d1d83bb9"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "02f6f0e94e41f07c32cdd3cc9d60953097afdd85",
+    "pinned_content_sha256": "ed6ba5d91314eb226d83fac9724ff2d4b22fcf1caa7332bd516e30d6d1d83bb9",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Cli.Commands/src/Piv/PivCommands.cs",
+    "current_raw_sha256": "67772e036a7a6ce0ce2f981d7e3fbc280e0f1be4a8770b66591641fc67bcfc7f",
+    "inventory_source_sha256": [
+      "67772e036a7a6ce0ce2f981d7e3fbc280e0f1be4a8770b66591641fc67bcfc7f"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "2f21f24f41dcdc90d331621a41338df8d5feb204",
+    "pinned_content_sha256": "67772e036a7a6ce0ce2f981d7e3fbc280e0f1be4a8770b66591641fc67bcfc7f",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Cli.Commands/src/Yubico.YubiKit.Cli.Commands.csproj",
+    "current_raw_sha256": "1988442b20626b9984a9df89d1741f53f6b1703bf8a08ea448e09af5ca7693eb",
+    "inventory_source_sha256": [
+      "1988442b20626b9984a9df89d1741f53f6b1703bf8a08ea448e09af5ca7693eb"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "b8ae8909cc58b7ff875d678b9fcb3aeef7719612",
+    "pinned_content_sha256": "06213e37ce3daf3c39691b4f4cc927ffbbfa7a8b60254889483e16a5ad1012f3",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Cli.Commands/tests/Yubico.YubiKit.Cli.Commands.UnitTests/Oath/OathHelpersTests.cs",
+    "current_raw_sha256": "df4f8104257bb560b15a95ba852a1b7069fc0ad4ee8068468c38f065d51b23a2",
+    "inventory_source_sha256": [
+      "df4f8104257bb560b15a95ba852a1b7069fc0ad4ee8068468c38f065d51b23a2"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "d170bb3323bd66f49e751e05af41017ec501d182",
+    "pinned_content_sha256": "df4f8104257bb560b15a95ba852a1b7069fc0ad4ee8068468c38f065d51b23a2",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Cli.Shared/src/Yubico.YubiKit.Cli.Shared.csproj",
+    "current_raw_sha256": "dd59c5617d354bd7973976f12571bbbcd32f85beedd21df8e04cf594a7fb5102",
+    "inventory_source_sha256": [
+      "dd59c5617d354bd7973976f12571bbbcd32f85beedd21df8e04cf594a7fb5102"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "a7e6eaa39bec4293bb1c8f59868b0bdeabe5440d",
+    "pinned_content_sha256": "48ed58f718710d8dba8e3c34e870d280ef29dd22b95443c67ea2b4820e340939",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/CLAUDE.md",
+    "current_raw_sha256": "e75263ee0c69550b56d7863e0eb86675e4d3513423bb9aa7a370e0834452e65e",
+    "inventory_source_sha256": [
+      "e75263ee0c69550b56d7863e0eb86675e4d3513423bb9aa7a370e0834452e65e"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "1b98f97c9ee8bb798530c93600cfec86640cbd4d",
+    "pinned_content_sha256": "e75263ee0c69550b56d7863e0eb86675e4d3513423bb9aa7a370e0834452e65e",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/PACKAGE_README.md",
+    "current_raw_sha256": "95ad7d10ee5175ec6ce8a1d49e01a1ebe8111a6ea1155c4aa9a90babe09b8c74",
+    "inventory_source_sha256": [
+      "95ad7d10ee5175ec6ce8a1d49e01a1ebe8111a6ea1155c4aa9a90babe09b8c74"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "a9919fac59736c0180a982447cebc850812ac5d7",
+    "pinned_content_sha256": "95ad7d10ee5175ec6ce8a1d49e01a1ebe8111a6ea1155c4aa9a90babe09b8c74",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/README.md",
+    "current_raw_sha256": "2fd1b886a380f4618a4e0fd25ab7536aecd5a84cb35ae1f0a2d26d058be0ae9a",
+    "inventory_source_sha256": [
+      "2fd1b886a380f4618a4e0fd25ab7536aecd5a84cb35ae1f0a2d26d058be0ae9a"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "0b8672e6ff4029163022cf51c9cd9c64901ea6a1",
+    "pinned_content_sha256": "2fd1b886a380f4618a4e0fd25ab7536aecd5a84cb35ae1f0a2d26d058be0ae9a",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/Exceptions.cs",
+    "current_raw_sha256": "f48edf1c3f527ce1ca5cf89fa4c78513c904156198858ea0e22716f5230b48e6",
+    "inventory_source_sha256": [
+      "f48edf1c3f527ce1ca5cf89fa4c78513c904156198858ea0e22716f5230b48e6"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "b86070b9dae778cf70361e0341141eca36646cba",
+    "pinned_content_sha256": "f48edf1c3f527ce1ca5cf89fa4c78513c904156198858ea0e22716f5230b48e6",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/Native/Desktop/SCard/SCard.Interop.cs",
+    "current_raw_sha256": "379b9d00f73f25e0c67053c4577997a88e6e5a00eb45fb21e25d192f1e0cca8d",
+    "inventory_source_sha256": [
+      "379b9d00f73f25e0c67053c4577997a88e6e5a00eb45fb21e25d192f1e0cca8d"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "aacf6fcf311846f3cb9f3d64475c91128bd8275d",
+    "pinned_content_sha256": "379b9d00f73f25e0c67053c4577997a88e6e5a00eb45fb21e25d192f1e0cca8d",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/Native/Desktop/SCard/SCardCardHandle.cs",
+    "current_raw_sha256": "78f8e4e5a3e2e85021e45803b42dff018964f173770d1454d193d367e3792b75",
+    "inventory_source_sha256": [
+      "78f8e4e5a3e2e85021e45803b42dff018964f173770d1454d193d367e3792b75"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "c5d37843970ebe2189ad5579a1c32d1f239d04a3",
+    "pinned_content_sha256": "78f8e4e5a3e2e85021e45803b42dff018964f173770d1454d193d367e3792b75",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/Native/Desktop/SCard/SCardContext.cs",
+    "current_raw_sha256": "e5014a9eb24db2394804c7b4eda92527a1b25f3b35834e2192f68c10c5068331",
+    "inventory_source_sha256": [
+      "e5014a9eb24db2394804c7b4eda92527a1b25f3b35834e2192f68c10c5068331"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "9c2066284a1957aae0cfb2d672b733a4dddcfcb6",
+    "pinned_content_sha256": "e5014a9eb24db2394804c7b4eda92527a1b25f3b35834e2192f68c10c5068331",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/Native/Desktop/SCard/SCardDisposition.cs",
+    "current_raw_sha256": "c4461eb8efd584d55753cbac9179efec60221b05348001889c25f040c57b7078",
+    "inventory_source_sha256": [
+      "c4461eb8efd584d55753cbac9179efec60221b05348001889c25f040c57b7078"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "2fad5d75f3d5cdc3b3c5e6f7e86e71dbd526332c",
+    "pinned_content_sha256": "c4461eb8efd584d55753cbac9179efec60221b05348001889c25f040c57b7078",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/Native/Desktop/SCard/SCardError.cs",
+    "current_raw_sha256": "5e7adeb4588b73720dda7be04f84dd152c21316823020217a919a2236aa37b4d",
+    "inventory_source_sha256": [
+      "5e7adeb4588b73720dda7be04f84dd152c21316823020217a919a2236aa37b4d"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "3d94cdf6e491244b04b2694f7b16b11c4c8f8976",
+    "pinned_content_sha256": "5e7adeb4588b73720dda7be04f84dd152c21316823020217a919a2236aa37b4d",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/Native/Desktop/SCard/SCardException.cs",
+    "current_raw_sha256": "20b11dd083888c6071725ce0100c6c5f4556cac76e9638946afa2ab0ea261597",
+    "inventory_source_sha256": [
+      "20b11dd083888c6071725ce0100c6c5f4556cac76e9638946afa2ab0ea261597"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "4d686310943eb93c7284d2fe986281866c1922ef",
+    "pinned_content_sha256": "20b11dd083888c6071725ce0100c6c5f4556cac76e9638946afa2ab0ea261597",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/Native/Desktop/SCard/SCardIORequest.cs",
+    "current_raw_sha256": "0fc62af77b2186afb0f93f5041aa1f97899f33d28b622669fec072c3265ec698",
+    "inventory_source_sha256": [
+      "0fc62af77b2186afb0f93f5041aa1f97899f33d28b622669fec072c3265ec698"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "1531b0ebb9e35d9046d8ba13747515657cc02b0f",
+    "pinned_content_sha256": "0fc62af77b2186afb0f93f5041aa1f97899f33d28b622669fec072c3265ec698",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/Native/Desktop/SCard/SCardProtocol.cs",
+    "current_raw_sha256": "84c7f9cbd67bb84e8f9192230003824f8381c177baf40b8344f8bc14784f4d14",
+    "inventory_source_sha256": [
+      "84c7f9cbd67bb84e8f9192230003824f8381c177baf40b8344f8bc14784f4d14"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "6450bb7194463a64d2b5c399e9d383faf97a22b2",
+    "pinned_content_sha256": "84c7f9cbd67bb84e8f9192230003824f8381c177baf40b8344f8bc14784f4d14",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/Native/Desktop/SCard/SCardReaderStateExtensions.cs",
+    "current_raw_sha256": "7459cf196731d11e5331011c414ea5d548afb91d542732e4dc4c3f051e9837f1",
+    "inventory_source_sha256": [
+      "7459cf196731d11e5331011c414ea5d548afb91d542732e4dc4c3f051e9837f1"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "7b5b80e4ce170d0e8aa0d8fea65ae2edd7333309",
+    "pinned_content_sha256": "7459cf196731d11e5331011c414ea5d548afb91d542732e4dc4c3f051e9837f1",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/Native/Desktop/SCard/SCardReaderStates.cs",
+    "current_raw_sha256": "9c4d79ee6d637e364a72a5839a5480b0f088fae59ab41f74f83c83d2f404a0f7",
+    "inventory_source_sha256": [
+      "9c4d79ee6d637e364a72a5839a5480b0f088fae59ab41f74f83c83d2f404a0f7"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "ec325e46a9b0e5f64930ee84c7d472e3f7428d52",
+    "pinned_content_sha256": "9c4d79ee6d637e364a72a5839a5480b0f088fae59ab41f74f83c83d2f404a0f7",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/Native/Desktop/SCard/SCardScope.cs",
+    "current_raw_sha256": "99da3cae5cca44385305c5c34771f16153c6153a021b49f7355cad4fed57db4c",
+    "inventory_source_sha256": [
+      "99da3cae5cca44385305c5c34771f16153c6153a021b49f7355cad4fed57db4c"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "65a1eda76032f6283a0aec819676917aee57008b",
+    "pinned_content_sha256": "99da3cae5cca44385305c5c34771f16153c6153a021b49f7355cad4fed57db4c",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/Native/Desktop/SCard/SCardShare.cs",
+    "current_raw_sha256": "0e8066a0fdcda044b0aa45c8594c4299e21e425c5b63f8b795e34362c2167ed5",
+    "inventory_source_sha256": [
+      "0e8066a0fdcda044b0aa45c8594c4299e21e425c5b63f8b795e34362c2167ed5"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "8b1af00cf69ea4211e7df95513021a114eec5fd4",
+    "pinned_content_sha256": "0e8066a0fdcda044b0aa45c8594c4299e21e425c5b63f8b795e34362c2167ed5",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/Native/Desktop/SCard/SCardState.cs",
+    "current_raw_sha256": "998ff18f922bf0e0d82ba5a1bb93ec7fb5b59783377a857af052072af40f7cb2",
+    "inventory_source_sha256": [
+      "998ff18f922bf0e0d82ba5a1bb93ec7fb5b59783377a857af052072af40f7cb2"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "623de9e85d9d4c86596b86c68ac842787beb9de3",
+    "pinned_content_sha256": "998ff18f922bf0e0d82ba5a1bb93ec7fb5b59783377a857af052072af40f7cb2",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/Native/Desktop/SCard/SCardStatus.cs",
+    "current_raw_sha256": "d5ce26e04eb382cbe5bfa4534f7eea6cf74d9fe65d7985e86c1c87eb2c36fbe8",
+    "inventory_source_sha256": [
+      "d5ce26e04eb382cbe5bfa4534f7eea6cf74d9fe65d7985e86c1c87eb2c36fbe8"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "aa327c189b5c6da2f04467dd41d93ab0d08231c4",
+    "pinned_content_sha256": "d5ce26e04eb382cbe5bfa4534f7eea6cf74d9fe65d7985e86c1c87eb2c36fbe8",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/Native/Libraries.cs",
+    "current_raw_sha256": "c121dbe7f1230571f4a98021fbf8e6e1fa34b660814668d672a0ed11baac7187",
+    "inventory_source_sha256": [
+      "c121dbe7f1230571f4a98021fbf8e6e1fa34b660814668d672a0ed11baac7187"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "5f87aee4afdb68d6a83cbe24cae6e30cd02f885e",
+    "pinned_content_sha256": "c121dbe7f1230571f4a98021fbf8e6e1fa34b660814668d672a0ed11baac7187",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/Native/NativeMethods.cs",
+    "current_raw_sha256": "07a4cbbbf3fee93d1875f3b839261d85ed31de1a0a41f968955f1e2559197de9",
+    "inventory_source_sha256": [
+      "07a4cbbbf3fee93d1875f3b839261d85ed31de1a0a41f968955f1e2559197de9"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "4e477e9159e7e25b6649943ae5c7ca1b3ed0a5e8",
+    "pinned_content_sha256": "07a4cbbbf3fee93d1875f3b839261d85ed31de1a0a41f968955f1e2559197de9",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/Native/PlatformApiException.cs",
+    "current_raw_sha256": "46335d832e3bae749c94517c0330a56398fa77cb9fbf1501bbf2b51fdf67d60c",
+    "inventory_source_sha256": [
+      "46335d832e3bae749c94517c0330a56398fa77cb9fbf1501bbf2b51fdf67d60c"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "7b3303e23520de2eaad5e4d085b4a92ba9c060e8",
+    "pinned_content_sha256": "46335d832e3bae749c94517c0330a56398fa77cb9fbf1501bbf2b51fdf67d60c",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/Native/SafeLibraryHandle.cs",
+    "current_raw_sha256": "8aa7e52a227b70ba37628837c94f5d16110e56f893d4daa0c7941f270ea272ba",
+    "inventory_source_sha256": [
+      "8aa7e52a227b70ba37628837c94f5d16110e56f893d4daa0c7941f270ea272ba"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "56c6bac466c5d1f73a3f69c1a72698112c6bc8b0",
+    "pinned_content_sha256": "8aa7e52a227b70ba37628837c94f5d16110e56f893d4daa0c7941f270ea272ba",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/Native/SdkPlatform.cs",
+    "current_raw_sha256": "622cf7b4c0eb2481fd996628631c963fe11c9b177ae590ced683cfffbf208ce1",
+    "inventory_source_sha256": [
+      "622cf7b4c0eb2481fd996628631c963fe11c9b177ae590ced683cfffbf208ce1"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "e00df837593ca304082994ce108158f703665703",
+    "pinned_content_sha256": "622cf7b4c0eb2481fd996628631c963fe11c9b177ae590ced683cfffbf208ce1",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/Native/SdkPlatformInfo.cs",
+    "current_raw_sha256": "8a81d80ba13d76e9a43b5aca1abfcb8246d7e1b48eddd6464136b21ec9516008",
+    "inventory_source_sha256": [
+      "8a81d80ba13d76e9a43b5aca1abfcb8246d7e1b48eddd6464136b21ec9516008"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "dcf263772c5b63530103f83163789781d5981e3f",
+    "pinned_content_sha256": "8a81d80ba13d76e9a43b5aca1abfcb8246d7e1b48eddd6464136b21ec9516008",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/Native/UnmanagedDynamicLibrary.cs",
+    "current_raw_sha256": "fdcbc325b24c703ff5be805d1cd62f248698688d4f91440a5c106f071412da02",
+    "inventory_source_sha256": [
+      "fdcbc325b24c703ff5be805d1cd62f248698688d4f91440a5c106f071412da02"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "85e7d99fed8cec193fdc93a5f74a9114768a778a",
+    "pinned_content_sha256": "fdcbc325b24c703ff5be805d1cd62f248698688d4f91440a5c106f071412da02",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/Native/Windows/Cfgmgr32/Cfgmgr32.DeviceProperties.cs",
+    "current_raw_sha256": "bd7b8c612cc2dd47fbc3786338ebc013f694b22a7b0b0deaa14dcdf6e206869e",
+    "inventory_source_sha256": [
+      "bd7b8c612cc2dd47fbc3786338ebc013f694b22a7b0b0deaa14dcdf6e206869e"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "48483668c1d40367fe801f49ed98bf743a6e9350",
+    "pinned_content_sha256": "bd7b8c612cc2dd47fbc3786338ebc013f694b22a7b0b0deaa14dcdf6e206869e",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/Native/Windows/Cfgmgr32/Cfgmgr32.Interop.cs",
+    "current_raw_sha256": "1f00cddacec3a4e81253b36af977e6cd27c99863613809ebdc191de5642b63cf",
+    "inventory_source_sha256": [
+      "1f00cddacec3a4e81253b36af977e6cd27c99863613809ebdc191de5642b63cf"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "b7d7218e9f9f0cb277c90e82f3822237c791baa3",
+    "pinned_content_sha256": "1f00cddacec3a4e81253b36af977e6cd27c99863613809ebdc191de5642b63cf",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/Native/Windows/Cfgmgr32/CmClassGuid.cs",
+    "current_raw_sha256": "d9509d4718dc5d1bec81cba059d18453b766fb103b63c3b8872b3fd8626c90d1",
+    "inventory_source_sha256": [
+      "d9509d4718dc5d1bec81cba059d18453b766fb103b63c3b8872b3fd8626c90d1"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "9cf2e189ad8c54f7a764b918dacea35559a09882",
+    "pinned_content_sha256": "d9509d4718dc5d1bec81cba059d18453b766fb103b63c3b8872b3fd8626c90d1",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/Native/Windows/Cfgmgr32/CmDevice.cs",
+    "current_raw_sha256": "4382ccc72ed8db4bcd2987243f1dee0e6b8a2b27e9cfe01b73935d5a7c25593b",
+    "inventory_source_sha256": [
+      "4382ccc72ed8db4bcd2987243f1dee0e6b8a2b27e9cfe01b73935d5a7c25593b"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "16ee112666e42b65986aec57d174d9250701e682",
+    "pinned_content_sha256": "4382ccc72ed8db4bcd2987243f1dee0e6b8a2b27e9cfe01b73935d5a7c25593b",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/Native/Windows/Cfgmgr32/CmDeviceProperty.cs",
+    "current_raw_sha256": "c9c5fe3bbd451de4849a056102da80caa10063db62a433dde04a250b3fc841fa",
+    "inventory_source_sha256": [
+      "c9c5fe3bbd451de4849a056102da80caa10063db62a433dde04a250b3fc841fa"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "eca75168d9f3229347c2f1ee014ead46ca559d9e",
+    "pinned_content_sha256": "c9c5fe3bbd451de4849a056102da80caa10063db62a433dde04a250b3fc841fa",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/Native/Windows/Cfgmgr32/CmInterfaceGuid.cs",
+    "current_raw_sha256": "3a9a61ff22d7f35b7b26c585c8b5639f3468957f4fbaae855dce88e3b0a81cf4",
+    "inventory_source_sha256": [
+      "3a9a61ff22d7f35b7b26c585c8b5639f3468957f4fbaae855dce88e3b0a81cf4"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "2cba4551933545d3c192accf7a9ce6a9c734001a",
+    "pinned_content_sha256": "3a9a61ff22d7f35b7b26c585c8b5639f3468957f4fbaae855dce88e3b0a81cf4",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/Native/Windows/Cfgmgr32/CmPropertyAccessHelper.cs",
+    "current_raw_sha256": "efb041a7501f8210d2e43179e848678c67b7ede7e5088f2b18f168c6c6ad6191",
+    "inventory_source_sha256": [
+      "efb041a7501f8210d2e43179e848678c67b7ede7e5088f2b18f168c6c6ad6191"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "a8dcb8b820f3f8b4bbf6b7807ff019c69417660b",
+    "pinned_content_sha256": "efb041a7501f8210d2e43179e848678c67b7ede7e5088f2b18f168c6c6ad6191",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/Native/Windows/HidD/HidD.Interop.cs",
+    "current_raw_sha256": "3f86e8d36cc6cf4ec379b9674c3a77954c778fff578a1f51703e71a40d5c8b5e",
+    "inventory_source_sha256": [
+      "3f86e8d36cc6cf4ec379b9674c3a77954c778fff578a1f51703e71a40d5c8b5e"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "3822dfb9e3fd95476b802d550d1cf11ee58cc496",
+    "pinned_content_sha256": "3f86e8d36cc6cf4ec379b9674c3a77954c778fff578a1f51703e71a40d5c8b5e",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/Native/Windows/HidD/IWindowsHidReportAccess.cs",
+    "current_raw_sha256": "68534126b0f628908709603c664949504d3076ac2aa572c882873564ad65cc1b",
+    "inventory_source_sha256": [
+      "68534126b0f628908709603c664949504d3076ac2aa572c882873564ad65cc1b"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "aaf49db2df96961f748e71fb4d8cbe756748f0a9",
+    "pinned_content_sha256": "68534126b0f628908709603c664949504d3076ac2aa572c882873564ad65cc1b",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/Native/Windows/HidD/WindowsHidReportAccess.cs",
+    "current_raw_sha256": "0c877aeab9d9cb6134ce2fbf50197a16efde08c47fcd9ed7c04bd7e4c9e3a1e7",
+    "inventory_source_sha256": [
+      "0c877aeab9d9cb6134ce2fbf50197a16efde08c47fcd9ed7c04bd7e4c9e3a1e7"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "2f5dd9c7e975f9799c09dcf5c3b8d5d46bbbe0ab",
+    "pinned_content_sha256": "0c877aeab9d9cb6134ce2fbf50197a16efde08c47fcd9ed7c04bd7e4c9e3a1e7",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/Native/Windows/Interop.Libraries.cs",
+    "current_raw_sha256": "700f5dcca7939442c98b7197b7a4118ea4bba88f09fd49d4f622c29e569eaaf5",
+    "inventory_source_sha256": [
+      "700f5dcca7939442c98b7197b7a4118ea4bba88f09fd49d4f622c29e569eaaf5"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "4cccc52f3e88e7baa516217d3a2bcd7702759575",
+    "pinned_content_sha256": "700f5dcca7939442c98b7197b7a4118ea4bba88f09fd49d4f622c29e569eaaf5",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/Native/Windows/Kernel32/Kernel32.Interop.cs",
+    "current_raw_sha256": "026aedd5637b957f32e9664b67cf9a5dc07f1860ce3b4cace8f09fc09e66116b",
+    "inventory_source_sha256": [
+      "026aedd5637b957f32e9664b67cf9a5dc07f1860ce3b4cace8f09fc09e66116b"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "a0eac346ec5015167cbc94a32328a3d2b524b27c",
+    "pinned_content_sha256": "026aedd5637b957f32e9664b67cf9a5dc07f1860ce3b4cace8f09fc09e66116b",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/Native/Windows/WinSCard/WinSCard.Interop.cs",
+    "current_raw_sha256": "aea659a17b7e754e4486ee8071a966af540d838cb85eff96809f5b67d429eef8",
+    "inventory_source_sha256": [
+      "aea659a17b7e754e4486ee8071a966af540d838cb85eff96809f5b67d429eef8"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "eadf56639e8135a38f3561a82f5fc3f67731ec34",
+    "pinned_content_sha256": "aea659a17b7e754e4486ee8071a966af540d838cb85eff96809f5b67d429eef8",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/Native/Windows/WindowsUnmanagedDynamicLibrary.cs",
+    "current_raw_sha256": "7ccecec739bccda1c8d30eaf12021732861a79cdc79aba6bcb23389fefb4f803",
+    "inventory_source_sha256": [
+      "7ccecec739bccda1c8d30eaf12021732861a79cdc79aba6bcb23389fefb4f803"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "9fc6bd54e648f5a488019b9240f7f0220be02838",
+    "pinned_content_sha256": "7ccecec739bccda1c8d30eaf12021732861a79cdc79aba6bcb23389fefb4f803",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/PublicAPI.Shipped.txt",
+    "current_raw_sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd",
+    "inventory_source_sha256": [
+      "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "7dc5c58110bfa8486c4ddb75c89a99655c1adcf8",
+    "pinned_content_sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/PublicAPI.Unshipped.txt",
+    "current_raw_sha256": "e993cf43c205ac7c8abc62afd1065e5acb16f7c1b7d6b1012f4954abe20dce76",
+    "inventory_source_sha256": [
+      "e993cf43c205ac7c8abc62afd1065e5acb16f7c1b7d6b1012f4954abe20dce76"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "e16b5c9b2127e5e48056919d361b0821b49b40af",
+    "pinned_content_sha256": "e993cf43c205ac7c8abc62afd1065e5acb16f7c1b7d6b1012f4954abe20dce76",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/ServiceLocator.cs",
+    "current_raw_sha256": "7f904c9f3a6e4bbe8a26b0fbe9b97c031ff7c4c3e3b868a7ffae62e84a435c10",
+    "inventory_source_sha256": [
+      "7f904c9f3a6e4bbe8a26b0fbe9b97c031ff7c4c3e3b868a7ffae62e84a435c10"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "1b07426a9243de4e3fa1e9805281e9a144a11fdc",
+    "pinned_content_sha256": "7f904c9f3a6e4bbe8a26b0fbe9b97c031ff7c4c3e3b868a7ffae62e84a435c10",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/Transports/Hid/FindHidInterfaces.cs",
+    "current_raw_sha256": "6405834078fb3e05c7e0e0fd42216c66b56e0d0329f7f0f516e42a2befb3a97a",
+    "inventory_source_sha256": [
+      "6405834078fb3e05c7e0e0fd42216c66b56e0d0329f7f0f516e42a2befb3a97a"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "f9b833c578e8a498bb991672e42ac67c78c6740c",
+    "pinned_content_sha256": "6405834078fb3e05c7e0e0fd42216c66b56e0d0329f7f0f516e42a2befb3a97a",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/Transports/Hid/HidConstants.cs",
+    "current_raw_sha256": "2b643689268d3762ed3c01321c1bdee6632b58237ef631d7bceeaeff3cb1ecd8",
+    "inventory_source_sha256": [
+      "2b643689268d3762ed3c01321c1bdee6632b58237ef631d7bceeaeff3cb1ecd8"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "5bdbc598f5165d6a2138197bd1f28bb303aebb38",
+    "pinned_content_sha256": "2b643689268d3762ed3c01321c1bdee6632b58237ef631d7bceeaeff3cb1ecd8",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/Transports/Hid/HidDescriptorInfo.cs",
+    "current_raw_sha256": "85db44055bfab0358be9da0e5b1b9668b69d9d98cb96ec8b98253186e5df962a",
+    "inventory_source_sha256": [
+      "85db44055bfab0358be9da0e5b1b9668b69d9d98cb96ec8b98253186e5df962a"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "ff113c4f164971ab984139f27352dca8089394a2",
+    "pinned_content_sha256": "85db44055bfab0358be9da0e5b1b9668b69d9d98cb96ec8b98253186e5df962a",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/Transports/Hid/HidDeviceChangeKind.cs",
+    "current_raw_sha256": "182f29d10eb30d432bb5f1cb8fa6c61093a1dc3eae65dc184eb93abfe472b0d0",
+    "inventory_source_sha256": [
+      "182f29d10eb30d432bb5f1cb8fa6c61093a1dc3eae65dc184eb93abfe472b0d0"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "04ae5c647be61310003777a25ea0fbab6dd76a51",
+    "pinned_content_sha256": "182f29d10eb30d432bb5f1cb8fa6c61093a1dc3eae65dc184eb93abfe472b0d0",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/Transports/Hid/HidDeviceListener.cs",
+    "current_raw_sha256": "72446dff788a056712d83d09926190bbd9a8c407a8b9146403568362180eca5a",
+    "inventory_source_sha256": [
+      "72446dff788a056712d83d09926190bbd9a8c407a8b9146403568362180eca5a"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "ac3769003c1208244f06699fb78e9ad3e1073f87",
+    "pinned_content_sha256": "72446dff788a056712d83d09926190bbd9a8c407a8b9146403568362180eca5a",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/Transports/Hid/HidDeviceRescanHint.cs",
+    "current_raw_sha256": "1349c9efa406758ff5939b8a0b412b953ff1004c971eade10fd89b1c92cda77a",
+    "inventory_source_sha256": [
+      "1349c9efa406758ff5939b8a0b412b953ff1004c971eade10fd89b1c92cda77a"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "cefd46fea26ae2e93e1d2ff1e062c17ccf53fb91",
+    "pinned_content_sha256": "1349c9efa406758ff5939b8a0b412b953ff1004c971eade10fd89b1c92cda77a",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/Transports/Hid/HidInterfaceClassifier.cs",
+    "current_raw_sha256": "7747646b872cbfeebb6248efcf6e59877bb6b5d77932c34541374002c8eeb5e2",
+    "inventory_source_sha256": [
+      "7747646b872cbfeebb6248efcf6e59877bb6b5d77932c34541374002c8eeb5e2"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "cb70b87f00ce94f6da9a44767d058effaac177c0",
+    "pinned_content_sha256": "7747646b872cbfeebb6248efcf6e59877bb6b5d77932c34541374002c8eeb5e2",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/Transports/Hid/HidInterfaceType.cs",
+    "current_raw_sha256": "d9f86c6ab4c4d64b702f1fc4c7c719bed3c114cdbd7e59f5497582de737da353",
+    "inventory_source_sha256": [
+      "d9f86c6ab4c4d64b702f1fc4c7c719bed3c114cdbd7e59f5497582de737da353"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "e7ef8fe1f58b3d7dddb23ca30085eddd69ec2001",
+    "pinned_content_sha256": "d9f86c6ab4c4d64b702f1fc4c7c719bed3c114cdbd7e59f5497582de737da353",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/Transports/Hid/HidReportDescriptorReader.cs",
+    "current_raw_sha256": "c3ae8800dc34fd6118768ef608fbc40e84a06ece45ff9b4aa3f6de09c50eb264",
+    "inventory_source_sha256": [
+      "c3ae8800dc34fd6118768ef608fbc40e84a06ece45ff9b4aa3f6de09c50eb264"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "eadd5f1ffd5bbd2f796d2f4f4e9fd9fb055f16a4",
+    "pinned_content_sha256": "c3ae8800dc34fd6118768ef608fbc40e84a06ece45ff9b4aa3f6de09c50eb264",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/Transports/Hid/HidReportType.cs",
+    "current_raw_sha256": "6b53d74fb98a4d703b84439ed5a01a3ec1cfdf0376f66344ca9a77277d384d57",
+    "inventory_source_sha256": [
+      "6b53d74fb98a4d703b84439ed5a01a3ec1cfdf0376f66344ca9a77277d384d57"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "20b4cb52d27cb518f6f13709b6c036c77497c422",
+    "pinned_content_sha256": "6b53d74fb98a4d703b84439ed5a01a3ec1cfdf0376f66344ca9a77277d384d57",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/Transports/Hid/IHidConnection.cs",
+    "current_raw_sha256": "5f611f99e26910690b40bbddc68875a22084b9e11462fc7407eaffacc8952f2c",
+    "inventory_source_sha256": [
+      "5f611f99e26910690b40bbddc68875a22084b9e11462fc7407eaffacc8952f2c"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "e38be11106bfa7c3940f98c735dfcc3ca4e61067",
+    "pinned_content_sha256": "5f611f99e26910690b40bbddc68875a22084b9e11462fc7407eaffacc8952f2c",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/Transports/Hid/IHidInterface.cs",
+    "current_raw_sha256": "a8991dbb6627f6fa24476fb1414b6d58d73c6c6697fce406b041d62319e8f647",
+    "inventory_source_sha256": [
+      "a8991dbb6627f6fa24476fb1414b6d58d73c6c6697fce406b041d62319e8f647"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "d81ed3e4c5c90a67520568f98b0341847261f679",
+    "pinned_content_sha256": "a8991dbb6627f6fa24476fb1414b6d58d73c6c6697fce406b041d62319e8f647",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/Transports/Hid/IOtpHidConnection.cs",
+    "current_raw_sha256": "fe9e2e88d6657dd21e15a335fde9f679d1a2f9025e1f65df24d35b06accb78cf",
+    "inventory_source_sha256": [
+      "fe9e2e88d6657dd21e15a335fde9f679d1a2f9025e1f65df24d35b06accb78cf"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "29899ed1cc7fc1889ebb88afcdbfe9c43ab83f91",
+    "pinned_content_sha256": "fe9e2e88d6657dd21e15a335fde9f679d1a2f9025e1f65df24d35b06accb78cf",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/Transports/Hid/Keyboard/HidCodeTranslator.ModHex.cs",
+    "current_raw_sha256": "f31205b72ec5b7591b0fb24a1a499c54b9fa81a9323e8c0d3cebd112247f4006",
+    "inventory_source_sha256": [
+      "f31205b72ec5b7591b0fb24a1a499c54b9fa81a9323e8c0d3cebd112247f4006"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "d8823a807405532cda464d26812c53240df4fe92",
+    "pinned_content_sha256": "f31205b72ec5b7591b0fb24a1a499c54b9fa81a9323e8c0d3cebd112247f4006",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/Transports/Hid/Keyboard/HidCodeTranslator.cs",
+    "current_raw_sha256": "f2664b4d2f50d043a45514e3e495c66bd333376e1347e294a4fc3a973def8ca9",
+    "inventory_source_sha256": [
+      "f2664b4d2f50d043a45514e3e495c66bd333376e1347e294a4fc3a973def8ca9"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "bf8e49bf26b130d55cef5e7f6d530ab18856c693",
+    "pinned_content_sha256": "f2664b4d2f50d043a45514e3e495c66bd333376e1347e294a4fc3a973def8ca9",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/Transports/Hid/Keyboard/HidCodeTranslator.de_DE.cs",
+    "current_raw_sha256": "1021617c0fcd66702ec8fd98d7cfefa1cb31543e5061060f518e75109de50338",
+    "inventory_source_sha256": [
+      "1021617c0fcd66702ec8fd98d7cfefa1cb31543e5061060f518e75109de50338"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "9e0a7de7c444b5812d7444925937e2439ecaab22",
+    "pinned_content_sha256": "1021617c0fcd66702ec8fd98d7cfefa1cb31543e5061060f518e75109de50338",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/Transports/Hid/Keyboard/HidCodeTranslator.en_UK.cs",
+    "current_raw_sha256": "559ac0cfbb2242fd25e62719cbd7b82a8badd3b5a65b3273ae6c085be1b0c967",
+    "inventory_source_sha256": [
+      "559ac0cfbb2242fd25e62719cbd7b82a8badd3b5a65b3273ae6c085be1b0c967"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "6729204025193cf62531b237caa5bcb298b5c5a4",
+    "pinned_content_sha256": "559ac0cfbb2242fd25e62719cbd7b82a8badd3b5a65b3273ae6c085be1b0c967",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/Transports/Hid/Keyboard/HidCodeTranslator.en_US.cs",
+    "current_raw_sha256": "64a1e550620a4b1e1bd6e73569047c604d64e10ad162b435077f12061692166c",
+    "inventory_source_sha256": [
+      "64a1e550620a4b1e1bd6e73569047c604d64e10ad162b435077f12061692166c"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "ed033642e505b936278dc04ffbb522d7f2c19eaa",
+    "pinned_content_sha256": "64a1e550620a4b1e1bd6e73569047c604d64e10ad162b435077f12061692166c",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/Transports/Hid/Keyboard/HidCodeTranslator.es_US.cs",
+    "current_raw_sha256": "ff7bb5961c79124686633c1444438d86d044c24b5d40c71c1568f70c167a7098",
+    "inventory_source_sha256": [
+      "ff7bb5961c79124686633c1444438d86d044c24b5d40c71c1568f70c167a7098"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "62d3caba251091e6662bcad39f57850776d73d6a",
+    "pinned_content_sha256": "ff7bb5961c79124686633c1444438d86d044c24b5d40c71c1568f70c167a7098",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/Transports/Hid/Keyboard/HidCodeTranslator.fr_FR.cs",
+    "current_raw_sha256": "7e2a8855870845062e7de34955452a18977f35b61a91053ae1b7d616b92ad625",
+    "inventory_source_sha256": [
+      "7e2a8855870845062e7de34955452a18977f35b61a91053ae1b7d616b92ad625"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "c3cc69c7e69eceb7a2e97d6aacad9724a6417b18",
+    "pinned_content_sha256": "7e2a8855870845062e7de34955452a18977f35b61a91053ae1b7d616b92ad625",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/Transports/Hid/Keyboard/HidCodeTranslator.it_IT.cs",
+    "current_raw_sha256": "c632fbf6a21c6d65b9a88e5d2585fcb1604d171b635d87d396da77d06430d616",
+    "inventory_source_sha256": [
+      "c632fbf6a21c6d65b9a88e5d2585fcb1604d171b635d87d396da77d06430d616"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "45f093ac35b3cee66457b1890160a2419b6a638f",
+    "pinned_content_sha256": "c632fbf6a21c6d65b9a88e5d2585fcb1604d171b635d87d396da77d06430d616",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/Transports/Hid/Keyboard/HidCodeTranslator.sv_SE.cs",
+    "current_raw_sha256": "ff7c91dbc3691a490acb16f81b957ab9bee7ca728dff71c35e02a825982855a3",
+    "inventory_source_sha256": [
+      "ff7c91dbc3691a490acb16f81b957ab9bee7ca728dff71c35e02a825982855a3"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "cf9b341d60167bc8c27c134cfe8084678632a3d7",
+    "pinned_content_sha256": "ff7c91dbc3691a490acb16f81b957ab9bee7ca728dff71c35e02a825982855a3",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/Transports/Hid/Keyboard/KeyboardLayout.cs",
+    "current_raw_sha256": "5db2356490d6a6f6e4380fc20055d3116d687d597d42625ee07ce094b82c3420",
+    "inventory_source_sha256": [
+      "5db2356490d6a6f6e4380fc20055d3116d687d597d42625ee07ce094b82c3420"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "231baa2e2838ae1a36aa52f40837e96675fe2a30",
+    "pinned_content_sha256": "5db2356490d6a6f6e4380fc20055d3116d687d597d42625ee07ce094b82c3420",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/Transports/Hid/Windows/WindowsHidDeviceListener.cs",
+    "current_raw_sha256": "a46ba2ccf6bf9d4de559e472f074af6e5caaff9cf446e57fc827e6ef37fa3d4f",
+    "inventory_source_sha256": [
+      "a46ba2ccf6bf9d4de559e472f074af6e5caaff9cf446e57fc827e6ef37fa3d4f"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "b4a5eb7d414f99d98e7c5dad8dd343a729a91d2d",
+    "pinned_content_sha256": "a46ba2ccf6bf9d4de559e472f074af6e5caaff9cf446e57fc827e6ef37fa3d4f",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/Transports/Hid/Windows/WindowsHidFeatureReportConnection.cs",
+    "current_raw_sha256": "4ca6b498e4f7254873bc205f879fe829aac9a5e58220f02bfedc58a73b436bdb",
+    "inventory_source_sha256": [
+      "4ca6b498e4f7254873bc205f879fe829aac9a5e58220f02bfedc58a73b436bdb"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "998c6a1cf97b6dc996a287b30de456ad5e380e6b",
+    "pinned_content_sha256": "4ca6b498e4f7254873bc205f879fe829aac9a5e58220f02bfedc58a73b436bdb",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/Transports/Hid/Windows/WindowsHidIOReportConnection.cs",
+    "current_raw_sha256": "510af458af29afaa8d1f2cadfc1fea54380836ac96d639cdd0d9cbe5251d4e0d",
+    "inventory_source_sha256": [
+      "510af458af29afaa8d1f2cadfc1fea54380836ac96d639cdd0d9cbe5251d4e0d"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "1a5549d4d0be10c1df8acbc2f99e188937031a92",
+    "pinned_content_sha256": "510af458af29afaa8d1f2cadfc1fea54380836ac96d639cdd0d9cbe5251d4e0d",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/Transports/Hid/Windows/WindowsHidInterface.cs",
+    "current_raw_sha256": "a8ef95e05b2dfb58b30df839f73234130a5b082cf0fe822404367d99238ce1e6",
+    "inventory_source_sha256": [
+      "a8ef95e05b2dfb58b30df839f73234130a5b082cf0fe822404367d99238ce1e6"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "b412926cdb83bc25525d58f7e46235507861408d",
+    "pinned_content_sha256": "a8ef95e05b2dfb58b30df839f73234130a5b082cf0fe822404367d99238ce1e6",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/Transports/IDeviceChangeListener.cs",
+    "current_raw_sha256": "581257e71cb6f5fa4a89fe81816db6c2b7cc55a8d2a75a3d90c6bd7903261a3c",
+    "inventory_source_sha256": [
+      "581257e71cb6f5fa4a89fe81816db6c2b7cc55a8d2a75a3d90c6bd7903261a3c"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "5cb88c9f42edde5c5d55a386ce0c0d732657b4fa",
+    "pinned_content_sha256": "581257e71cb6f5fa4a89fe81816db6c2b7cc55a8d2a75a3d90c6bd7903261a3c",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/src/Yubico.YubiKit.Core.csproj",
+    "current_raw_sha256": "fd04737837a54845a15f034fc1a79c57618b06ed84e26cbf4400880b26676d76",
+    "inventory_source_sha256": [
+      "fd04737837a54845a15f034fc1a79c57618b06ed84e26cbf4400880b26676d76"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "3a254225f677786feb76b4d1d0deac7cb3f2bae4",
+    "pinned_content_sha256": "091a0365c45a105d928da08ca457f722af5cde4c933d8d65832f7095d81cac0b",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/tests/CLAUDE.md",
+    "current_raw_sha256": "1e2b5f35b5389022368b664cb3334b8dafd9f79b6d3397b10aaf858ce0f33deb",
+    "inventory_source_sha256": [
+      "1e2b5f35b5389022368b664cb3334b8dafd9f79b6d3397b10aaf858ce0f33deb"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "791650347d18c84b4f4f4322e3efbe03bcab91b0",
+    "pinned_content_sha256": "1e2b5f35b5389022368b664cb3334b8dafd9f79b6d3397b10aaf858ce0f33deb",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/IntegrationTestBase.cs",
+    "current_raw_sha256": "bb7f9ca65d4e78bcc1a0bf9464ace85ab2ddfa4eecc71bf6269c8c6268f597c0",
+    "inventory_source_sha256": [
+      "bb7f9ca65d4e78bcc1a0bf9464ace85ab2ddfa4eecc71bf6269c8c6268f597c0"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "bfe14fd74ceba67bde4b90539d4e7ad48a91462c",
+    "pinned_content_sha256": "bb7f9ca65d4e78bcc1a0bf9464ace85ab2ddfa4eecc71bf6269c8c6268f597c0",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Transports/Hid/HidDeviceListenerIntegrationTests.cs",
+    "current_raw_sha256": "5bd3eaa5b245f3c287d65150a4fd5ac0fb2fc52a1b3855d5bd5031c725879a65",
+    "inventory_source_sha256": [
+      "5bd3eaa5b245f3c287d65150a4fd5ac0fb2fc52a1b3855d5bd5031c725879a65"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "5b6f435f094cfc51183bcbaa41664b7917f4cb71",
+    "pinned_content_sha256": "5bd3eaa5b245f3c287d65150a4fd5ac0fb2fc52a1b3855d5bd5031c725879a65",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Transports/Hid/HidEnumerationTests.cs",
+    "current_raw_sha256": "a874d29ea319ad0f50ccdff5557e1d3a28a61bff60323d09592422e40bfdec30",
+    "inventory_source_sha256": [
+      "a874d29ea319ad0f50ccdff5557e1d3a28a61bff60323d09592422e40bfdec30"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "9f0e1bcb150927fff79905eddbe641939ef3f100",
+    "pinned_content_sha256": "a874d29ea319ad0f50ccdff5557e1d3a28a61bff60323d09592422e40bfdec30",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/Yubico.YubiKit.Core.IntegrationTests.csproj",
+    "current_raw_sha256": "793083dd180e464019bb614187ba24a6b71332265bff8bc06586e594fed8a608",
+    "inventory_source_sha256": [
+      "793083dd180e464019bb614187ba24a6b71332265bff8bc06586e594fed8a608"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "818ef474a612ade0bf1da572639394af1e91f635",
+    "pinned_content_sha256": "7f8dcb9f5340e8acb3fe39e9d6a8a3219ff78b991300dd9221e130e9447d8a5c",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.IntegrationTests/xunit.runner.json",
+    "current_raw_sha256": "cdad8a2da160035ca40f70b9b59693a661a8d926f464ecf252b25707f7f7235c",
+    "inventory_source_sha256": [
+      "cdad8a2da160035ca40f70b9b59693a661a8d926f464ecf252b25707f7f7235c"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "c31558944b98b44bd18a9dc93fc5e86315c91bc7",
+    "pinned_content_sha256": "cdad8a2da160035ca40f70b9b59693a661a8d926f464ecf252b25707f7f7235c",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/ChildProcessTestRunner.cs",
+    "current_raw_sha256": "6c9b1302795903c9880e619c12e05d1bb7353781d0372cac7e549dc69ac2ff99",
+    "inventory_source_sha256": [
+      "6c9b1302795903c9880e619c12e05d1bb7353781d0372cac7e549dc69ac2ff99"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "77093cb4666060b4d9a4d41bb3c41586a9894c36",
+    "pinned_content_sha256": "6c9b1302795903c9880e619c12e05d1bb7353781d0372cac7e549dc69ac2ff99",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/AuditV2/CoreAuditReproTests.cs",
+    "current_raw_sha256": "926ce7b360e09e8e42479962eaedbfabcb6aa8da46cfccccee088f6a8d305feb",
+    "inventory_source_sha256": [
+      "926ce7b360e09e8e42479962eaedbfabcb6aa8da46cfccccee088f6a8d305feb"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "913634756edea575c21363f6cd2f19edbc0c773a",
+    "pinned_content_sha256": "926ce7b360e09e8e42479962eaedbfabcb6aa8da46cfccccee088f6a8d305feb",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/AdapterContractRegistry.cs",
+    "current_raw_sha256": "847bbe90caa0cdb507141a5d193c3af67ae1dc0b788ba73304c45fb5da86c32d",
+    "inventory_source_sha256": [
+      "847bbe90caa0cdb507141a5d193c3af67ae1dc0b788ba73304c45fb5da86c32d"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "a981318751fefe6d793179d94edeb9ed86166d55",
+    "pinned_content_sha256": "847bbe90caa0cdb507141a5d193c3af67ae1dc0b788ba73304c45fb5da86c32d",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/AdapterContractRegistryTests.cs",
+    "current_raw_sha256": "7b2849955ecfd57c61ad61c438994615b680445b6abee350a861ef7955a148c5",
+    "inventory_source_sha256": [
+      "7b2849955ecfd57c61ad61c438994615b680445b6abee350a861ef7955a148c5"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "b16e0dd9b79adbad03abc78396078aa8d20c0e22",
+    "pinned_content_sha256": "7b2849955ecfd57c61ad61c438994615b680445b6abee350a861ef7955a148c5",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/BoundaryInventoryTests.cs",
+    "current_raw_sha256": "e46904fcfd3b69e78358de905917bac4fc5796e89aee5ef277b47ccc4fe242cb",
+    "inventory_source_sha256": [
+      "e46904fcfd3b69e78358de905917bac4fc5796e89aee5ef277b47ccc4fe242cb"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "1eeaa3350df810eccd09b1c1ba2e1f309ebc0b9e",
+    "pinned_content_sha256": "e46904fcfd3b69e78358de905917bac4fc5796e89aee5ef277b47ccc4fe242cb",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/BoundaryManifest.cs",
+    "current_raw_sha256": "49ac596611527a2d57b83ee3fad39fb44c77381c451faa1ccf90ed6754c7a1f7",
+    "inventory_source_sha256": [
+      "49ac596611527a2d57b83ee3fad39fb44c77381c451faa1ccf90ed6754c7a1f7"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "0f1b333416c8df770f96aa5771749199a434bd6f",
+    "pinned_content_sha256": "49ac596611527a2d57b83ee3fad39fb44c77381c451faa1ccf90ed6754c7a1f7",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/BoundaryScanner.cs",
+    "current_raw_sha256": "e9f5a1ef0e80aff32cba6d3d75d5625d95937d7ae14508c64a7126de5091d33b",
+    "inventory_source_sha256": [
+      "e9f5a1ef0e80aff32cba6d3d75d5625d95937d7ae14508c64a7126de5091d33b"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "4c9752e1c9301cc6a844cea29867079197e82cce",
+    "pinned_content_sha256": "e9f5a1ef0e80aff32cba6d3d75d5625d95937d7ae14508c64a7126de5091d33b",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/CrossLayerAcceptanceTests.cs",
+    "current_raw_sha256": "a775510040aff92d84baf5ff427161ad4ed2921344f6d3aa7a0ab42c2de0870c",
+    "inventory_source_sha256": [
+      "a775510040aff92d84baf5ff427161ad4ed2921344f6d3aa7a0ab42c2de0870c"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "47125d0f46c4f1546b8049460a58eda652ffdf47",
+    "pinned_content_sha256": "a775510040aff92d84baf5ff427161ad4ed2921344f6d3aa7a0ab42c2de0870c",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/MigrationDiagnosticsTests.cs",
+    "current_raw_sha256": "2bf1cc481166c3c0478cdc9c796e86883b34ad59ac3b0d6cd3984d94b8c7aa70",
+    "inventory_source_sha256": [
+      "2bf1cc481166c3c0478cdc9c796e86883b34ad59ac3b0d6cd3984d94b8c7aa70"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "87d2b9c650bc3e5bb486256e74f15ba81414a263",
+    "pinned_content_sha256": "2bf1cc481166c3c0478cdc9c796e86883b34ad59ac3b0d6cd3984d94b8c7aa70",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/PublicSyncBoundaryRegistry.cs",
+    "current_raw_sha256": "958a5e4783b1f5d9a0a7a2102e9f65c8fcfca71d7da971aa331e838ef190ffdb",
+    "inventory_source_sha256": [
+      "958a5e4783b1f5d9a0a7a2102e9f65c8fcfca71d7da971aa331e838ef190ffdb"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "a79479d68f6f6d0862c1f8e8edf3763819aac75e",
+    "pinned_content_sha256": "958a5e4783b1f5d9a0a7a2102e9f65c8fcfca71d7da971aa331e838ef190ffdb",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/PublicSyncBoundaryRegistryTests.cs",
+    "current_raw_sha256": "9337124408a09f1a0470f15f1f35f56b5bdff60129039875e85f6214a41816cc",
+    "inventory_source_sha256": [
+      "9337124408a09f1a0470f15f1f35f56b5bdff60129039875e85f6214a41816cc"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "2f9ff79877087c1d3e22e25527281c97b3e44a32",
+    "pinned_content_sha256": "9337124408a09f1a0470f15f1f35f56b5bdff60129039875e85f6214a41816cc",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/README.md",
+    "current_raw_sha256": "b185c6e2ab5bc0eb303a25b3bbeb5a46186712094620a44b253315ec7c030b9e",
+    "inventory_source_sha256": [
+      "b185c6e2ab5bc0eb303a25b3bbeb5a46186712094620a44b253315ec7c030b9e"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "66939a39cea73a8c68c087a9564892671a4e0beb",
+    "pinned_content_sha256": "b185c6e2ab5bc0eb303a25b3bbeb5a46186712094620a44b253315ec7c030b9e",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/ResponsivenessProbeTests.cs",
+    "current_raw_sha256": "212f6f8827873c2077a2d13c582128301c561c702aae789f4d41892657934ec3",
+    "inventory_source_sha256": [
+      "212f6f8827873c2077a2d13c582128301c561c702aae789f4d41892657934ec3"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "c077cf7780614fbb0bbbf295111c49be1f075910",
+    "pinned_content_sha256": "212f6f8827873c2077a2d13c582128301c561c702aae789f4d41892657934ec3",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/WithheldNativeProbe.cs",
+    "current_raw_sha256": "2fa1d00b6de0fe7e8f11676a1b152529cd2a6dd99cc57e95a985564a63beda38",
+    "inventory_source_sha256": [
+      "2fa1d00b6de0fe7e8f11676a1b152529cd2a6dd99cc57e95a985564a63beda38"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "1e4e42567e42006dd8ee1dd2efaac2791b6d576e",
+    "pinned_content_sha256": "2fa1d00b6de0fe7e8f11676a1b152529cd2a6dd99cc57e95a985564a63beda38",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/adapter-contracts.v1.json",
+    "current_raw_sha256": "53deb82c284c1d22b2b86a04ae7b781d28b4e624102d3eb77782b169a6cd8ab2",
+    "inventory_source_sha256": [
+      "53deb82c284c1d22b2b86a04ae7b781d28b4e624102d3eb77782b169a6cd8ab2"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "93772317c631f66d104bad1ed9dee1e6e1998065",
+    "pinned_content_sha256": "53deb82c284c1d22b2b86a04ae7b781d28b4e624102d3eb77782b169a6cd8ab2",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/BoundaryInventory/core-boundaries.v1.json",
+    "current_raw_sha256": "b3aff5f945df3bf0f1cfb1c13514fc8afd17bb1a855dd2abb987ce7972b51980",
+    "inventory_source_sha256": [
+      "b3aff5f945df3bf0f1cfb1c13514fc8afd17bb1a855dd2abb987ce7972b51980"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "da8521aefd8483c8b177504f09b52999b3760777",
+    "pinned_content_sha256": "b3aff5f945df3bf0f1cfb1c13514fc8afd17bb1a855dd2abb987ce7972b51980",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Native/Windows/CfgMgr32InteropTests.cs",
+    "current_raw_sha256": "117a95d2925e465c3971a7172284a1d4701216a2090e9579b50226a03958d07a",
+    "inventory_source_sha256": [
+      "117a95d2925e465c3971a7172284a1d4701216a2090e9579b50226a03958d07a"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "1dfedd31d7a094caa623c369c379671499596d1b",
+    "pinned_content_sha256": "117a95d2925e465c3971a7172284a1d4701216a2090e9579b50226a03958d07a",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/RuntimeResilience/RuntimeResilienceStaticScanTests.cs",
+    "current_raw_sha256": "0c22f9586d74e7e9d46c8feb6f6da0eeef882563f7f9e8d458881dbe4f766752",
+    "inventory_source_sha256": [
+      "0c22f9586d74e7e9d46c8feb6f6da0eeef882563f7f9e8d458881dbe4f766752"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "9b2c806a969e410212fc71852c5cc2dac59c1400",
+    "pinned_content_sha256": "0c22f9586d74e7e9d46c8feb6f6da0eeef882563f7f9e8d458881dbe4f766752",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/FindHidInterfacesBoundaryTests.cs",
+    "current_raw_sha256": "2b4c17d56ab72d2a22c0e1c82d91c3d823e36f7fce38eb73fed6d2a5b3203b2d",
+    "inventory_source_sha256": [
+      "2b4c17d56ab72d2a22c0e1c82d91c3d823e36f7fce38eb73fed6d2a5b3203b2d"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "688044bee99a9db3285ea238ed4d1f983340a14b",
+    "pinned_content_sha256": "2b4c17d56ab72d2a22c0e1c82d91c3d823e36f7fce38eb73fed6d2a5b3203b2d",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/HidDeviceListenerDisposalTests.cs",
+    "current_raw_sha256": "d4dc2dd7ee6aeebb893158492ce3cbd74268c3708e854a490dde4eba42b88b2a",
+    "inventory_source_sha256": [
+      "d4dc2dd7ee6aeebb893158492ce3cbd74268c3708e854a490dde4eba42b88b2a"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "97d3e24b9887c16c841917ddf6c1c00df16bba38",
+    "pinned_content_sha256": "d4dc2dd7ee6aeebb893158492ce3cbd74268c3708e854a490dde4eba42b88b2a",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/HidInterfaceClassifierTests.cs",
+    "current_raw_sha256": "83e7f8999f42f2bec87b154d39f69dd572fe1de40889a6a63126378ec7995f03",
+    "inventory_source_sha256": [
+      "83e7f8999f42f2bec87b154d39f69dd572fe1de40889a6a63126378ec7995f03"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "f6455d5cb904da6f783b76cbe90e1c1985d82c96",
+    "pinned_content_sha256": "83e7f8999f42f2bec87b154d39f69dd572fe1de40889a6a63126378ec7995f03",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/WindowsHidConnectionOpenFailureTests.cs",
+    "current_raw_sha256": "dd668b4da846830cb54d956177bfaad3f08c347c77e0e3fcc8f6aaece1c41be0",
+    "inventory_source_sha256": [
+      "dd668b4da846830cb54d956177bfaad3f08c347c77e0e3fcc8f6aaece1c41be0"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "54b78d3ef6c262c7d0d05db380f746bc2e13e530",
+    "pinned_content_sha256": "dd668b4da846830cb54d956177bfaad3f08c347c77e0e3fcc8f6aaece1c41be0",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/WindowsHidDeviceListenerTests.cs",
+    "current_raw_sha256": "5543e24c877c3e4afa1dcca1d0f1cfddabf7372dac07929228b8bf5678baf3a3",
+    "inventory_source_sha256": [
+      "5543e24c877c3e4afa1dcca1d0f1cfddabf7372dac07929228b8bf5678baf3a3"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "a3df6c4e9ec8f8013c200f7e4f948677234fba7b",
+    "pinned_content_sha256": "5543e24c877c3e4afa1dcca1d0f1cfddabf7372dac07929228b8bf5678baf3a3",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Yubico.YubiKit.Core.UnitTests.csproj",
+    "current_raw_sha256": "a778d4fe2a7ba5e3da251972f9d142b6e3e3e0a7aa782fbb0e2ee3065ab3a6ad",
+    "inventory_source_sha256": [
+      "a778d4fe2a7ba5e3da251972f9d142b6e3e3e0a7aa782fbb0e2ee3065ab3a6ad"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "09d6670a874310988f0c4125ee4acefebb97b99f",
+    "pinned_content_sha256": "53edab7187616afaad07d913c48277e738ca2cae775133f7f5c0c9b8fba7bff3",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/xunit.runner.json",
+    "current_raw_sha256": "d476fd8a3dc93a92df6521b63eecde412c3c1c8c4190201d60f17ed89355b7ad",
+    "inventory_source_sha256": [
+      "d476fd8a3dc93a92df6521b63eecde412c3c1c8c4190201d60f17ed89355b7ad"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "c2f84268630061a02e3a0917ce90345877a29c69",
+    "pinned_content_sha256": "d476fd8a3dc93a92df6521b63eecde412c3c1c8c4190201d60f17ed89355b7ad",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/PublicApi/CLAUDE.md",
+    "current_raw_sha256": "3136464ffe00bc4e7d08065126b3947b1eed77581389760a736e4ea18b51377b",
+    "inventory_source_sha256": [
+      "3136464ffe00bc4e7d08065126b3947b1eed77581389760a736e4ea18b51377b"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "382c5137a153dcc292e9efcacad17c59d36b9e18",
+    "pinned_content_sha256": "3136464ffe00bc4e7d08065126b3947b1eed77581389760a736e4ea18b51377b",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/AsyncSurfaceConventionTests.cs",
+    "current_raw_sha256": "85fbcc31608e60580d789ee04ce1bcea2877d35b569ba4752ac6998b273a20b3",
+    "inventory_source_sha256": [
+      "85fbcc31608e60580d789ee04ce1bcea2877d35b569ba4752ac6998b273a20b3"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "e3b29506cbafc6db5e6759caaaff994a0fd8fad0",
+    "pinned_content_sha256": "85fbcc31608e60580d789ee04ce1bcea2877d35b569ba4752ac6998b273a20b3",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/FactoryShapeTests.cs",
+    "current_raw_sha256": "b6948d12ff7ab0d2007fafcfc95318d69b41323ab4f8419309f62ed7add42122",
+    "inventory_source_sha256": [
+      "b6948d12ff7ab0d2007fafcfc95318d69b41323ab4f8419309f62ed7add42122"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "0ebaf8983441635db786e6b4220e9fb8c674b902",
+    "pinned_content_sha256": "b6948d12ff7ab0d2007fafcfc95318d69b41323ab4f8419309f62ed7add42122",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/PublicReturnContractScanner.cs",
+    "current_raw_sha256": "59af00f87f465226f137f62b5fbaa0c7097bae7d22fe4d9d336873b547a7860d",
+    "inventory_source_sha256": [
+      "59af00f87f465226f137f62b5fbaa0c7097bae7d22fe4d9d336873b547a7860d"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "0fee274c5e2f1ea41179c2e60b916ec51a95cda0",
+    "pinned_content_sha256": "59af00f87f465226f137f62b5fbaa0c7097bae7d22fe4d9d336873b547a7860d",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/PublicReturnContractScannerTests.cs",
+    "current_raw_sha256": "620c8967782d46623fef4cb78b9f5cf5c523c81b82da7714e10ee47223edb05a",
+    "inventory_source_sha256": [
+      "620c8967782d46623fef4cb78b9f5cf5c523c81b82da7714e10ee47223edb05a"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "79a9fe2cb517837c82e1a32372da53838130759c",
+    "pinned_content_sha256": "620c8967782d46623fef4cb78b9f5cf5c523c81b82da7714e10ee47223edb05a",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/PublicReturnContractTests.cs",
+    "current_raw_sha256": "8b5e05cdb918b75c0b04f3a2e0e7f6ab651fbf8f5235b1a54bf252b9e4853469",
+    "inventory_source_sha256": [
+      "8b5e05cdb918b75c0b04f3a2e0e7f6ab651fbf8f5235b1a54bf252b9e4853469"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "3ff2c4b4a608d66048a301347cf8694b04b4cac5",
+    "pinned_content_sha256": "8b5e05cdb918b75c0b04f3a2e0e7f6ab651fbf8f5235b1a54bf252b9e4853469",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/Yubico.YubiKit.PublicApi.UnitTests.csproj",
+    "current_raw_sha256": "86059d70123adaeac3505fda72da1b4ce10850bd2101a99e6d9daa924f0fb2ad",
+    "inventory_source_sha256": [
+      "86059d70123adaeac3505fda72da1b4ce10850bd2101a99e6d9daa924f0fb2ad"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "c83fe99523df49fc5e824377e7c479d4b12c8e0e",
+    "pinned_content_sha256": "f3bcde7dfc0cd435799d8363e4569472164a20cb9504c370478a0b53e4e42e29",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Tests.Shared/CLAUDE.md",
+    "current_raw_sha256": "5d9303462a236dcfbc4cf3a71afca4e3d84d3aeecc9ca81b703e284de39e3f35",
+    "inventory_source_sha256": [
+      "5d9303462a236dcfbc4cf3a71afca4e3d84d3aeecc9ca81b703e284de39e3f35"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "2779563b6761d27bab645444d833018e72a89005",
+    "pinned_content_sha256": "5d9303462a236dcfbc4cf3a71afca4e3d84d3aeecc9ca81b703e284de39e3f35",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Tests.Shared/Infrastructure/AllowList.cs",
+    "current_raw_sha256": "e7f68ab75c6e2322399ed1057b04d3ce71997c149ae160f58f533f3181d3d9d2",
+    "inventory_source_sha256": [
+      "e7f68ab75c6e2322399ed1057b04d3ce71997c149ae160f58f533f3181d3d9d2"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "dca35e5a52457024e7603e2f2a458884e00c7e8e",
+    "pinned_content_sha256": "e7f68ab75c6e2322399ed1057b04d3ce71997c149ae160f58f533f3181d3d9d2",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Tests.Shared/Infrastructure/AppSettingsAllowListProvider.cs",
+    "current_raw_sha256": "725497bfec4542e86dd43345d809252968f503815116755873ecc800ab208735",
+    "inventory_source_sha256": [
+      "725497bfec4542e86dd43345d809252968f503815116755873ecc800ab208735"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "af86a3736a76e9ba78ec4e5fe3f4eed2bcc05834",
+    "pinned_content_sha256": "725497bfec4542e86dd43345d809252968f503815116755873ecc800ab208735",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Tests.Shared/Infrastructure/IAllowListProvider.cs",
+    "current_raw_sha256": "d27eb2a644f81a97259cfc2f529404aa1f46d7c3efe4ff83cd0be9cb4acda3fd",
+    "inventory_source_sha256": [
+      "d27eb2a644f81a97259cfc2f529404aa1f46d7c3efe4ff83cd0be9cb4acda3fd"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "53adeb0d1caed08f733da287184bddead61c5bd9",
+    "pinned_content_sha256": "d27eb2a644f81a97259cfc2f529404aa1f46d7c3efe4ff83cd0be9cb4acda3fd",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Tests.Shared/Infrastructure/OperatorCue.cs",
+    "current_raw_sha256": "7f634fd5cd677c40afca9f7ecc8d2590c504604e7bafb1de7a8b5287f47794c3",
+    "inventory_source_sha256": [
+      "7f634fd5cd677c40afca9f7ecc8d2590c504604e7bafb1de7a8b5287f47794c3"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "3aa933941bf4ecee0c282ada79da1df422019d93",
+    "pinned_content_sha256": "7f634fd5cd677c40afca9f7ecc8d2590c504604e7bafb1de7a8b5287f47794c3",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Tests.Shared/Infrastructure/TestCategories.cs",
+    "current_raw_sha256": "b2835236c7b311de3a6139acd825371eb77e395aaf57b76f2dd10440e829d1e5",
+    "inventory_source_sha256": [
+      "b2835236c7b311de3a6139acd825371eb77e395aaf57b76f2dd10440e829d1e5"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "9a7aa86244874d6864d8d383c7e5705f2c522cce",
+    "pinned_content_sha256": "b2835236c7b311de3a6139acd825371eb77e395aaf57b76f2dd10440e829d1e5",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Tests.Shared/Infrastructure/TransientScanRetry.cs",
+    "current_raw_sha256": "1482c58e54b0e2840c6a27ccead517579124887fa710bf1ecfaeb0d36cbd2e9a",
+    "inventory_source_sha256": [
+      "1482c58e54b0e2840c6a27ccead517579124887fa710bf1ecfaeb0d36cbd2e9a"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "2ff4668a1e930c1e55414239d06a9fc949e296f9",
+    "pinned_content_sha256": "1482c58e54b0e2840c6a27ccead517579124887fa710bf1ecfaeb0d36cbd2e9a",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Tests.Shared/Infrastructure/WithYubiKeyAttribute.cs",
+    "current_raw_sha256": "4ed3880bf8ddc6deaa67ac189f4872100c50f36efd015c3b4c49d58f12f31435",
+    "inventory_source_sha256": [
+      "4ed3880bf8ddc6deaa67ac189f4872100c50f36efd015c3b4c49d58f12f31435"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "8c0ff3dc5b2d51ed6d8c96dba8afc107bc1b46ba",
+    "pinned_content_sha256": "4ed3880bf8ddc6deaa67ac189f4872100c50f36efd015c3b4c49d58f12f31435",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Tests.Shared/Infrastructure/YubiKeyTestInfrastructure.cs",
+    "current_raw_sha256": "c28e1d6ba276e217bacb5106eaa6e7a8bd8a395bcb4fc2ceee2fd36cdd3bd2bd",
+    "inventory_source_sha256": [
+      "c28e1d6ba276e217bacb5106eaa6e7a8bd8a395bcb4fc2ceee2fd36cdd3bd2bd"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "91fbadb65e75fa67bf51b1e98cc261cf447b9401",
+    "pinned_content_sha256": "c28e1d6ba276e217bacb5106eaa6e7a8bd8a395bcb4fc2ceee2fd36cdd3bd2bd",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Tests.Shared/README.md",
+    "current_raw_sha256": "061a24d373ea7e26445de3242836a85c5dcdd96631fccbf88b27ec2d993e821e",
+    "inventory_source_sha256": [
+      "061a24d373ea7e26445de3242836a85c5dcdd96631fccbf88b27ec2d993e821e"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "9614db3b7432e61b18f4fd42a56f420702819f25",
+    "pinned_content_sha256": "061a24d373ea7e26445de3242836a85c5dcdd96631fccbf88b27ec2d993e821e",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Tests.Shared/YubiKeyTestState.cs",
+    "current_raw_sha256": "8d40305bf0021173ed0d64c29a8417fc5534e9d017133e623007a2bc207bac88",
+    "inventory_source_sha256": [
+      "8d40305bf0021173ed0d64c29a8417fc5534e9d017133e623007a2bc207bac88"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "bf58d0596b6a8024df7f8a26c62aeb53a8e39f69",
+    "pinned_content_sha256": "8d40305bf0021173ed0d64c29a8417fc5534e9d017133e623007a2bc207bac88",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Tests.Shared/YubiKeyTestStateExtensions.cs",
+    "current_raw_sha256": "fb3fa012ee11dfe4324d9cd4bd38b1480a092db2faac3c035efd6834ad844ad4",
+    "inventory_source_sha256": [
+      "fb3fa012ee11dfe4324d9cd4bd38b1480a092db2faac3c035efd6834ad844ad4"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "edd476b9c2fe7415c3231aea7af434b05f099b7f",
+    "pinned_content_sha256": "fb3fa012ee11dfe4324d9cd4bd38b1480a092db2faac3c035efd6834ad844ad4",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Tests.Shared/Yubico.YubiKit.Tests.Shared.csproj",
+    "current_raw_sha256": "4f37a8227bd5b8c1ef9fb089c65667c989b60d9b80f2d5e7c5e3287ae494a963",
+    "inventory_source_sha256": [
+      "4f37a8227bd5b8c1ef9fb089c65667c989b60d9b80f2d5e7c5e3287ae494a963"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "82d753ad1efbb73b8ac127f28dc885f84261d49e",
+    "pinned_content_sha256": "c9666d8293410b6ef2a57eb288cd164179967d0f39a603d557714cd992991d88",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "src/Tests.Shared/appsettings.json",
+    "current_raw_sha256": "6500728c3ad148f7231b52db4a33c22a3c274b5e7ff8612aa5c1e61ecd04c414",
+    "inventory_source_sha256": [
+      "6500728c3ad148f7231b52db4a33c22a3c274b5e7ff8612aa5c1e61ecd04c414"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "2fa1e237195f48c3de14f43fb078d63d1f79b931",
+    "pinned_content_sha256": "6500728c3ad148f7231b52db4a33c22a3c274b5e7ff8612aa5c1e61ecd04c414",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "toolchain.cs",
+    "current_raw_sha256": "b1331780108717829036bd3952952c0a571d1febd4f4504a2611567169c1f74e",
+    "inventory_source_sha256": [
+      "b1331780108717829036bd3952952c0a571d1febd4f4504a2611567169c1f74e"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "75a1bf2b759bddfe84497ee27dcd0fa168bd0a02",
+    "pinned_content_sha256": "b1331780108717829036bd3952952c0a571d1febd4f4504a2611567169c1f74e",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "verification/NativeAotVerification/Program.cs",
+    "current_raw_sha256": "2f130b2a20c77ed2e03cc6208e8ffb53f9f9d8000af146c0fadb729095220425",
+    "inventory_source_sha256": [
+      "2f130b2a20c77ed2e03cc6208e8ffb53f9f9d8000af146c0fadb729095220425"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "da076149b2c5f92dc2f329fd6c5c92e802885d41",
+    "pinned_content_sha256": "2f130b2a20c77ed2e03cc6208e8ffb53f9f9d8000af146c0fadb729095220425",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "verification/NativeAotVerification/Yubico.YubiKit.NativeAotVerification.csproj",
+    "current_raw_sha256": "82b206fda06085a97765b4c8f4511b52d07a11b070456e38eb49be4ed049b9fc",
+    "inventory_source_sha256": [
+      "82b206fda06085a97765b4c8f4511b52d07a11b070456e38eb49be4ed049b9fc"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "2a34237db25ed016700a07fc6492c6d8b68ab10c",
+    "pinned_content_sha256": "930034466a92b8f4f84cef0487add67e9da5bf73d82d202c1829b03dfe9cb3b3",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "verification/NativeCompatibilityVerification/NativeCompatibilityVerification.csproj",
+    "current_raw_sha256": "84f5047b7f89666452fdf024a4d822983c41adbccf7f5b2ce2f662ef603d0eb8",
+    "inventory_source_sha256": [
+      "84f5047b7f89666452fdf024a4d822983c41adbccf7f5b2ce2f662ef603d0eb8"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "33a4c4d46c6b86f8a9a13117c2a7f917a8b06f9b",
+    "pinned_content_sha256": "c31654137bf6626608b5df348abcacce972fd1786d73ef42e7a57edb1393b76d",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "verification/NativeCompatibilityVerification/Program.cs",
+    "current_raw_sha256": "18e7dfca9d2dc170b111cad732800ca9bd98c4d52c1c7e434d6d23d924eb875a",
+    "inventory_source_sha256": [
+      "18e7dfca9d2dc170b111cad732800ca9bd98c4d52c1c7e434d6d23d924eb875a"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "5edd6fee3dece8033899feb8a25ab00f4c93c1f1",
+    "pinned_content_sha256": "18e7dfca9d2dc170b111cad732800ca9bd98c4d52c1c7e434d6d23d924eb875a",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "verification/NativeCompatibilityVerification/README.md",
+    "current_raw_sha256": "94326442dd1907eae94a24c371b282fddf499eb35a2a9f725c0876371a4c5ccf",
+    "inventory_source_sha256": [
+      "94326442dd1907eae94a24c371b282fddf499eb35a2a9f725c0876371a4c5ccf"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "582708f0b5303430c639ca732fa2cfea0a973800",
+    "pinned_content_sha256": "94326442dd1907eae94a24c371b282fddf499eb35a2a9f725c0876371a4c5ccf",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "verification/NativeCompatibilityVerification/RuntimeConsumer/Program.cs",
+    "current_raw_sha256": "6948323a4efa38377c61b40a0075e6b30d76aa05ae3152ba35279bdbc3d10c2f",
+    "inventory_source_sha256": [
+      "6948323a4efa38377c61b40a0075e6b30d76aa05ae3152ba35279bdbc3d10c2f"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "235484c2e89ad26ca74a1fa2cd4fe926caf787a2",
+    "pinned_content_sha256": "6948323a4efa38377c61b40a0075e6b30d76aa05ae3152ba35279bdbc3d10c2f",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "verification/NativeCompatibilityVerification/RuntimeConsumer/RuntimeConsumer.csproj",
+    "current_raw_sha256": "eed07c87835dc9841ffc972b8e7b79a47627ff707f31ca7525cfd7ff588e9b30",
+    "inventory_source_sha256": [
+      "eed07c87835dc9841ffc972b8e7b79a47627ff707f31ca7525cfd7ff588e9b30"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "4612ac66e35dd860727d2f24ad7829ae3f80f0b5",
+    "pinned_content_sha256": "dbabde5fb07045208f838c55de2ff45e32a9c4e6e57e1f464ac89380d633eb25",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "verification/NativeCompatibilityVerification/baseline-exports.json",
+    "current_raw_sha256": "ca1e4642c56e5a5c2cac7ce9bd3bf41ea6d04b12a3d9a60a35b23f7e01a012dc",
+    "inventory_source_sha256": [
+      "ca1e4642c56e5a5c2cac7ce9bd3bf41ea6d04b12a3d9a60a35b23f7e01a012dc"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "46448655071e00a3b61d319bfa08b78c5aee1ec1",
+    "pinned_content_sha256": "ca1e4642c56e5a5c2cac7ce9bd3bf41ea6d04b12a3d9a60a35b23f7e01a012dc",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  },
+  {
+    "path": "verification/NativeCompatibilityVerification/missing-baseline-export.json",
+    "current_raw_sha256": "d3b99885c77924003dafe3b2f287075cc3e36286872fa508ff3801a4fb54e9d7",
+    "inventory_source_sha256": [
+      "d3b99885c77924003dafe3b2f287075cc3e36286872fa508ff3801a4fb54e9d7"
+    ],
+    "inventory_match": true,
+    "pinned_git_blob": "4be18b211b23c151dffe7d5e9e0161dbd8e84d37",
+    "pinned_content_sha256": "d3b99885c77924003dafe3b2f287075cc3e36286872fa508ff3801a4fb54e9d7",
+    "lf_equal_to_pin": true,
+    "semantic_evidence": "Recorded separately; identity is not a read disposition."
+  }
+]

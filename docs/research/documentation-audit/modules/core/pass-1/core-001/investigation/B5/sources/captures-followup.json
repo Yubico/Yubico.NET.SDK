@@ -1,0 +1,20 @@
+[
+  {
+    "name": "ykcore.c",
+    "url": "https://raw.githubusercontent.com/Yubico/yubikey-personalization/db0c0d641d47ee52e43af94dcee603d76186b6d3/ykcore/ykcore.c",
+    "accessed_utc": "2026-11-11T23:21:38.645289+00:00",
+    "status": 200,
+    "final_url": "https://raw.githubusercontent.com/Yubico/yubikey-personalization/db0c0d641d47ee52e43af94dcee603d76186b6d3/ykcore/ykcore.c",
+    "bytes": 19964,
+    "sha256": "89369ecce44fc853b0e502142e1696713b9f56e8138f28f77db026c1175e16f2"
+  },
+  {
+    "name": "ykdef.h",
+    "url": "https://raw.githubusercontent.com/Yubico/yubikey-personalization/db0c0d641d47ee52e43af94dcee603d76186b6d3/ykcore/ykdef.h",
+    "accessed_utc": "2026-11-11T23:21:38.646111+00:00",
+    "status": 200,
+    "final_url": "https://raw.githubusercontent.com/Yubico/yubikey-personalization/db0c0d641d47ee52e43af94dcee603d76186b6d3/ykcore/ykdef.h",
+    "bytes": 14457,
+    "sha256": "c0ca58a5c1870ab2e4ab820956dbb65b2836f3a0d4e489c34f904b764786523a"
+  }
+]

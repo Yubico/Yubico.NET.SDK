@@ -1,0 +1,119 @@
+[
+  {
+    "id": "core-001:unit:70e9c3eb1db1eb9d",
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/ApplicationIdsTests.cs",
+    "label": "Yubico.YubiKit.Core.UnitTests.Sessions.ApplicationIdsTests :: [Theory] [MemberData(nameof(IdentifierNames))] public void Identifier_WritingThroughRecoveredArray_DoesNotAffectLaterReads(string identifierName) ",
+    "source_sha256": "36daee6e9c6f6c910706edfde90c82a6656355870b4084d60f43ac8b37d70177",
+    "range_sha256": "81228b8047acc9ccf82d1fd35f7bc806f4a9fa626288f22a4f67fcf30a8a8a66",
+    "reason": "Read theory data/reflection and all nine exact-byte assertions. Recover actual Memory array and mutate it; later getter unchanged plus independent array identities. FIDO alias equality is asserted. This is local isolation and modeled bytes, not independent vendor AID conformance.",
+    "independent_sample": "NOT-PERFORMED; remove later edits/context overlaps"
+  },
+  {
+    "id": "core-001:unit:9e97f25b58ed0c3c",
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/ApplicationSessionDisposalTests.cs",
+    "label": "Yubico.YubiKit.Core.UnitTests.Sessions.ApplicationSessionDisposalTests :: [Fact] public void CapabilityQueries_AfterDisposal_UseRetainedFirmwareState() ",
+    "source_sha256": "c2f6628df582e0ef205535c9b15ce79be231dc4bbfd9c3db8edf8b609628a7a0",
+    "range_sha256": "9425c9357cd532a631dabb05cdcc273421d788303e4546bc680848b92e52f211",
+    "reason": "Read every sync/async/repeated/held/throwing cleanup assertion and complete probe/connection helpers. BeginDisposal flags/refusal precede derived and connection cleanup; first winner controls sync versus async dispatch; failure instance shared. Detach tests explicitly use bound ProbeSession.Create; reusable tracking fake supplies no native recovery proof. One older concurrent-cleanup test lacks finally release (C008). Queries intentionally remain firmware-only after disposal.",
+    "independent_sample": "NOT-PERFORMED; remove later edits/context overlaps"
+  },
+  {
+    "id": "core-001:unit:1b565768f458e12f",
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/RawSmartCardNativeBoundaryTests.cs",
+    "label": "Yubico.YubiKit.Core.UnitTests.Sessions.RawSmartCardNativeBoundaryTests :: [Fact] public async Task BorrowedRawSession_CancelDuringInitialNativeTransmit_DrainsResponseContinuationBeforeReuse() ",
+    "source_sha256": "5c075e3e636ea440f2143800e076616d76cf988dcbb26b4b97381c231d085be4",
+    "range_sha256": "dcf81a66ee8647425e04feeb15ae0a4b5a7b200db33c7b0deaba529939559795",
+    "reason": "Read all four actual-production-PCSC-owner tests and ControlledSCardConnectionApi/PcscTestDevices dependency helpers. They inject synchronous SCard seam, not real native calls. Entry-cancel no transmit; admitted cancel remains pending and succeeds after held return; GET RESPONSE C0 drains DE AD; failed continuation refuses without replay. Borrowed detach waits drain and no disconnect before connection disposal. Release gates exist in finally. No PIV or OS resource manager qualification.",
+    "independent_sample": "NOT-PERFORMED; remove later edits/context overlaps"
+  },
+  {
+    "id": "core-001:unit:6014afdd997025b8",
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/RawSessionConstructionFailureTests.cs",
+    "label": "Yubico.YubiKit.Core.UnitTests.Sessions.RawSessionConstructionFailureTests :: [Fact] public async Task CreateRawCtapHidSession_WhenProtocolLoggerConstructionThrows_ReleasesClaimWithoutDisposingConnection() ",
+    "source_sha256": "6a23d3d98244799c3632e3a2305afa83d38f80c14a7cb737c31bf48500bbbf47",
+    "range_sha256": "216966e19610555e9b2ac6b7df7d4f059ab6348cd641141add70704c99071e79",
+    "reason": "Logger factory throws exactly second CreateLogger, after base session logger but during protocol creation, and temporary global logging scope restores factory. SmartCard SupportsExtendedApdu throws once. Subsequent binding succeeds and both disposal methods counted0. No wire initialization is modeled; collection disables parallelization. This verifies managed construction cleanup, not cleanup after partially sent handshake.",
+    "independent_sample": "NOT-PERFORMED; remove later edits/context overlaps"
+  },
+  {
+    "id": "core-001:unit:4c09b48be35d0f61",
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/ProtocolFactoryTests.cs",
+    "label": "Yubico.YubiKit.Core.UnitTests.Protocols.ProtocolFactoryTests :: [Fact] public void Create_MapsSupportedConnectionTypes() ",
+    "source_sha256": "476aa9aa857fcebd94f58127c04e500b961521df7d3bcf202d3186fde22b82cf",
+    "range_sha256": "e02f46adad585ac390138efcb90cefd9108940607d4a1e11a1c44d23593b64b4",
+    "reason": "All supported fake connections inherit Type Unknown; assertions establish runtime-interface dispatch, not Type mapping or native open. Unsupported fake produces NotSupportedException naming type. All borrowing protocols are disposed through using; fake methods throw if accidentally used for I/O.",
+    "independent_sample": "NOT-PERFORMED; remove later edits/context overlaps"
+  },
+  {
+    "id": "core-001:unit:39342a05c77c88d6",
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Otp/Hid/OtpHidProtocolTests.cs",
+    "label": "Yubico.YubiKit.Core.UnitTests.Protocols.Otp.Hid.OtpHidProtocolTests :: [Fact] public async Task FailedAbandonmentReset_WhenWarningLoggerThrows_StillPreservesCancellationAndFaultsProtocol() ",
+    "source_sha256": "1025cb6cb478c78f02d7b3ec1be11f183a034f41143220590a98b2c4060800fe",
+    "range_sha256": "dc572257abea3658f4cc8d96fa8f555288b5ac3b0557e03cabf64f23f73c1b77",
+    "reason": "Read all tests plus MockHidConnection, RetainingOtpHidConnection, pool, status/touch/sequence helpers and logger. Fault at programming read sends no abort; held fourth write/response error sends one abort without replay; failed abort/reset latches and refuses reports/configure. Touch timeout0, callback throw, cancellation and completion-winning-same-poll are explicit oracles. Exact pool-return zeroing differs from unobserved input-report arrays. 200ms fake timing catches old sleep-first loop, not hardware responsiveness. Maximum32 report range and malformed gaps checked.",
+    "independent_sample": "NOT-PERFORMED; remove later edits/context overlaps"
+  },
+  {
+    "id": "core-001:unit:6196affe1731488a",
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Otp/Hid/OtpHidProtocolTests.cs",
+    "label": "Yubico.YubiKit.Core.UnitTests.Protocols.Otp.Hid.OtpHidProtocolTests :: [Fact] public async Task FailedResetAfterCompleteDataResponse_FaultsProtocolWithoutFurtherReports() ",
+    "source_sha256": "1025cb6cb478c78f02d7b3ec1be11f183a034f41143220590a98b2c4060800fe",
+    "range_sha256": "e59f3109d0de0425752498e80ba7cc3bbc81a03f5cb1909350d5f8a9f971d8df",
+    "reason": "Read all tests plus MockHidConnection, RetainingOtpHidConnection, pool, status/touch/sequence helpers and logger. Fault at programming read sends no abort; held fourth write/response error sends one abort without replay; failed abort/reset latches and refuses reports/configure. Touch timeout0, callback throw, cancellation and completion-winning-same-poll are explicit oracles. Exact pool-return zeroing differs from unobserved input-report arrays. 200ms fake timing catches old sleep-first loop, not hardware responsiveness. Maximum32 report range and malformed gaps checked.",
+    "independent_sample": "NOT-PERFORMED; remove later edits/context overlaps"
+  },
+  {
+    "id": "core-001:unit:543769ea2315facb",
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/SessionCreationOptionsTests.cs",
+    "label": "Yubico.YubiKit.Core.UnitTests.Sessions.SessionCreationOptionsTests :: [Fact] public void WithPreferredConnectionType_CopiesEveryOptionAndOverridesConnectionType() ",
+    "source_sha256": "7743945a537f2551b33983a7cf48740b9a6b73c9931c2d808c42edf35a685093",
+    "range_sha256": "947cc09930903c55ce1c813ccbdef4a5706557b4408320ba4be6e78e182a7959",
+    "reason": "All five WithPreferred settings checked: configuration equality and reference identity for SCP/version/prompt, distinct carrier and unchanged original preference. Parameters owned using scope. Test does not prove applet snapshots, no retention or secret deep cloning; boundary factories provide those call paths.",
+    "independent_sample": "NOT-PERFORMED; remove later edits/context overlaps"
+  },
+  {
+    "id": "core-001:unit:f72a718d07e9a370",
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/UserPresenceNotificationTests.cs",
+    "label": "Yubico.YubiKit.Core.UnitTests.Sessions.UserPresenceNotificationTests :: [Fact] public async Task RequestFailure_PropagatesWithoutResolutionOrRetry() ",
+    "source_sha256": "f082f2fb5630e1dee6c8549ee6676823e1b601239b118c43bf6aa5781c60325a",
+    "range_sha256": "68e2639639f75b2e8f164e53e9a54ab803832452042f27ddb82b9c0f75e59525",
+    "reason": "Read all state/basis/context/identifier tests and full recording/pending prompt helpers. None inert; at-most-once sequential request/resolve; request failure disables; resolution failure primary precedence; premature resolution while awaited request does not reactivate. API is explicitly single-owner/not thread-safe. Pending callback test lacks finally release (C008). C owns implementation/logging/intent contracts; these assertions do not prove every applet terminal classification.",
+    "independent_sample": "NOT-PERFORMED; remove later edits/context overlaps"
+  },
+  {
+    "id": "core-001:unit:5e8416e550934536",
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/RawSmartCardSessionTests.cs",
+    "label": "Yubico.YubiKit.Core.UnitTests.Sessions.RawSmartCardSessionTests :: [Fact] public async Task CreateAsync_WithScp_ConfiguresBaseProcessorBeforeEstablishment() ",
+    "source_sha256": "17665fa97aaae168f6e89a08ed989ded1541f19e523ad69439d60f66e39b62af",
+    "range_sha256": "446f7958e6aef9f9eca4bcb8c2b4213567e73abe7975476480a9aa6f12649fc7",
+    "reason": "Read all tests plus StubApplet and RecordingSmartCardConnection. Bind refusal before SELECT, exact caller AID, raw non-OK response, ForceShort configure and firmware record, configure overlap/disposal refusal, sequential borrowing, SCP initialization short fake failure and short formatter bytes, overlap+sequential success. SCP tests stop at INITIALIZE UPDATE, not authenticated success. Held tests lack finally release/drain (C008).",
+    "independent_sample": "NOT-PERFORMED; remove later edits/context overlaps"
+  },
+  {
+    "id": "core-001:unit:31fae25215752be4",
+    "path": "src/Core/src/Protocols/Otp/Hid/ChecksumUtils.cs",
+    "label": "Yubico.YubiKit.Core.Protocols.Otp.Hid.ChecksumUtils :: public static ushort CalculateCrc(ReadOnlySpan<byte> data, int length) ",
+    "source_sha256": "a6bc1d809b48ea9422f73b12ee666bc65793e87cb3d0ed23767738447e7b3451",
+    "range_sha256": "9b5bc0b417087a908af1afca646a7b74f29c73db8ca0a2b8f16b8e3d4272ca13",
+    "reason": "Read reflected bitwise CRC algorithm: initial FFFF, polynomial8408, eight steps per byte, no final complement in CalculateCrc; CheckCrc compares F0B8 residue over caller-selected prefix. Caller must supply a valid in-bounds length. Outbound slot-frame CRC differs from inner slot configuration CRC.",
+    "independent_sample": "NOT-PERFORMED; remove later edits/context overlaps"
+  },
+  {
+    "id": "core-001:unit:d310cd20b8654b2e",
+    "path": "src/Core/src/Protocols/Otp/Hid/ChecksumUtils.cs",
+    "label": "Yubico.YubiKit.Core.Protocols.Otp.Hid.ChecksumUtils :: public static bool CheckCrc(ReadOnlySpan<byte> data, int length) => CalculateCrc(data, length) == ValidResidue;",
+    "source_sha256": "a6bc1d809b48ea9422f73b12ee666bc65793e87cb3d0ed23767738447e7b3451",
+    "range_sha256": "9f99a09569014abd70565fd5f7720286555e622c3830e7e79ec4ad085cfd8671",
+    "reason": "Read reflected bitwise CRC algorithm: initial FFFF, polynomial8408, eight steps per byte, no final complement in CalculateCrc; CheckCrc compares F0B8 residue over caller-selected prefix. Caller must supply a valid in-bounds length. Outbound slot-frame CRC differs from inner slot configuration CRC.",
+    "independent_sample": "NOT-PERFORMED; remove later edits/context overlaps"
+  },
+  {
+    "id": "core-001:unit:091b8d287555adc1",
+    "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/ApplicationSessionDisposalTests.cs",
+    "label": "Yubico.YubiKit.Core.UnitTests.Sessions.ApplicationSessionDisposalTests :: [Fact] public async Task DisposeAsync_ThrowingProtocol_ReleasesOwnedConnectionAsynchronouslyAndDetachesSession() ",
+    "source_sha256": "c2f6628df582e0ef205535c9b15ce79be231dc4bbfd9c3db8edf8b609628a7a0",
+    "range_sha256": "221314567a3223b1441a2661f5bc5ae6c15d56af01a38cd2fcdb6f6416c0f7c4",
+    "reason": "Read every sync/async/repeated/held/throwing cleanup assertion and complete probe/connection helpers. BeginDisposal flags/refusal precede derived and connection cleanup; first winner controls sync versus async dispatch; failure instance shared. Detach tests explicitly use bound ProbeSession.Create; reusable tracking fake supplies no native recovery proof. One older concurrent-cleanup test lacks finally release (C008). Queries intentionally remain firmware-only after disposal.",
+    "independent_sample": "NOT-PERFORMED; remove later edits/context overlaps"
+  }
+]

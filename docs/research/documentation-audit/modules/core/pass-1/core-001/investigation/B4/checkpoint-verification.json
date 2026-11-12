@@ -1,0 +1,67 @@
+{
+  "status": "PASSED-RECORD-IDENTITIES",
+  "packet_completion": "CONTINUATION-REQUIRED",
+  "assigned_units": 2350,
+  "outstanding_units": 1462,
+  "source_capture_count": 29,
+  "published_shim_source_blob_checks": [
+    {
+      "local": "shim-pcsc.c",
+      "release_path": "Yubico.NativeShims/pcsc.c",
+      "actual_git_blob": "5f580dd0897d28f0ab854622786e5ec4abf53c73",
+      "expected_git_blob": "5f580dd0897d28f0ab854622786e5ec4abf53c73",
+      "match": true
+    },
+    {
+      "local": "shim-native_abi.h",
+      "release_path": "Yubico.NativeShims/native_abi.h",
+      "actual_git_blob": "8bdad6cd64eb6fdd95946278b708e46f7705851c",
+      "expected_git_blob": "8bdad6cd64eb6fdd95946278b708e46f7705851c",
+      "match": true
+    },
+    {
+      "local": "shim-CMakeLists.txt",
+      "release_path": "Yubico.NativeShims/CMakeLists.txt",
+      "actual_git_blob": "b9e5fd9cef08391309678739156856f655841120",
+      "expected_git_blob": "b9e5fd9cef08391309678739156856f655841120",
+      "match": true
+    },
+    {
+      "local": "shim-exports.msvc",
+      "release_path": "Yubico.NativeShims/exports.msvc",
+      "actual_git_blob": "382d662b4170b82bd2ff916aaa2bb93e54ec085e",
+      "expected_git_blob": "382d662b4170b82bd2ff916aaa2bb93e54ec085e",
+      "match": true
+    },
+    {
+      "local": "shim-nuspec.xml",
+      "release_path": "Yubico.NativeShims/Yubico.NativeShims.nuspec",
+      "actual_git_blob": "1d70f0a2149ade39976e720f4130645eb174beaf",
+      "expected_git_blob": "1d70f0a2149ade39976e720f4130645eb174beaf",
+      "match": true
+    },
+    {
+      "local": "shim-header.in",
+      "release_path": "Yubico.NativeShims/Yubico.NativeShims.h.in",
+      "actual_git_blob": "272d16edbb9621e0f0746ccdd31cc3203b303b08",
+      "expected_git_blob": "272d16edbb9621e0f0746ccdd31cc3203b303b08",
+      "match": true
+    },
+    {
+      "local": "shim-build-windows.ps1",
+      "release_path": "Yubico.NativeShims/build-windows.ps1",
+      "actual_git_blob": "51726c5b48a0948ca6124492e308634a5ec0e297",
+      "expected_git_blob": "51726c5b48a0948ca6124492e308634a5ec0e297",
+      "match": true
+    },
+    {
+      "local": "shim-pcscd.cmake",
+      "release_path": "Yubico.NativeShims/cmake/pcscd.cmake",
+      "actual_git_blob": "422269386218c9aeec18e95d25828070ec1bc981",
+      "expected_git_blob": "422269386218c9aeec18e95d25828070ec1bc981",
+      "match": true
+    }
+  ],
+  "failures": [],
+  "qualification": "Static record/identity verification only; no semantic completeness, independent review, compiler/native/device result or installed native producer attestation."
+}

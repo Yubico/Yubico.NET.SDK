@@ -1,0 +1,9 @@
+Command: python3 -B docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B4/verify_completion.py
+Exit: 1
+Verifier implementation failure, not a product execution:
+Traceback (most recent call last):
+  File "/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B4/verify_completion.py", line 142, in <module>
+    check(sha((p.parent / record["path"]).read_bytes()) == record["sha256"], f"frozen artifact {p.parent / record['path']}")
+FileNotFoundError: [Errno 2] No such file or directory: '/home/rupicola/Code/y/Yubico.Yubikit.NET/docs/research/documentation-audit/PAUSED.md'
+Cause: root frozen manifest uses records/ as its relative artifact root; module manifests use their own parent.
+Correction: resolve the root manifest under records/ explicitly. Preserve this failed attempt; no frozen artifact was changed.

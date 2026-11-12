@@ -1,0 +1,107 @@
+{
+  "status": "HISTORICAL-INCOMPLETE-CHECKPOINT",
+  "files": [
+    {
+      "original_path": "investigation/B6/candidates.md",
+      "snapshot": "candidates.md",
+      "sha256": "7bfdb9fe58e7f4e0fc56c7b318f4a58d936913f257693e337f924ff03f7a358e",
+      "bytes": 27883
+    },
+    {
+      "original_path": "investigation/B6/checkpoint-summary.json",
+      "snapshot": "checkpoint-summary.json",
+      "sha256": "0c23751bc101ac4d8d6ed276ade9bfdc9316ddad2451a0efcf6c6ef4953102d4",
+      "bytes": 1434
+    },
+    {
+      "original_path": "investigation/B6/checkpoint.py",
+      "snapshot": "checkpoint.py",
+      "sha256": "4bccaf97ad26883543f015137df9990f6b142a51277e9d9de339cc7f9ba31acc",
+      "bytes": 13122
+    },
+    {
+      "original_path": "investigation/B6/clean-nominees.json",
+      "snapshot": "clean-nominees.json",
+      "sha256": "81b383e2243c49c89b4f7fefa033b2f5a0a38942b84fc4e5d232ed53aa0349cf",
+      "bytes": 12113
+    },
+    {
+      "original_path": "investigation/B6/fetch-followup.py",
+      "snapshot": "fetch-followup.py",
+      "sha256": "e4023e3d7e9ac05fc98846e5954641d82eaabdc76d8f92a09903ced6946c3995",
+      "bytes": 1312
+    },
+    {
+      "original_path": "investigation/B6/fetch-originals.py",
+      "snapshot": "fetch-originals.py",
+      "sha256": "9c15f4042270ef63cef1e863c72e7ece497a19be9f431e24838952aecdbb3608",
+      "bytes": 1986
+    },
+    {
+      "original_path": "investigation/B6/file-dispositions.json",
+      "snapshot": "file-dispositions.json",
+      "sha256": "4aedf3fb39dbf563c9fa346141041e09cd1c3aceead2795d15edaac6c83edc23",
+      "bytes": 89237
+    },
+    {
+      "original_path": "investigation/B6/inherited-dispositions.json",
+      "snapshot": "inherited-dispositions.json",
+      "sha256": "f6f6aaf70d6a800521b09a84a59514f5e93ad9658bb6e17304e96eb381fe1184",
+      "bytes": 4102
+    },
+    {
+      "original_path": "investigation/B6/ownership-and-handoffs.md",
+      "snapshot": "ownership-and-handoffs.md",
+      "sha256": "a73c1b3bc43b98b50494f04807964fe9af1a71a1cd1e22d9dd13ff6be8c9d3c7",
+      "bytes": 9322
+    },
+    {
+      "original_path": "investigation/B6/prepared-examples.md",
+      "snapshot": "prepared-examples.md",
+      "sha256": "69b2bf5f83048ac6ddc028c9a43278aba5143ddb2558a83b4a9b4c32dbb8823a",
+      "bytes": 4539
+    },
+    {
+      "original_path": "investigation/B6/probe-plan.md",
+      "snapshot": "probe-plan.md",
+      "sha256": "06237b84819b80bf3fa570cfe59ba8e3bc814cc2657c979ed2679ac83ff30709",
+      "bytes": 3870
+    },
+    {
+      "original_path": "investigation/B6/semantic-notes.json",
+      "snapshot": "semantic-notes.json",
+      "sha256": "9fb72b96fc70fe3f115897ad5678d4922208a244c03352619b3d4112a0b99d30",
+      "bytes": 16419
+    },
+    {
+      "original_path": "investigation/B6/unchanged-paths.json",
+      "snapshot": "unchanged-paths.json",
+      "sha256": "1864665f768ce9b533d7b9875e6f180db56b850bbab0868b8d314b53262a6464",
+      "bytes": 29937
+    },
+    {
+      "original_path": "investigation/B6/unit-dispositions.json",
+      "snapshot": "unit-dispositions.json",
+      "sha256": "a35149202bea2b0f129792b582f3f8679f19b056f9bfc94921607fa61d6bdd7e",
+      "bytes": 1053641
+    },
+    {
+      "original_path": "investigation/B6/verification-receipt.json",
+      "snapshot": "verification-receipt.json",
+      "sha256": "f12304fc2504b2d876a558a18e450e8ce6289f92d0e583704a4261259a2c1d6d",
+      "bytes": 2878
+    },
+    {
+      "original_path": "investigation/B6/verify-records.py",
+      "snapshot": "verify-records.py",
+      "sha256": "cc314cb55798f60dc193a788d6d5fa2a23b209a0107fede35c0f34137da61666",
+      "bytes": 3804
+    },
+    {
+      "original_path": "investigation-B6.md",
+      "snapshot": "investigation-B6.md",
+      "sha256": "3882f5efa51a23ed6984f83c0b96a369ae75a95366f88fde8725687105824ff6",
+      "bytes": 10296
+    }
+  ]
+}

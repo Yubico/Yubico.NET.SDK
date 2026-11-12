@@ -1,0 +1,269 @@
+{
+  "state": "FINAL-BOUNDED-SOURCE-REGISTER",
+  "sources": [
+    {
+      "name": "scp03-1.1.2.pdf",
+      "url": "https://globalplatform.org/wp-content/uploads/2014/07/GPC_2.3_D_SCP03_v1.1.2_PublicRelease.pdf",
+      "requested_utc": "2026-11-11T23:28:58.587395+00:00",
+      "final_url": "https://globalplatform.org/wp-content/uploads/2014/07/GPC_2.3_D_SCP03_v1.1.2_PublicRelease.pdf",
+      "status": 200,
+      "bytes": 487598,
+      "sha256": "973a10834f7fe8befd98da9af65393622234b80745092bd85248804c57b648dd",
+      "capture_manifest": "sources/initial-download-manifest.json",
+      "retained_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B6/sources/scp03-1.1.2.pdf",
+      "byte_exact_original": true
+    },
+    {
+      "name": "scp11-public-review-1.3.0.13.pdf",
+      "url": "https://globalplatform.org/wp-content/uploads/2023/08/GPC_2.3_F_SCP11_v1.3.0.13_PublicRvw.pdf",
+      "requested_utc": "2026-11-11T23:28:59.790398+00:00",
+      "final_url": "https://globalplatform.org/wp-content/uploads/2023/08/GPC_2.3_F_SCP11_v1.3.0.13_PublicRvw.pdf",
+      "status": 200,
+      "bytes": 799930,
+      "sha256": "5db47b3df3c4e565a5ad91257395604f3482ed5db70c64853544c3b0e289fde0",
+      "capture_manifest": "sources/initial-download-manifest.json",
+      "retained_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B6/sources/scp11-public-review-1.3.0.13.pdf",
+      "byte_exact_original": true
+    },
+    {
+      "name": "scp11-catalogue.html",
+      "url": "https://globalplatform.org/specs-library/secure-channel-protocol-11-amendment-f/",
+      "requested_utc": "2026-11-11T23:29:00.843133+00:00",
+      "final_url": "https://globalplatform.org/specs-library/secure-channel-protocol-11-amendment-f/",
+      "status": 200,
+      "bytes": 125639,
+      "sha256": "6219c1139a5c4f41f39ed27a6c95633ffdb55d1a9824ef877de6b087fb2b61a5",
+      "download_links": [
+        "https://www.microsoft.com/software-download/windows10",
+        "javascript:download_spec(13818, ",
+        "javascript:download_spec(34377, ",
+        "javascript:download_spec(4806, ",
+        "javascript:download_spec(4807, ",
+        "javascript:download_spec(53958, ",
+        "javascript:download_spec(7310, "
+      ],
+      "capture_manifest": "sources/initial-download-manifest.json",
+      "retained_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B6/sources/scp11-catalogue.html",
+      "byte_exact_original": true
+    },
+    {
+      "name": "scp03-catalogue.html",
+      "url": "https://globalplatform.org/specs-library/secure-channel-protocol-03-amendment-d-v1-2/",
+      "requested_utc": "2026-11-11T23:29:01.727126+00:00",
+      "final_url": "https://globalplatform.org/specs-library/secure-channel-protocol-03-amendment-d-v1-2/",
+      "status": 200,
+      "bytes": 122441,
+      "sha256": "86fa3f52729c26bcb3aa35eb9ecd50473ef074c56cb3dca0c2ce63d47b1434b8",
+      "download_links": [
+        "https://www.microsoft.com/software-download/windows10",
+        "javascript:download_spec(12915, ",
+        "javascript:download_spec(13845, ",
+        "javascript:download_spec(22832, ",
+        "javascript:download_spec(5396, "
+      ],
+      "capture_manifest": "sources/initial-download-manifest.json",
+      "retained_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B6/sources/scp03-catalogue.html",
+      "byte_exact_original": true
+    },
+    {
+      "name": "yubico-profile.html",
+      "url": "https://docs.yubico.com/hardware/yubikey/yk-tech-manual/yk5-apps-scp.html",
+      "requested_utc": "2026-11-11T23:29:02.592213+00:00",
+      "final_url": "https://docs.yubico.com/hardware/yubikey/yk-tech-manual/yk5-apps-scp.html",
+      "status": 200,
+      "bytes": 60313,
+      "sha256": "4314cfaa8c56f27c684d5323f386f830da95897bc678c0b96209a9245460b0c0",
+      "download_links": [
+        "https://globalplatform.org/wp-content/uploads/2014/07/GPC_2.3_D_SCP03_v1.1.2_PublicRelease.pdf",
+        "https://globalplatform.org/wp-content/uploads/2017/09/GPC_2_3_F_SCP11_v1.2_PublicRelease.pdf"
+      ],
+      "capture_manifest": "sources/initial-download-manifest.json",
+      "retained_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B6/sources/yubico-profile.html",
+      "byte_exact_original": true
+    },
+    {
+      "name": "arraybufferwriter-v10.cs",
+      "url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.0/src/libraries/System.Memory/src/System/Buffers/ArrayBufferWriter.cs",
+      "requested_utc": "2026-11-11T23:29:02.745789+00:00",
+      "error": "HTTP Error 404: Not Found",
+      "capture_manifest": "sources/initial-download-manifest.json",
+      "retained_path": null,
+      "qualification": "Unavailable raw original after bounded research; extracted text/metadata is a separate evidence form."
+    },
+    {
+      "name": "scp03-public-review-1.1.2.6.pdf",
+      "url": "https://globalplatform.org/wp-content/uploads/2019/12/GPC_2.3_D_SCP03_v1.1.2.6.pdf",
+      "requested_utc": "2026-11-11T23:29:40.876245+00:00",
+      "error": "HTTP Error 403: Forbidden",
+      "capture_manifest": "sources/focused-followup-manifest.json",
+      "retained_path": null,
+      "qualification": "Unavailable raw original after bounded research; extracted text/metadata is a separate evidence form."
+    },
+    {
+      "name": "scp11-public-release-1.2.pdf",
+      "url": "https://globalplatform.org/wp-content/uploads/2017/09/GPC_2_3_F_SCP11_v1.2_PublicRelease.pdf",
+      "requested_utc": "2026-11-11T23:29:41.431498+00:00",
+      "error": "HTTP Error 403: Forbidden",
+      "capture_manifest": "sources/focused-followup-manifest.json",
+      "retained_path": null,
+      "qualification": "Unavailable raw original after bounded research; extracted text/metadata is a separate evidence form."
+    },
+    {
+      "name": "arraybufferwriter-v10.cs",
+      "url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.0/src/libraries/System.Private.CoreLib/src/System/Buffers/ArrayBufferWriter.cs",
+      "requested_utc": "2026-11-11T23:29:42.025323+00:00",
+      "error": "HTTP Error 404: Not Found",
+      "capture_manifest": "sources/focused-followup-manifest.json",
+      "retained_path": null,
+      "qualification": "Unavailable raw original after bounded research; extracted text/metadata is a separate evidence form."
+    },
+    {
+      "name": "nist-component-testing.html",
+      "url": "https://csrc.nist.gov/projects/cryptographic-algorithm-validation-program/component-testing",
+      "requested_utc": "2026-11-11T23:47:51.954506+00:00",
+      "error": "HTTP Error 403: Forbidden",
+      "capture_manifest": "sources/completion-initial-manifest.json",
+      "retained_path": null,
+      "qualification": "Unavailable raw original after bounded research; extracted text/metadata is a separate evidence form."
+    },
+    {
+      "name": "nist-askdfvs.pdf",
+      "url": "https://csrc.nist.gov/csrc/media/projects/cryptographic-algorithm-validation-program/documents/components/askdfvs.pdf",
+      "requested_utc": "2026-11-11T23:47:52.320867+00:00",
+      "error": "HTTP Error 403: Forbidden",
+      "capture_manifest": "sources/completion-initial-manifest.json",
+      "retained_path": null,
+      "qualification": "Unavailable raw original after bounded research; extracted text/metadata is a separate evidence form."
+    },
+    {
+      "name": "iso7816-4-2020.html",
+      "url": "https://www.iso.org/standard/77180.html",
+      "requested_utc": "2026-11-11T23:47:52.657289+00:00",
+      "error": "HTTP Error 403: Forbidden",
+      "capture_manifest": "sources/completion-initial-manifest.json",
+      "retained_path": null,
+      "qualification": "Unavailable raw original after bounded research; extracted text/metadata is a separate evidence form."
+    },
+    {
+      "name": "nist-ansx963_2001.zip",
+      "url": "https://csrc.nist.gov/CSRC/media/Projects/Cryptographic-Algorithm-Validation-Program/documents/components/800-135testvectors/ansx963_2001.zip",
+      "requested_utc": "2026-11-11T23:48:16.026546+00:00",
+      "error": "HTTP Error 403: Forbidden",
+      "capture_manifest": "sources/completion-followup-manifest.json",
+      "retained_path": null,
+      "qualification": "Unavailable raw original after bounded research; extracted text/metadata is a separate evidence form."
+    },
+    {
+      "name": "nist-askdfvs.pdf",
+      "url": "https://csrc.nist.gov/CSRC/media/Projects/Cryptographic-Algorithm-Validation-Program/documents/components/askdfvs.pdf",
+      "requested_utc": "2026-11-11T23:48:16.377491+00:00",
+      "error": "HTTP Error 403: Forbidden",
+      "capture_manifest": "sources/completion-followup-manifest.json",
+      "retained_path": null,
+      "qualification": "Unavailable raw original after bounded research; extracted text/metadata is a separate evidence form."
+    },
+    {
+      "name": "iso-obp.html",
+      "url": "https://www.iso.org/obp/ui/en/#iso:std:iso-iec:7816:-4:ed-4:v1:en",
+      "requested_utc": "2026-11-11T23:48:16.712541+00:00",
+      "error": "HTTP Error 403: Forbidden",
+      "capture_manifest": "sources/completion-followup-manifest.json",
+      "retained_path": null,
+      "qualification": "Unavailable raw original after bounded research; extracted text/metadata is a separate evidence form."
+    },
+    {
+      "retained_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B6/sources/scp03-1.1.2.txt",
+      "sha256": "921d503eea2e236a95430358e553cc9ce029b41ef6d4e874b355515d79bef6b7",
+      "role": "pdftotext -layout reading derivative",
+      "byte_exact_original": false
+    },
+    {
+      "retained_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B6/sources/scp11-public-review-1.3.0.13.txt",
+      "sha256": "59dddee8b2baa28964d5c3acb4d603f45c48a6055aef5452840a920849e55543",
+      "role": "pdftotext -layout reading derivative",
+      "byte_exact_original": false
+    },
+    {
+      "retained_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sources/python/manifest.json",
+      "sha256": "c0359b1a331c66b5e0aa594b0e11fa1342a92fc362e3b3600e069c5a6c0f76b3",
+      "role": "reused pinned source/evidence; read scope is explicit in completion-evidence.md or ownership-and-handoffs.md"
+    },
+    {
+      "retained_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sources/python/snapshot/yubikit/core/smartcard/__init__.py",
+      "sha256": "595be784aa2ede30488263cbc63686e94365a68d598b96fb350c71c1b5d694bd",
+      "role": "reused pinned source/evidence; read scope is explicit in completion-evidence.md or ownership-and-handoffs.md"
+    },
+    {
+      "retained_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sources/python/snapshot/yubikit/core/smartcard/scp.py",
+      "sha256": "e1bbcae2b85b459d1801feb0630c83a00f96cb0dd7513087545b837464c70d1e",
+      "role": "reused pinned source/evidence; read scope is explicit in completion-evidence.md or ownership-and-handoffs.md"
+    },
+    {
+      "retained_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sources/python/snapshot/tests/device/test_scp.py",
+      "sha256": "5dd8d9a89afebce4704b2d8882588bfadb6b1d08e605dd3c95a6ee1864793316",
+      "role": "reused pinned source/evidence; read scope is explicit in completion-evidence.md or ownership-and-handoffs.md"
+    },
+    {
+      "retained_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/final-source-register.md",
+      "sha256": "6078fe5116d94de6ae580797220f0e190bc322a6a4b0b8c6817626e5630fb23e",
+      "role": "reused pinned source/evidence; read scope is explicit in completion-evidence.md or ownership-and-handoffs.md"
+    },
+    {
+      "retained_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/rfc4493.txt",
+      "sha256": "252850ac038a44e931fdce6cb02b444a18ed1da0c9e212bfdd1da0ed3366fc1c",
+      "role": "reused pinned source/evidence; read scope is explicit in completion-evidence.md or ownership-and-handoffs.md"
+    },
+    {
+      "retained_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-B5.md",
+      "sha256": "5c9b80dcf2351d22bf179584c9fd8a105f897a33efeebfff34e1cfd72e7ab186",
+      "role": "reused pinned source/evidence; read scope is explicit in completion-evidence.md or ownership-and-handoffs.md"
+    },
+    {
+      "retained_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B5/candidates.md",
+      "sha256": "6f82e2bf20ae7291206d690a5c4ce0a7711e8bd2c14c99be1e264925ac5fbf8a",
+      "role": "reused pinned source/evidence; read scope is explicit in completion-evidence.md or ownership-and-handoffs.md"
+    },
+    {
+      "revision": "652e5825a2ecea8f9b4e3c55da6bf7b802594263",
+      "url": "https://github.com/Yubico/yubikey-manager/commit/652e5825a2ecea8f9b4e3c55da6bf7b802594263.patch",
+      "sha256": "912c8dbfe25d4dad98b4a41c85bf07ab851c1558423d6ebc5c413ffdd7c947f6",
+      "bytes": 7938,
+      "retained_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sources/python/history/652e5825a2ecea8f9b4e3c55da6bf7b802594263.patch",
+      "read_scope": "Exact selected full file diffs listed in completion-evidence.md; other applet/CLI hunks excluded from claims"
+    },
+    {
+      "revision": "e55c9c2f37c48b0c6d7eaa5eff7794d58adf9b8c",
+      "url": "https://github.com/Yubico/yubikey-manager/commit/e55c9c2f37c48b0c6d7eaa5eff7794d58adf9b8c.patch",
+      "sha256": "18a03ab54bfac9488de9d04a709f8cfd4f6317d65bf26c45bfa515fa83d6dd3a",
+      "bytes": 28160,
+      "retained_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sources/python/history/e55c9c2f37c48b0c6d7eaa5eff7794d58adf9b8c.patch",
+      "read_scope": "Exact selected full file diffs listed in completion-evidence.md; other applet/CLI hunks excluded from claims"
+    },
+    {
+      "revision": "a10d3b3b249c6dcdba3691824e24758d40994647",
+      "url": "https://github.com/Yubico/yubikey-manager/commit/a10d3b3b249c6dcdba3691824e24758d40994647.patch",
+      "sha256": "b5d8028c84c8bfca3a63d89ecc645f33b5383293c159313f98e20665cebff322",
+      "bytes": 20741,
+      "retained_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sources/python/history/a10d3b3b249c6dcdba3691824e24758d40994647.patch",
+      "read_scope": "Exact selected full file diffs listed in completion-evidence.md; other applet/CLI hunks excluded from claims"
+    },
+    {
+      "revision": "8706337cc0682ccffd6baae6563e02d4bf993036",
+      "url": "https://github.com/Yubico/yubikey-manager/commit/8706337cc0682ccffd6baae6563e02d4bf993036.patch",
+      "sha256": "8f35c6f7fd10969cb37d1fd3af114dd90fc81044989e0991c592bea0b3aba020",
+      "bytes": 22091,
+      "retained_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sources/python/history/8706337cc0682ccffd6baae6563e02d4bf993036.patch",
+      "read_scope": "Exact selected full file diffs listed in completion-evidence.md; other applet/CLI hunks excluded from claims"
+    },
+    {
+      "revision": "7fd50da5db6f844f49947ce888c8ffab9b8e4eff",
+      "url": "https://github.com/Yubico/yubikey-manager/commit/7fd50da5db6f844f49947ce888c8ffab9b8e4eff.patch",
+      "sha256": "ec523bd3cb3c421e3297e9d6bee1ca5d0e62e4dad97240f84bc38a29903d6924",
+      "bytes": 20739,
+      "retained_path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sources/python/history/7fd50da5db6f844f49947ce888c8ffab9b8e4eff.patch",
+      "read_scope": "Exact selected full file diffs listed in completion-evidence.md; other applet/CLI hunks excluded from claims"
+    }
+  ],
+  "raw_originals_unchanged": true,
+  "normative_status": "See final-source-register.md; draft/final/vendor/API/oracle roles are distinct"
+}

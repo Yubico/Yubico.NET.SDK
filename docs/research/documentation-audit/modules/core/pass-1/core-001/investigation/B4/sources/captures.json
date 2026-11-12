@@ -1,0 +1,380 @@
+[
+  {
+    "name": "cfgmgr32.h",
+    "url": "https://raw.githubusercontent.com/tpn/winsdk-10/master/Include/10.0.16299.0/um/cfgmgr32.h",
+    "accessed_utc": "2026-11-11T23:17:34.655820+00:00",
+    "status": 200,
+    "final_url": "https://raw.githubusercontent.com/tpn/winsdk-10/master/Include/10.0.16299.0/um/cfgmgr32.h",
+    "bytes": 141169,
+    "sha256": "f8c0a68c4feaa34c2d20cc61dd65d06db20f710efbee101369efe673394279d7"
+  },
+  {
+    "name": "hidsdi.h",
+    "url": "https://raw.githubusercontent.com/tpn/winsdk-10/master/Include/10.0.16299.0/shared/hidsdi.h",
+    "accessed_utc": "2026-11-11T23:17:34.994740+00:00",
+    "status": 200,
+    "final_url": "https://raw.githubusercontent.com/tpn/winsdk-10/master/Include/10.0.16299.0/shared/hidsdi.h",
+    "bytes": 16103,
+    "sha256": "39b7f6bf0fb93e3d3f37bac5e8a77d24af88cd6f06712efba35443f391ba0c30"
+  },
+  {
+    "name": "winnt.h",
+    "url": "https://raw.githubusercontent.com/tpn/winsdk-10/master/Include/10.0.16299.0/um/winnt.h",
+    "accessed_utc": "2026-11-11T23:17:35.245991+00:00",
+    "status": 200,
+    "final_url": "https://raw.githubusercontent.com/tpn/winsdk-10/master/Include/10.0.16299.0/um/winnt.h",
+    "bytes": 735583,
+    "sha256": "2f8d43a5e0e2936b207857bd178bd2edd0ea411b98699cc55e8892d4018f4cd7"
+  },
+  {
+    "name": "cm-unregister.html",
+    "url": "https://learn.microsoft.com/en-us/windows/win32/api/cfgmgr32/nf-cfgmgr32-cm_unregister_notification",
+    "accessed_utc": "2026-11-11T23:17:35.511779+00:00",
+    "status": 200,
+    "final_url": "https://learn.microsoft.com/en-us/windows/win32/api/cfgmgr32/nf-cfgmgr32-cm_unregister_notification",
+    "bytes": 57034,
+    "sha256": "eacdd31a133642644779abe5a7144213e06e25591a02fa528a4c4913bf92092e"
+  },
+  {
+    "name": "cm-interface-list.html",
+    "url": "https://learn.microsoft.com/en-us/windows/win32/api/cfgmgr32/nf-cfgmgr32-cm_get_device_interface_listw",
+    "accessed_utc": "2026-11-11T23:17:36.213798+00:00",
+    "status": 200,
+    "final_url": "https://learn.microsoft.com/en-us/windows/win32/api/cfgmgr32/nf-cfgmgr32-cm_get_device_interface_listw",
+    "bytes": 56090,
+    "sha256": "b2bb42449ebc333b1ea1576692972f5c4bd8ee4c8b8d2fd3595366e4fe3cd9a6"
+  },
+  {
+    "name": "cm-interface-property.html",
+    "url": "https://learn.microsoft.com/en-us/windows/win32/api/cfgmgr32/nf-cfgmgr32-cm_get_device_interface_propertyw",
+    "accessed_utc": "2026-11-11T23:17:36.293141+00:00",
+    "status": 200,
+    "final_url": "https://learn.microsoft.com/en-us/windows/win32/api/cfgmgr32/nf-cfgmgr32-cm_get_device_interface_propertyw",
+    "bytes": 53290,
+    "sha256": "51b6b4baac9f8494b68983142feaef2c9fc2870ac78ab999af2e426af1af67e9"
+  },
+  {
+    "name": "hidd-getfeature.html",
+    "url": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/hidsdi/nf-hidsdi-hidd_getfeature",
+    "accessed_utc": "2026-11-11T23:17:36.720828+00:00",
+    "status": 200,
+    "final_url": "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/hidsdi/nf-hidsdi-hidd_getfeature",
+    "bytes": 55140,
+    "sha256": "744407c7ab7fe1d1cecfe17229e8976ec4629738891d2a9a4107f38511cb2684"
+  },
+  {
+    "name": "createfile.html",
+    "url": "https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilew",
+    "accessed_utc": "2026-11-11T23:17:37.464589+00:00",
+    "status": 200,
+    "final_url": "https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilew",
+    "bytes": 115313,
+    "sha256": "b946f24eb9b62fbb37093e74741e9bc3aad5c96cf82d6ed552ef716118d248eb"
+  },
+  {
+    "name": "readfile.html",
+    "url": "https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-readfile",
+    "accessed_utc": "2026-11-11T23:17:37.663449+00:00",
+    "status": 200,
+    "final_url": "https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-readfile",
+    "bytes": 69454,
+    "sha256": "bfe3b583c4302f4098b45796d95743d219438576c28fff08045f2dc1d4072f95"
+  },
+  {
+    "name": "cancelioex.html",
+    "url": "https://learn.microsoft.com/en-us/windows/win32/api/ioapiset/nf-ioapiset-cancelioex",
+    "accessed_utc": "2026-11-11T23:17:37.892080+00:00",
+    "status": 200,
+    "final_url": "https://learn.microsoft.com/en-us/windows/win32/api/ioapiset/nf-ioapiset-cancelioex",
+    "bytes": 55079,
+    "sha256": "d94292b24848109b1cb32e7ab73b4d72c791aeec87053229b8cedca048adbaad"
+  },
+  {
+    "name": "getoverlappedresult.html",
+    "url": "https://learn.microsoft.com/en-us/windows/win32/api/ioapiset/nf-ioapiset-getoverlappedresult",
+    "accessed_utc": "2026-11-11T23:17:38.119643+00:00",
+    "status": 200,
+    "final_url": "https://learn.microsoft.com/en-us/windows/win32/api/ioapiset/nf-ioapiset-getoverlappedresult",
+    "bytes": 56322,
+    "sha256": "69239f3f2dd565440a5275e619d2cc234c456367639453830a8cdf00267786af"
+  },
+  {
+    "name": "safehandle-marshaller.cs",
+    "url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.0/src/libraries/System.Private.CoreLib/src/System/Runtime/InteropServices/Marshalling/SafeHandleMarshaller.cs",
+    "accessed_utc": "2026-11-11T23:17:38.306291+00:00",
+    "status": 200,
+    "final_url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.0/src/libraries/System.Private.CoreLib/src/System/Runtime/InteropServices/Marshalling/SafeHandleMarshaller.cs",
+    "bytes": 7697,
+    "sha256": "d40e582fc5f12e671d741fe7d1734e46e86a20e3b9f1a9ac933f07c1ec4d12c1"
+  },
+  {
+    "name": "interop-best-practices.md",
+    "url": "https://raw.githubusercontent.com/dotnet/docs/main/docs/standard/native-interop/best-practices.md",
+    "accessed_utc": "2026-11-11T23:17:38.542765+00:00",
+    "status": 200,
+    "final_url": "https://raw.githubusercontent.com/dotnet/docs/main/docs/standard/native-interop/best-practices.md",
+    "bytes": 31199,
+    "sha256": "41a5bebd9cae59ae36e1eef3fecdb6e4cb51a79945c691d4adb3d75fdca3b274"
+  },
+  {
+    "name": "official-cfgmgr32.h",
+    "url": "https://raw.githubusercontent.com/microsoft/win32metadata/15fc870a5e96df7c560877ff30136c0fb5a21e9b/generation/WinSDK/RecompiledIdlHeaders/um/cfgmgr32.h",
+    "accessed_utc": "2026-11-11T23:18:23.077466+00:00",
+    "status": 200,
+    "final_url": "https://raw.githubusercontent.com/microsoft/win32metadata/15fc870a5e96df7c560877ff30136c0fb5a21e9b/generation/WinSDK/RecompiledIdlHeaders/um/cfgmgr32.h",
+    "bytes": 137055,
+    "sha256": "986a02619c81ffe5acef63e761bd41e25e3a4190ab1840c72600319342d4aa67"
+  },
+  {
+    "name": "official-hidsdi.h",
+    "url": "https://raw.githubusercontent.com/microsoft/win32metadata/15fc870a5e96df7c560877ff30136c0fb5a21e9b/generation/WinSDK/RecompiledIdlHeaders/shared/hidsdi.h",
+    "accessed_utc": "2026-11-11T23:18:23.412715+00:00",
+    "status": 200,
+    "final_url": "https://raw.githubusercontent.com/microsoft/win32metadata/15fc870a5e96df7c560877ff30136c0fb5a21e9b/generation/WinSDK/RecompiledIdlHeaders/shared/hidsdi.h",
+    "bytes": 15583,
+    "sha256": "554213863d08da22bfae22639126b809e9886ce2f310c03972e3dbe06bf13147"
+  },
+  {
+    "name": "loadlibraryex.html",
+    "url": "https://learn.microsoft.com/en-us/windows/win32/api/libloaderapi/nf-libloaderapi-loadlibraryexw",
+    "accessed_utc": "2026-11-11T23:18:23.651004+00:00",
+    "status": 200,
+    "final_url": "https://learn.microsoft.com/en-us/windows/win32/api/libloaderapi/nf-libloaderapi-loadlibraryexw",
+    "bytes": 85974,
+    "sha256": "75dd9f400132d9e74a146795ffa4334eac6418b9cc631fb924f0059fd2b7e389"
+  },
+  {
+    "name": "x64-calling-convention.html",
+    "url": "https://learn.microsoft.com/en-us/cpp/build/x64-calling-convention?view=msvc-170",
+    "accessed_utc": "2026-11-11T23:18:23.904837+00:00",
+    "status": 200,
+    "final_url": "https://learn.microsoft.com/en-us/cpp/build/x64-calling-convention?view=msvc-170",
+    "bytes": 70525,
+    "sha256": "493d7e1da2e6a08e81dba2de04296f272aafdac61372e509edbe3667fb25bf3f"
+  },
+  {
+    "name": "libraryimport.html",
+    "url": "https://learn.microsoft.com/en-us/dotnet/standard/native-interop/pinvoke-source-generation",
+    "accessed_utc": "2026-11-11T23:18:24.190438+00:00",
+    "status": 200,
+    "final_url": "https://learn.microsoft.com/en-us/dotnet/standard/native-interop/pinvoke-source-generation",
+    "bytes": 60299,
+    "sha256": "3e19edc465b4c4ae678e24f96befbf6db00fe5f46db29fea7d8ccf9dcc39b1d6"
+  },
+  {
+    "name": "shim-pcsc.c",
+    "url": "https://raw.githubusercontent.com/Yubico/Yubico.NET.SDK/dedba95b94946907112a7953cd82df8a15c22655/Yubico.NativeShims/pcsc.c",
+    "accessed_utc": "2026-11-11T23:19:33.636864+00:00",
+    "status": 200,
+    "final_url": "https://raw.githubusercontent.com/Yubico/Yubico.NET.SDK/dedba95b94946907112a7953cd82df8a15c22655/Yubico.NativeShims/pcsc.c",
+    "bytes": 4588,
+    "sha256": "10654d81c4468bc1bf712667875c918fbeff335eba513458be692ba80051e39a"
+  },
+  {
+    "name": "shim-native_abi.h",
+    "url": "https://raw.githubusercontent.com/Yubico/Yubico.NET.SDK/dedba95b94946907112a7953cd82df8a15c22655/Yubico.NativeShims/native_abi.h",
+    "accessed_utc": "2026-11-11T23:19:33.932140+00:00",
+    "status": 200,
+    "final_url": "https://raw.githubusercontent.com/Yubico/Yubico.NET.SDK/dedba95b94946907112a7953cd82df8a15c22655/Yubico.NativeShims/native_abi.h",
+    "bytes": 364,
+    "sha256": "c45bb889d0c5917c5a8c9b6c4161eec41cb7a91b5f1d53deb46de185127a46c9"
+  },
+  {
+    "name": "shim-CMakeLists.txt",
+    "url": "https://raw.githubusercontent.com/Yubico/Yubico.NET.SDK/dedba95b94946907112a7953cd82df8a15c22655/Yubico.NativeShims/CMakeLists.txt",
+    "accessed_utc": "2026-11-11T23:19:34.182310+00:00",
+    "status": 200,
+    "final_url": "https://raw.githubusercontent.com/Yubico/Yubico.NET.SDK/dedba95b94946907112a7953cd82df8a15c22655/Yubico.NativeShims/CMakeLists.txt",
+    "bytes": 9602,
+    "sha256": "3d306301ad1aec28d849a99e809661e76b301ed0a8b4c840f632a022c0a28460"
+  },
+  {
+    "name": "shim-exports.msvc",
+    "url": "https://raw.githubusercontent.com/Yubico/Yubico.NET.SDK/dedba95b94946907112a7953cd82df8a15c22655/Yubico.NativeShims/exports.msvc",
+    "accessed_utc": "2026-11-11T23:19:34.429454+00:00",
+    "status": 200,
+    "final_url": "https://raw.githubusercontent.com/Yubico/Yubico.NET.SDK/dedba95b94946907112a7953cd82df8a15c22655/Yubico.NativeShims/exports.msvc",
+    "bytes": 1170,
+    "sha256": "b28cffa21fd51325acf06622a7ea12e2bd8e54c7b75f62b6da952ef04e185fa7"
+  },
+  {
+    "name": "shim-nuspec.xml",
+    "url": "https://raw.githubusercontent.com/Yubico/Yubico.NET.SDK/dedba95b94946907112a7953cd82df8a15c22655/Yubico.NativeShims/Yubico.NativeShims.nuspec",
+    "accessed_utc": "2026-11-11T23:19:34.678437+00:00",
+    "status": 200,
+    "final_url": "https://raw.githubusercontent.com/Yubico/Yubico.NET.SDK/dedba95b94946907112a7953cd82df8a15c22655/Yubico.NativeShims/Yubico.NativeShims.nuspec",
+    "bytes": 3119,
+    "sha256": "5e5630b74d816d1ef1c04c29a5a0a915ad34b4999ef3d07052d425b8a94c94d6"
+  },
+  {
+    "name": "shim-header.in",
+    "url": "https://raw.githubusercontent.com/Yubico/Yubico.NET.SDK/dedba95b94946907112a7953cd82df8a15c22655/Yubico.NativeShims/Yubico.NativeShims.h.in",
+    "accessed_utc": "2026-11-11T23:19:54.087893+00:00",
+    "status": 200,
+    "final_url": "https://raw.githubusercontent.com/Yubico/Yubico.NET.SDK/dedba95b94946907112a7953cd82df8a15c22655/Yubico.NativeShims/Yubico.NativeShims.h.in",
+    "bytes": 2689,
+    "sha256": "4819b98147f3cc8f7fb149eaa574dace969a79d603ef4858bef3ab20954fe619"
+  },
+  {
+    "name": "shim-build-windows.ps1",
+    "url": "https://raw.githubusercontent.com/Yubico/Yubico.NET.SDK/dedba95b94946907112a7953cd82df8a15c22655/Yubico.NativeShims/build-windows.ps1",
+    "accessed_utc": "2026-11-11T23:19:54.335941+00:00",
+    "status": 200,
+    "final_url": "https://raw.githubusercontent.com/Yubico/Yubico.NET.SDK/dedba95b94946907112a7953cd82df8a15c22655/Yubico.NativeShims/build-windows.ps1",
+    "bytes": 2645,
+    "sha256": "e880a4edc8aeb0854e02b8c79d345efab78a4aa0b543b7d7cb7225f96140681c"
+  },
+  {
+    "name": "shim-pcscd.cmake",
+    "url": "https://raw.githubusercontent.com/Yubico/Yubico.NET.SDK/dedba95b94946907112a7953cd82df8a15c22655/Yubico.NativeShims/cmake/pcscd.cmake",
+    "accessed_utc": "2026-11-11T23:19:54.664348+00:00",
+    "status": 200,
+    "final_url": "https://raw.githubusercontent.com/Yubico/Yubico.NET.SDK/dedba95b94946907112a7953cd82df8a15c22655/Yubico.NativeShims/cmake/pcscd.cmake",
+    "bytes": 5702,
+    "sha256": "f488cf77403e9ffcfb904f79e52030b34fe2664660273ca05a40d6511a342f4e"
+  },
+  {
+    "name": "official-winerror.h",
+    "url": "https://raw.githubusercontent.com/microsoft/win32metadata/15fc870a5e96df7c560877ff30136c0fb5a21e9b/generation/WinSDK/RecompiledIdlHeaders/shared/winerror.h",
+    "accessed_utc": "2026-11-11T23:21:44.454144+00:00",
+    "status": 200,
+    "final_url": "https://raw.githubusercontent.com/microsoft/win32metadata/15fc870a5e96df7c560877ff30136c0fb5a21e9b/generation/WinSDK/RecompiledIdlHeaders/shared/winerror.h",
+    "bytes": 1568644,
+    "sha256": "0423ebea8bca5bd635681f274e762a8aefdd7b723c9da1e14cd4e3dcf71ff8e1"
+  },
+  {
+    "name": "pcsclite-wintypes.html",
+    "url": "https://pcsclite.apdu.fr/api/wintypes_8h_source.html",
+    "accessed_utc": "2026-11-11T23:21:44.992622+00:00",
+    "status": 200,
+    "final_url": "https://pcsclite.apdu.fr/api/wintypes_8h_source.html",
+    "bytes": 19888,
+    "sha256": "075f3ba0f011b0b0f64de9461d0a84c01924dd902390a0cc39b43c073dcad99c"
+  },
+  {
+    "name": "pcsclite-types.html",
+    "url": "https://pcsclite.apdu.fr/api/pcsclite_8h_source.html",
+    "accessed_utc": "2026-11-11T23:21:45.170451+00:00",
+    "status": 200,
+    "final_url": "https://pcsclite.apdu.fr/api/pcsclite_8h_source.html",
+    "bytes": 58709,
+    "sha256": "ada3575bf7c6bc325b85e72852395c99f0429d25f234c95a8a4b5d8823414e1a"
+  },
+  {
+    "name": "dotnet10-WindowsIdentity.cs",
+    "url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.0/src/libraries/System.Security.Principal.Windows/src/System/Security/Principal/WindowsIdentity.cs",
+    "accessed_utc": "2026-11-11T23:40:12.961750+00:00",
+    "status": 200,
+    "final_url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.0/src/libraries/System.Security.Principal.Windows/src/System/Security/Principal/WindowsIdentity.cs",
+    "bytes": 59573,
+    "sha256": "3ff16a9cff2dd025f71cab365bb2ea01b817af08f8fe38f2c94f6e3f35571e8b"
+  },
+  {
+    "name": "official-devguid.h",
+    "url": "https://raw.githubusercontent.com/microsoft/win32metadata/15fc870a5e96df7c560877ff30136c0fb5a21e9b/generation/WinSDK/RecompiledIdlHeaders/shared/devguid.h",
+    "accessed_utc": "2026-11-11T23:40:13.206742+00:00",
+    "status": 200,
+    "final_url": "https://raw.githubusercontent.com/microsoft/win32metadata/15fc870a5e96df7c560877ff30136c0fb5a21e9b/generation/WinSDK/RecompiledIdlHeaders/shared/devguid.h",
+    "bytes": 15263,
+    "sha256": "8f24b87b2d4d538d3f31147a471c51359585eb807c9208a191da24dbf306dfa5"
+  },
+  {
+    "name": "official-devpkey.h",
+    "url": "https://raw.githubusercontent.com/microsoft/win32metadata/15fc870a5e96df7c560877ff30136c0fb5a21e9b/generation/WinSDK/RecompiledIdlHeaders/shared/devpkey.h",
+    "accessed_utc": "2026-11-11T23:40:13.453472+00:00",
+    "status": 200,
+    "final_url": "https://raw.githubusercontent.com/microsoft/win32metadata/15fc870a5e96df7c560877ff30136c0fb5a21e9b/generation/WinSDK/RecompiledIdlHeaders/shared/devpkey.h",
+    "bytes": 39556,
+    "sha256": "6d59670e0157b4dbe3b279785491d74058fea7c548016cfc90696542f7094a80"
+  },
+  {
+    "name": "official-hidclass.h",
+    "url": "https://raw.githubusercontent.com/microsoft/win32metadata/15fc870a5e96df7c560877ff30136c0fb5a21e9b/generation/WinSDK/RecompiledIdlHeaders/shared/hidclass.h",
+    "accessed_utc": "2026-11-11T23:40:13.733459+00:00",
+    "status": 200,
+    "final_url": "https://raw.githubusercontent.com/microsoft/win32metadata/15fc870a5e96df7c560877ff30136c0fb5a21e9b/generation/WinSDK/RecompiledIdlHeaders/shared/hidclass.h",
+    "bytes": 9333,
+    "sha256": "6ad68a5d2bfc2c50d59c3dbfc9325d8ac1d7b47e335e0118ccc3743936ee0f7b"
+  },
+  {
+    "name": "shim-build-linux-amd64.sh",
+    "url": "https://raw.githubusercontent.com/Yubico/Yubico.NET.SDK/dedba95b94946907112a7953cd82df8a15c22655/Yubico.NativeShims/build-linux-amd64.sh",
+    "accessed_utc": "2026-11-11T23:40:13.970003+00:00",
+    "status": 200,
+    "final_url": "https://raw.githubusercontent.com/Yubico/Yubico.NET.SDK/dedba95b94946907112a7953cd82df8a15c22655/Yubico.NativeShims/build-linux-amd64.sh",
+    "bytes": 3304,
+    "sha256": "422c17a0bcd71639b785ffd8e247f0044105bf22f95674161efd175b93ae5265"
+  },
+  {
+    "name": "shim-build-linux-arm64.sh",
+    "url": "https://raw.githubusercontent.com/Yubico/Yubico.NET.SDK/dedba95b94946907112a7953cd82df8a15c22655/Yubico.NativeShims/build-linux-arm64.sh",
+    "accessed_utc": "2026-11-11T23:40:14.230361+00:00",
+    "status": 200,
+    "final_url": "https://raw.githubusercontent.com/Yubico/Yubico.NET.SDK/dedba95b94946907112a7953cd82df8a15c22655/Yubico.NativeShims/build-linux-arm64.sh",
+    "bytes": 5671,
+    "sha256": "5ed37d3728a601082f7fb35ae18671f3dc6bfd9202762062ea82ab9c1907536b"
+  },
+  {
+    "name": "shim-Aot.targets",
+    "url": "https://raw.githubusercontent.com/Yubico/Yubico.NET.SDK/dedba95b94946907112a7953cd82df8a15c22655/Yubico.NativeShims/msbuild/Yubico.NativeShims.Aot.targets",
+    "accessed_utc": "2026-11-11T23:40:14.456092+00:00",
+    "status": 200,
+    "final_url": "https://raw.githubusercontent.com/Yubico/Yubico.NET.SDK/dedba95b94946907112a7953cd82df8a15c22655/Yubico.NativeShims/msbuild/Yubico.NativeShims.Aot.targets",
+    "bytes": 4406,
+    "sha256": "76aea7798ce05301a3719ead63f2fbacf11ddc03586b4d3bb08acda8930126e9"
+  },
+  {
+    "name": "hid-1.11.pdf",
+    "url": "https://www.usb.org/sites/default/files/hid1_11.pdf",
+    "accessed_utc": "2026-11-11T23:40:14.698041+00:00",
+    "status": 200,
+    "final_url": "https://www.usb.org/sites/default/files/hid1_11.pdf",
+    "bytes": 1031484,
+    "sha256": "206272dacaf01ff34beda038b8ed59abbb02f028394896345c393bc026795d36"
+  },
+  {
+    "name": "hut-1.5.pdf",
+    "url": "https://usb.org/sites/default/files/hut1_5.pdf",
+    "accessed_utc": "2026-11-11T23:40:14.889957+00:00",
+    "status": 200,
+    "final_url": "https://usb.org/sites/default/files/hut1_5.pdf",
+    "bytes": 4452110,
+    "sha256": "f4ead217b01134f89199155ed616d4eeae9ad40a5f73dad9544002b592c07db3"
+  },
+  {
+    "name": "official-ntddkbd.h",
+    "url": "https://raw.githubusercontent.com/microsoft/win32metadata/15fc870a5e96df7c560877ff30136c0fb5a21e9b/generation/WinSDK/RecompiledIdlHeaders/shared/ntddkbd.h",
+    "accessed_utc": "2026-11-11T23:45:44.129838+00:00",
+    "status": 200,
+    "final_url": "https://raw.githubusercontent.com/microsoft/win32metadata/15fc870a5e96df7c560877ff30136c0fb5a21e9b/generation/WinSDK/RecompiledIdlHeaders/shared/ntddkbd.h",
+    "bytes": 9989,
+    "sha256": "c1c0782542dd99bba74bc4ed061b3245409b08bd610253666723cdbc2ceaf7a8"
+  },
+  {
+    "name": "official-usbiodef.h",
+    "url": "https://raw.githubusercontent.com/microsoft/win32metadata/15fc870a5e96df7c560877ff30136c0fb5a21e9b/generation/WinSDK/RecompiledIdlHeaders/shared/usbiodef.h",
+    "accessed_utc": "2026-11-11T23:45:44.374226+00:00",
+    "status": 200,
+    "final_url": "https://raw.githubusercontent.com/microsoft/win32metadata/15fc870a5e96df7c560877ff30136c0fb5a21e9b/generation/WinSDK/RecompiledIdlHeaders/shared/usbiodef.h",
+    "bytes": 8765,
+    "sha256": "f26695a68b2f8f2d4963e6e4d0659c32fea8d60cc9198a52db73b1762fd1afe2"
+  },
+  {
+    "name": "official-winsmcrd.h",
+    "url": "https://raw.githubusercontent.com/microsoft/win32metadata/15fc870a5e96df7c560877ff30136c0fb5a21e9b/generation/WinSDK/RecompiledIdlHeaders/shared/winsmcrd.h",
+    "accessed_utc": "2026-11-11T23:45:44.613776+00:00",
+    "status": 200,
+    "final_url": "https://raw.githubusercontent.com/microsoft/win32metadata/15fc870a5e96df7c560877ff30136c0fb5a21e9b/generation/WinSDK/RecompiledIdlHeaders/shared/winsmcrd.h",
+    "bytes": 13857,
+    "sha256": "c34993b38e913253cac12a8398057b638078bec490b89d9828368efbe38d13eb"
+  },
+  {
+    "name": "sourcelink-CVE-2026-62900.html",
+    "url": "https://github.com/dotnet/sourcelink/security/advisories/GHSA-23fw-v26w-5fgq",
+    "accessed_utc": "2026-11-11T23:59:17.134903+00:00",
+    "status": 200,
+    "final_url": "https://github.com/dotnet/sourcelink/security/advisories/GHSA-23fw-v26w-5fgq",
+    "bytes": 153142,
+    "sha256": "088c82eee53c0f55d60dc4779f55f9de14c7af06fe7c7e5203037047c9737080"
+  }
+]

@@ -39,6 +39,43 @@
       "url": "https://www.itu.int/rec/T-REC-X.690-202102-I/en",
       "access_utc": "2026-11-11T22:56:23.143991+00:00",
       "authority": "investigation/C/sources/ber-source-attempts.json"
+    },
+    {
+      "path": "investigation/B4/sources/hid-1.11.pdf",
+      "kind": "original-specification-pdf",
+      "bytes": 1031484,
+      "sha256": "206272dacaf01ff34beda038b8ed59abbb02f028394896345c393bc026795d36",
+      "url": "https://www.usb.org/sites/default/files/hid1_11.pdf",
+      "access_utc": "2026-11-11T23:40:14.698041+00:00",
+      "authority": "investigation/B4/sources/captures.json"
+    },
+    {
+      "path": "investigation/B4/sources/hut-1.5.pdf",
+      "kind": "original-specification-pdf",
+      "bytes": 4452110,
+      "sha256": "f4ead217b01134f89199155ed616d4eeae9ad40a5f73dad9544002b592c07db3",
+      "url": "https://usb.org/sites/default/files/hut1_5.pdf",
+      "access_utc": "2026-11-11T23:40:14.889957+00:00",
+      "authority": "investigation/B4/sources/captures.json"
+    },
+    {
+      "path": "investigation/B6/sources/scp03-1.1.2.pdf",
+      "kind": "original-specification-pdf",
+      "bytes": 487598,
+      "sha256": "973a10834f7fe8befd98da9af65393622234b80745092bd85248804c57b648dd",
+      "url": "https://globalplatform.org/wp-content/uploads/2014/07/GPC_2.3_D_SCP03_v1.1.2_PublicRelease.pdf",
+      "access_utc": "2026-11-11T23:28:58.587395+00:00",
+      "authority": "investigation/B6/sources/final-manifest.json"
+    },
+    {
+      "path": "investigation/B6/sources/scp11-public-review-1.3.0.13.pdf",
+      "kind": "original-specification-pdf",
+      "bytes": 799930,
+      "sha256": "5db47b3df3c4e565a5ad91257395604f3482ed5db70c64853544c3b0e289fde0",
+      "url": "https://globalplatform.org/wp-content/uploads/2023/08/GPC_2.3_F_SCP11_v1.3.0.13_PublicRvw.pdf",
+      "access_utc": "2026-11-11T23:28:59.790398+00:00",
+      "authority": "investigation/B6/sources/final-manifest.json",
+      "applicability": "Public-review edition; final SCP11 and vendor-profile clauses remain separately qualified."
     }
   ]
 }

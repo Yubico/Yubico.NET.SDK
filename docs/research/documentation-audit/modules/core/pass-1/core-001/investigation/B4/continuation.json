@@ -1,0 +1,9 @@
+{
+  "status": "PINNED-INVESTIGATION-COMPLETE",
+  "source_pin": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "remaining_unit_ids": [],
+  "remaining": [],
+  "next_candidate_number": "CORE-B4-C011",
+  "external_qualification_record": "qualification-gaps.json",
+  "late_windows_delta": "Ready handoff only; no unfinished branch/worktree inspected; focused reopening map in continuation-and-verification.md."
+}

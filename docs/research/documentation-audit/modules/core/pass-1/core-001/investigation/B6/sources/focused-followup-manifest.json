@@ -1,0 +1,20 @@
+[
+  {
+    "name": "scp03-public-review-1.1.2.6.pdf",
+    "url": "https://globalplatform.org/wp-content/uploads/2019/12/GPC_2.3_D_SCP03_v1.1.2.6.pdf",
+    "requested_utc": "2026-11-11T23:29:40.876245+00:00",
+    "error": "HTTP Error 403: Forbidden"
+  },
+  {
+    "name": "scp11-public-release-1.2.pdf",
+    "url": "https://globalplatform.org/wp-content/uploads/2017/09/GPC_2_3_F_SCP11_v1.2_PublicRelease.pdf",
+    "requested_utc": "2026-11-11T23:29:41.431498+00:00",
+    "error": "HTTP Error 403: Forbidden"
+  },
+  {
+    "name": "arraybufferwriter-v10.cs",
+    "url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.0/src/libraries/System.Private.CoreLib/src/System/Buffers/ArrayBufferWriter.cs",
+    "requested_utc": "2026-11-11T23:29:42.025323+00:00",
+    "error": "HTTP Error 404: Not Found"
+  }
+]

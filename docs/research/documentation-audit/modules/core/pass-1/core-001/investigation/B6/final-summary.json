@@ -1,0 +1,36 @@
+{
+  "source_pin": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "observed_metadata_head": "bb94f0884f63f260156227957d4cc112d984e300",
+  "state": "SOURCE-INVESTIGATION-COMPLETE",
+  "primary_files": 50,
+  "primary_lines": 9441,
+  "primary_unit_count": 668,
+  "shared_unit_count": 16,
+  "total_assigned_ids": 684,
+  "unit_dispositions": {
+    "READ-CONTEXT": 267,
+    "READ-CANDIDATE": 137,
+    "READ-CLEAN": 278,
+    "READ-HISTORICAL-CONTEXT": 2
+  },
+  "primary_dispositions": {
+    "READ-CONTEXT": 267,
+    "READ-CANDIDATE": 127,
+    "READ-CLEAN": 274
+  },
+  "shared_dispositions": {
+    "READ-CANDIDATE": 10,
+    "READ-CLEAN": 4,
+    "READ-HISTORICAL-CONTEXT": 2
+  },
+  "unread": 0,
+  "awaiting_context_or_final_triage": 0,
+  "local_concern_groups": 16,
+  "clean_nominees": 16,
+  "accepted_core_ids_allocated": 0,
+  "inherited_keys": 8,
+  "historical_checkpoint": "history/checkpoint-48-files/manifest.json",
+  "qualifications": "Bounded unavailable originals and later independent review/compilation/runtime/platform/device gates are separate from completed source reading.",
+  "new_sdk_execution_count": 0,
+  "writes": "B6 records only"
+}

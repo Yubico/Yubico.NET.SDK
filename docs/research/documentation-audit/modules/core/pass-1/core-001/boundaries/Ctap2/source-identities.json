@@ -1,0 +1,212 @@
+[
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/plan.md",
+    "sha256": "25e7fe9daf55fd02d1d7278c0571bb25590c4f32d7d60899c350cf44b16e0de1",
+    "bytes": 8865,
+    "role": "reused immutable authority/original or completed family evidence; semantic scope in sources.md"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/dispatch-map.md",
+    "sha256": "1747b280d659099cc140dbd548f2098ba5eb0c2bb405f63324c10bba57075673",
+    "bytes": 12020,
+    "role": "reused immutable authority/original or completed family evidence; semantic scope in sources.md"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory.md",
+    "sha256": "6c45a4b93a655a6f134c9e6b04e54d58545f24dd5c435e3b33118d364e2222b5",
+    "bytes": 20037,
+    "role": "reused immutable authority/original or completed family evidence; semantic scope in sources.md"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/inherited-findings.md",
+    "sha256": "541b5c88b4ab213e71c49c29b743f5e60846b11aaffcaf5a5692af02af209ce4",
+    "bytes": 10028,
+    "role": "reused immutable authority/original or completed family evidence; semantic scope in sources.md"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/inherited-findings/boundary-seeds.md",
+    "sha256": "9ed51a236bbe615c1afdfb4c92958eaa63c299b0be5546b8d7410951924c4ed3",
+    "bytes": 12918,
+    "role": "reused immutable authority/original or completed family evidence; semantic scope in sources.md"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/inherited-findings/registry.json",
+    "sha256": "da49c371613b2ddc2c9ec59e1aa87b0e68b5b4611f2b795d935aaaf23922a481",
+    "bytes": 709753,
+    "role": "reused immutable authority/original or completed family evidence; semantic scope in sources.md"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/inherited-routing.json",
+    "sha256": "6da8ae5538df16ed9d623986a32f77091ad1a8f0a741ee1298900ad13715326b",
+    "bytes": 146812,
+    "role": "reused immutable authority/original or completed family evidence; semantic scope in sources.md"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/inherited-packet-inputs.json",
+    "sha256": "8b4d36bda7feddb24af4df42f0160d79e300cd945421abc9515686dba6c4d881",
+    "bytes": 42398,
+    "role": "reused immutable authority/original or completed family evidence; semantic scope in sources.md"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/packets/BOUNDARY-Ctap2.json",
+    "sha256": "1869ddeaed02256155eb155ea16d9985ced562b6a759388d845de5b3fecefc6a",
+    "bytes": 48622,
+    "role": "reused immutable authority/original or completed family evidence; semantic scope in sources.md"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sources/python/context.md",
+    "sha256": "68694ce44329e1d16d56f048cfe4f1c1ad6c7d12152f92f703e1c8b3671d9ba7",
+    "bytes": 7589,
+    "role": "reused immutable authority/original or completed family evidence; semantic scope in sources.md"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sources/python/manifest.json",
+    "sha256": "c0359b1a331c66b5e0aa594b0e11fa1342a92fc362e3b3600e069c5a6c0f76b3",
+    "bytes": 4161,
+    "role": "reused immutable authority/original or completed family evidence; semantic scope in sources.md"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-A.md",
+    "sha256": "97489191c737d17b705084e78a5c6dacc64aa2d982d7554d6f53968be8d24256",
+    "bytes": 40551,
+    "role": "reused immutable authority/original or completed family evidence; semantic scope in sources.md"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-B1.md",
+    "sha256": "2dcfa9c987390940ad44e90298d91ebcccd4ad009ccea473a2995c9f67e8bc4d",
+    "bytes": 26371,
+    "role": "reused immutable authority/original or completed family evidence; semantic scope in sources.md"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-B2.md",
+    "sha256": "d3f576aa39639f2821c77cb29818a802c551a950e20861e8862570aeb43f779d",
+    "bytes": 15340,
+    "role": "reused immutable authority/original or completed family evidence; semantic scope in sources.md"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-B3.md",
+    "sha256": "13ee9f4c481c5ca4827d838dc8259b9b7d566cb548252f2d160c77a0ed3e11de",
+    "bytes": 17584,
+    "role": "reused immutable authority/original or completed family evidence; semantic scope in sources.md"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-C.md",
+    "sha256": "cef485c07823d4959f353532846d2f81e84c8d1bbd20ffd0820f2046a8543b34",
+    "bytes": 19154,
+    "role": "reused immutable authority/original or completed family evidence; semantic scope in sources.md"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation-B5.md",
+    "sha256": "5c9b80dcf2351d22bf179584c9fd8a105f897a33efeebfff34e1cfd72e7ab186",
+    "bytes": 13553,
+    "role": "reused immutable authority/original or completed family evidence; semantic scope in sources.md"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B5/sources/register.md",
+    "sha256": "64fd3a505c69cf88f12481f4afe02c0bd52d170087d7f8e716d5db4d82b53ccc",
+    "bytes": 12112,
+    "role": "reused immutable authority/original or completed family evidence; semantic scope in sources.md"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B5/sources/captures.json",
+    "sha256": "d48bb33d2b5856459da3613d4f7ac58c1cae599c0d950a3aa387447c0bd3d217",
+    "bytes": 3851,
+    "role": "reused immutable authority/original or completed family evidence; semantic scope in sources.md"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B5/sources/captures-followup.json",
+    "sha256": "b7b3dccb8a09864635aae77dccfcc47afde50c67d5166654ab25422b983285c5",
+    "bytes": 974,
+    "role": "reused immutable authority/original or completed family evidence; semantic scope in sources.md"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B5/sources/ctap20.html",
+    "sha256": "2294baef2eb10827fc07ab031632269bfc61192e3e23395aa9355afb98cce58e",
+    "bytes": 332424,
+    "role": "reused immutable authority/original or completed family evidence; semantic scope in sources.md"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B5/sources/ctap21.html",
+    "sha256": "9273020f60376b746d27cb5af840ecf7586bb35ab3f5c60e4373019df11aad61",
+    "bytes": 1059428,
+    "role": "reused immutable authority/original or completed family evidence; semantic scope in sources.md"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B5/sources/ctap23.html",
+    "sha256": "c8d8100f8b9153ce4daf5eba0fdfc663975e82ac6e18bfb899884f14e8c60722",
+    "bytes": 1372350,
+    "role": "reused immutable authority/original or completed family evidence; semantic scope in sources.md"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B5/sources/ctap21.txt",
+    "sha256": "97960d3aff3b1d266cdcb6e8e1ee2802df5629b0c420bc6e0192d6b1841ed71f",
+    "bytes": 487139,
+    "role": "reused immutable authority/original or completed family evidence; semantic scope in sources.md"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B5/sources/ctap23.txt",
+    "sha256": "e36c7e9111613ed7d821e47ddfcf86ec1d782c4f5666e00549a2724087799faf",
+    "bytes": 814656,
+    "role": "reused immutable authority/original or completed family evidence; semantic scope in sources.md"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/C/sources/final-source-register.md",
+    "sha256": "6078fe5116d94de6ae580797220f0e190bc322a6a4b0b8c6817626e5630fb23e",
+    "bytes": 13576,
+    "role": "reused immutable authority/original or completed family evidence; semantic scope in sources.md"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B3/sources/register.md",
+    "sha256": "260ed909a8c3f4db3556b404118a956be9a78577e3b52d9f5ca63a6d25008c10",
+    "bytes": 9881,
+    "role": "reused immutable authority/original or completed family evidence; semantic scope in sources.md"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/triage.md",
+    "sha256": "0b82744aff3cb26c397b00a770eebdef016b0a4dc0bc34e962799a57261e22d6",
+    "bytes": 19867,
+    "role": "reused immutable authority/original or completed family evidence; semantic scope in sources.md"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/triage-addendum.md",
+    "sha256": "359113bcb6e038645dcc48747be1b1b87a46d3cba304ab6b091d61d90df26655",
+    "bytes": 34358,
+    "role": "reused immutable authority/original or completed family evidence; semantic scope in sources.md"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/boundary-final.md",
+    "sha256": "f20feca7265bba49475e8f0be97c4140675632478a1e21789dd95d8459effa00",
+    "bytes": 33328,
+    "role": "reused immutable authority/original or completed family evidence; semantic scope in sources.md"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/boundary-review-final.md",
+    "sha256": "641c8276f01086d4994570b212cd9937fbe699e7bb25a6c9d1a131ca818b9f66",
+    "bytes": 4791,
+    "role": "reused immutable authority/original or completed family evidence; semantic scope in sources.md"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/evidence/e/primary-excerpts.md",
+    "sha256": "c4237983e7d975dfbc3a2956ef4aabf51e7b619a4c56abcca13b7ab22e4673af",
+    "bytes": 12928,
+    "role": "reused immutable authority/original or completed family evidence; semantic scope in sources.md"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/evidence/g/boundary-originals.md",
+    "sha256": "1f775eead1bc5e28c1bc386f4b8932f64015679cdcfffd77c9cddce52b60d3bc",
+    "bytes": 10767,
+    "role": "reused immutable authority/original or completed family evidence; semantic scope in sources.md"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/evidence/framework/Guid-v10.0.14.cs",
+    "sha256": "8849825055730b57406e92c1851d5d7fd868d0981fed619b658082578ef219a8",
+    "bytes": 73290,
+    "role": "reused immutable authority/original or completed family evidence; semantic scope in sources.md"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/ctap2/pass-1/ctap2-001/evidence/framework/CborWriter-v10.0.2.cs",
+    "sha256": "0c0d9dd6700e689529a5c70f0ee7e2f1e5475977103221e48e7f8afaa0ee4be2",
+    "bytes": 22198,
+    "role": "reused immutable authority/original or completed family evidence; semantic scope in sources.md"
+  }
+]

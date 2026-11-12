@@ -1,0 +1,14 @@
+{
+  "source_pin": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "selected_ids_exact": true,
+  "duplicate_disposition_ids": false,
+  "identity_failures": [],
+  "protected_input_hashes": {
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/user-work-baseline.json": "8515cd743225e2c74b1249d0b7dc41226575f8a4d006835bafab3c25b0c95dc8",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/baseline.json": "a901bda4ebcbb0c8e7298fb577d56c88a2f9da8ff8938e3d5e5dd7c30714a5fa",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/semantic-units.json": "f358fb02b124714e92f45a5d7d65886ebd2d2f864e3a8214bb38dbd25a72d1cf",
+    "docs/research/documentation-audit/modules/core/pass-1/core-001/inventory/shared-sections.json": "148a865f7883cd0bde059226553c6cb31b7ea80506bd9669d3e60da0ffabdd0e"
+  },
+  "executed": "Python/Git reads, HTTP source capture and B4-only record writes; zero SDK/native/device executions.",
+  "claims": "Structural checks verify record/source identities, never semantic completeness."
+}

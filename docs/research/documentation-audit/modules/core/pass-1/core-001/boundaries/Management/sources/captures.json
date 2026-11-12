@@ -1,0 +1,24 @@
+[
+  {
+    "url": "https://docs.yubico.com/yesdk/users-manual/sdk-programming-guide/bio-mpe.html",
+    "final_url": "https://docs.yubico.com/yesdk/users-manual/sdk-programming-guide/bio-mpe.html",
+    "status": 200,
+    "access_utc": "2026-11-11T23:44:42.871326+00:00",
+    "last_modified": "Fri, 30 Oct 2026 16:12:40 GMT",
+    "sha256": "180641a30a73463bca30121f2186919b4452725f193ae825341476d5c7fd2c5a",
+    "bytes": 14060,
+    "retained_path": "bio-mpe.html",
+    "authority": "Unversioned manufacturer product/legacy-SDK description; no current v2 API or physical acceptance inferred."
+  },
+  {
+    "url": "https://docs.yubico.com/yesdk/yubikey-api/Yubico.YubiKey.Management.Commands.DeviceResetCommand.html",
+    "final_url": "https://docs.yubico.com/yesdk/yubikey-api/Yubico.YubiKey.Management.Commands.DeviceResetCommand.html",
+    "status": 200,
+    "access_utc": "2026-11-11T23:44:42.975868+00:00",
+    "last_modified": "Fri, 30 Oct 2026 16:12:41 GMT",
+    "sha256": "e818b46ccfbcc6bf3c58b1b7283a4adc0ebe6fe3322d9c38cffebe6e1235bbf0",
+    "bytes": 11803,
+    "retained_path": "device-reset-command.html",
+    "authority": "Unversioned manufacturer product/legacy-SDK description; no current v2 API or physical acceptance inferred."
+  }
+]

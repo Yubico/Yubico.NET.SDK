@@ -1,0 +1,60 @@
+{
+  "kind": "RECORDS-ONLY; not SDK tests, independent semantic review, or completion of B6",
+  "ids_checked": 684,
+  "primary_files_completely_read": 48,
+  "shared_ids_read": 16,
+  "unread": [
+    {
+      "id": "core-001:unit:59c33b8c7c8f294c",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/SmartCard/Scp/ansx963_2001.rsp"
+    },
+    {
+      "id": "core-001:unit:24a290b7fd0ed693",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/SmartCard/Scp/ansx963_2001.txt"
+    }
+  ],
+  "pending_related_context_triage": 662,
+  "inherited_keys_checked": 8,
+  "clean_nominees_checked": 8,
+  "retained_sources_and_derivatives": [
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B6/sources/scp03-1.1.2.pdf",
+      "sha256": "973a10834f7fe8befd98da9af65393622234b80745092bd85248804c57b648dd",
+      "manifest": "initial-download-manifest.json"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B6/sources/scp11-public-review-1.3.0.13.pdf",
+      "sha256": "5db47b3df3c4e565a5ad91257395604f3482ed5db70c64853544c3b0e289fde0",
+      "manifest": "initial-download-manifest.json"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B6/sources/scp11-catalogue.html",
+      "sha256": "6219c1139a5c4f41f39ed27a6c95633ffdb55d1a9824ef877de6b087fb2b61a5",
+      "manifest": "initial-download-manifest.json"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B6/sources/scp03-catalogue.html",
+      "sha256": "86fa3f52729c26bcb3aa35eb9ecd50473ef074c56cb3dca0c2ce63d47b1434b8",
+      "manifest": "initial-download-manifest.json"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B6/sources/yubico-profile.html",
+      "sha256": "4314cfaa8c56f27c684d5323f386f830da95897bc678c0b96209a9245460b0c0",
+      "manifest": "initial-download-manifest.json"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B6/sources/scp03-1.1.2.txt",
+      "sha256": "921d503eea2e236a95430358e553cc9ce029b41ef6d4e874b355515d79bef6b7",
+      "role": "pdftotext -layout reading derivative"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B6/sources/scp11-public-review-1.3.0.13.txt",
+      "sha256": "59dddee8b2baa28964d5c3acb4d603f45c48a6055aef5452840a920849e55543",
+      "role": "pdftotext -layout reading derivative"
+    }
+  ],
+  "authored_local_links_checked": 15,
+  "source_and_assertion_edits": "none authorized or made",
+  "new_sdk_execution_count": 0,
+  "scope": "All684 original unit IDs/raw-range identities and packet partitions reconciled; original downloads match manifest; authored record links/fences checked."
+}

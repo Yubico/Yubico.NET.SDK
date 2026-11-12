@@ -1,0 +1,756 @@
+[
+  {
+    "id": "CORE-B5-C001",
+    "canonical_accepted_id": null,
+    "unit_ids": [
+      "core-001:unit:c7efad99afd618f3",
+      "core-001:unit:cdb92a387279e464",
+      "core-001:unit:5d14103a2630dac0",
+      "core-001:unit:da4452142afe2119",
+      "core-001:unit:28d27ee878322a00",
+      "core-001:unit:46ebe281fd67872b",
+      "core-001:unit:a31cac4b6e482a9f",
+      "core-001:unit:036e5d6208295bde",
+      "core-001:unit:e1fd8e7f0321811d",
+      "core-001:unit:7958d0703696b837",
+      "core-001:unit:9c86e938e4708d6e",
+      "core-001:unit:0803124846ae7828",
+      "core-001:unit:548fd4dd7ae8184d",
+      "core-001:unit:6c32785ea767d45d",
+      "core-001:unit:50b59c62c985ef8f",
+      "core-001:unit:33ae8acf2460be87",
+      "core-001:unit:f8d1989ef82a9138",
+      "core-001:unit:8ece2813b449c1a3",
+      "core-001:unit:269746640823eea4",
+      "core-001:unit:8ad058f85defa68e",
+      "core-001:unit:1e08b68eca850eec",
+      "core-001:unit:aad2750b841235be",
+      "core-001:unit:e7eed88f17ee547d",
+      "core-001:unit:23faca1ebe4502c7",
+      "core-001:unit:097cf4f60caefb84",
+      "core-001:unit:4cb22a75093d26e0",
+      "core-001:unit:e63ac0e6fc5ace49",
+      "core-001:unit:4f888bc8469192df",
+      "core-001:unit:1ed10d86028efc66",
+      "core-001:unit:6a730ef8845ddf3c",
+      "core-001:unit:9cc5bf091d1f7fcd",
+      "core-001:unit:d93aaf04e4318051",
+      "core-001:unit:2acc249f85fc6d36",
+      "core-001:unit:2329bfeabd7faf63",
+      "core-001:unit:f6483db81f6f048e",
+      "core-001:unit:d0f7ff1289a8023b",
+      "core-001:unit:14aa0019ca75eaf0",
+      "core-001:unit:28037a9b0dffae8d",
+      "core-001:unit:13572f6be02741d4",
+      "core-001:unit:d6b228fdb13ab417",
+      "core-001:unit:1d3fe56a8baa414a",
+      "core-001:unit:3b82efe0a9a7aee3",
+      "core-001:unit:8f68ef659f5a0e3d",
+      "core-001:unit:fce2188000ccc79f",
+      "core-001:unit:de45cafad3d99a58",
+      "core-001:unit:8c70f4cf5a322fe9",
+      "core-001:unit:ce4f782aab106080"
+    ],
+    "candidate_associated_unchanged_paths": [
+      {
+        "path": "docs/SDK-HOUSE-STYLE.md",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      },
+      {
+        "path": "docs/architecture/raw-access-tiers.md",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      },
+      {
+        "path": "docs/migration/v1-to-v2.md",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      },
+      {
+        "path": "docs/v1-to-v2-comparison.md",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      },
+      {
+        "path": "docs/v2-highlights.md",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      },
+      {
+        "path": "src/Core/CLAUDE.md",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      },
+      {
+        "path": "src/Core/README.md",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      },
+      {
+        "path": "src/Core/src/Abstractions/IApplicationSession.cs",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      },
+      {
+        "path": "src/Core/src/Sessions/ApplicationSession.cs",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      },
+      {
+        "path": "src/Core/src/Sessions/RawCtapHidSession.cs",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      },
+      {
+        "path": "src/Core/src/Sessions/RawOtpHidSession.cs",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      },
+      {
+        "path": "src/Core/src/Sessions/RawSmartCardSession.cs",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      },
+      {
+        "path": "src/Core/src/Sessions/SessionCreationOptions.cs",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      },
+      {
+        "path": "src/Management/src/ManagementSession.cs",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "narrow dependency / future owner; no whole-file disposition"
+      },
+      {
+        "path": "src/SecurityDomain/src/SecurityDomainSession.cs",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "narrow dependency / future owner; no whole-file disposition"
+      }
+    ],
+    "documentation": "CANDIDATE-TRIAGE",
+    "implementation": "NOT-FIXED; decisions in candidates.md",
+    "qualification": "NO-NEW-RUNTIME-PROOF",
+    "independent_review": "PENDING"
+  },
+  {
+    "id": "CORE-B5-C002",
+    "canonical_accepted_id": null,
+    "unit_ids": [
+      "core-001:unit:f8cbb7a551e6016e",
+      "core-001:unit:1ec8a105c8be433f",
+      "core-001:unit:53aaffa02e58ec1f",
+      "core-001:unit:b1e084d179db6039",
+      "core-001:unit:5c5867c122bf78b9",
+      "core-001:unit:b1a19380b6159d13",
+      "core-001:unit:2dc0e9094427136b",
+      "core-001:unit:e7eed88f17ee547d",
+      "core-001:unit:8471724a7e40de20",
+      "core-001:unit:0fcd2ecfdebb0cf3",
+      "core-001:unit:daecccd8060f88f1",
+      "core-001:unit:0b53788fa89bf09f",
+      "core-001:unit:a4e1bf076a3b4840",
+      "core-001:unit:160da8a040d2bc5b",
+      "core-001:unit:017400764a7eea12",
+      "core-001:unit:4ebb5dd14764295c",
+      "core-001:unit:604b8d2421d76d79",
+      "core-001:unit:197ff074340e9a0e"
+    ],
+    "candidate_associated_unchanged_paths": [
+      {
+        "path": "docs/architecture/raw-access-tiers.md",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      },
+      {
+        "path": "src/Core/CLAUDE.md",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      },
+      {
+        "path": "src/Core/README.md",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      },
+      {
+        "path": "src/Core/src/Protocols/Fido/Hid/FidoHidProtocol.cs",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      },
+      {
+        "path": "src/Core/src/Protocols/Fido/Hid/IFidoHidProtocol.cs",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      },
+      {
+        "path": "src/Core/src/Sessions/RawCtapHidSession.cs",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Fido/Hid/FidoHidProtocolTests.cs",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      },
+      {
+        "path": "src/Ctap2/src/Backend/HidBackend.cs",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "narrow dependency / future owner; no whole-file disposition"
+      },
+      {
+        "path": "src/WebAuthn/src/Client/CeremonyDeadline.cs",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "narrow dependency / future owner; no whole-file disposition"
+      }
+    ],
+    "documentation": "CANDIDATE-TRIAGE",
+    "implementation": "NOT-FIXED; decisions in candidates.md",
+    "qualification": "NO-NEW-RUNTIME-PROOF",
+    "independent_review": "PENDING"
+  },
+  {
+    "id": "CORE-B5-C003",
+    "canonical_accepted_id": null,
+    "unit_ids": [
+      "core-001:unit:57b8e8cf8053107f",
+      "core-001:unit:b6a85d3192dceedb",
+      "core-001:unit:1ec8a105c8be433f",
+      "core-001:unit:53aaffa02e58ec1f",
+      "core-001:unit:b1e084d179db6039",
+      "core-001:unit:5bef2866e0981f3e",
+      "core-001:unit:63b18cdc5393ba40",
+      "core-001:unit:d251260bc471af93",
+      "core-001:unit:478a3b187f510bbe",
+      "core-001:unit:0373ed1006801700",
+      "core-001:unit:e54232b12fff99be",
+      "core-001:unit:d78f906718363ec6",
+      "core-001:unit:f735527f2549ac1d",
+      "core-001:unit:ed08d0e6c0bf6d49",
+      "core-001:unit:d557c5153be0a296",
+      "core-001:unit:47bbe8f9d8389d2f",
+      "core-001:unit:f038476f58045d84",
+      "core-001:unit:917a64fce4259717",
+      "core-001:unit:28e791bb7fce7dad",
+      "core-001:unit:8c6b27dbc41b0c78",
+      "core-001:unit:3e65541b72d351f9",
+      "core-001:unit:09b8d352512a2b6a",
+      "core-001:unit:cdc1d3be3b5ae318",
+      "core-001:unit:e704a38f149f0c7b",
+      "core-001:unit:1dde96db8244868b",
+      "core-001:unit:01003be2f7d65288",
+      "core-001:unit:33fa14a3b8762cd3",
+      "core-001:unit:af87be6c80d27a02",
+      "core-001:unit:d1580d888d0a8a18"
+    ],
+    "candidate_associated_unchanged_paths": [
+      {
+        "path": "docs/architecture/raw-access-tiers.md",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      },
+      {
+        "path": "src/Core/README.md",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      },
+      {
+        "path": "src/Core/src/Protocols/Fido/Hid/FidoHidProtocol.cs",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Fido/Hid/FidoHidProtocolTests.cs",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      }
+    ],
+    "documentation": "CANDIDATE-TRIAGE",
+    "implementation": "NOT-FIXED; decisions in candidates.md",
+    "qualification": "NO-NEW-RUNTIME-PROOF",
+    "independent_review": "PENDING"
+  },
+  {
+    "id": "CORE-B5-C004",
+    "canonical_accepted_id": null,
+    "unit_ids": [
+      "core-001:unit:cad893c0ef760598",
+      "core-001:unit:3f8adbecfdbaddfc",
+      "core-001:unit:f7b6973e21bd166f",
+      "core-001:unit:d55c158fcbb01fdc",
+      "core-001:unit:ac3ad1bdc3537fe6",
+      "core-001:unit:e7eed88f17ee547d",
+      "core-001:unit:1ed10d86028efc66",
+      "core-001:unit:604b8d2421d76d79",
+      "core-001:unit:197ff074340e9a0e",
+      "core-001:unit:e69894b46c744fcb"
+    ],
+    "candidate_associated_unchanged_paths": [
+      {
+        "path": "docs/architecture/raw-access-tiers.md",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      },
+      {
+        "path": "src/Core/CLAUDE.md",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      },
+      {
+        "path": "src/Core/README.md",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      },
+      {
+        "path": "src/Core/src/Protocols/Fido/Hid/IFidoHidConnection.cs",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      },
+      {
+        "path": "src/Core/src/Sessions/RawCtapHidSession.cs",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      },
+      {
+        "path": "src/Core/src/Sessions/RawOtpHidSession.cs",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      },
+      {
+        "path": "src/Core/src/Transports/Hid/IOtpHidConnection.cs",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "narrow dependency / future owner; no whole-file disposition"
+      }
+    ],
+    "documentation": "CANDIDATE-TRIAGE",
+    "implementation": "NOT-FIXED; decisions in candidates.md",
+    "qualification": "NO-NEW-RUNTIME-PROOF",
+    "independent_review": "PENDING"
+  },
+  {
+    "id": "CORE-B5-C005",
+    "canonical_accepted_id": null,
+    "unit_ids": [
+      "core-001:unit:f8cbb7a551e6016e",
+      "core-001:unit:1ec8a105c8be433f",
+      "core-001:unit:63b18cdc5393ba40",
+      "core-001:unit:d251260bc471af93",
+      "core-001:unit:919148aa6538c226",
+      "core-001:unit:d991f69c9564f534",
+      "core-001:unit:5902305ddcc386f6",
+      "core-001:unit:1d9a347723311f97",
+      "core-001:unit:1a5c6a55d327ee54",
+      "core-001:unit:2e57ecd123c1f8a2",
+      "core-001:unit:9be2ecdeb70cb636",
+      "core-001:unit:d1580d888d0a8a18",
+      "core-001:unit:5556bcf56ba54b25",
+      "core-001:unit:4c840999e29b86a1",
+      "core-001:unit:916ee306765f2ce7",
+      "core-001:unit:446afaeff7245467",
+      "core-001:unit:7c553593acc0012f",
+      "core-001:unit:7ee7f69146cb64a4",
+      "core-001:unit:eca00131f5c8126b",
+      "core-001:unit:85848b778da72846",
+      "core-001:unit:fa6f90bfab0ed825",
+      "core-001:unit:42ad58eb9474b888",
+      "core-001:unit:b50c9f9296daa7ca",
+      "core-001:unit:cbcf6ba9966471b0",
+      "core-001:unit:ef339f391a0eea20"
+    ],
+    "candidate_associated_unchanged_paths": [
+      {
+        "path": "docs/MEMORY-MANAGEMENT.md",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "narrow dependency / future owner; no whole-file disposition"
+      },
+      {
+        "path": "docs/usage/user-interaction.md",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "narrow dependency / future owner; no whole-file disposition"
+      },
+      {
+        "path": "src/Core/src/Protocols/Fido/Hid/FidoHidProtocol.cs",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      },
+      {
+        "path": "src/Core/src/Protocols/Otp/Hid/OtpHidProtocol.cs",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      },
+      {
+        "path": "src/Core/src/Transports/Hid/IOtpHidConnection.cs",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "narrow dependency / future owner; no whole-file disposition"
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Fido/Hid/FidoHidProtocolTests.cs",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Otp/Hid/OtpHidProtocolTests.cs",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      },
+      {
+        "path": "src/Ctap2/src/Backend/HidBackend.cs",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "narrow dependency / future owner; no whole-file disposition"
+      },
+      {
+        "path": "src/YubiOtp/src/Backend/HidBackend.cs",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "narrow dependency / future owner; no whole-file disposition"
+      }
+    ],
+    "documentation": "CANDIDATE-TRIAGE",
+    "implementation": "NOT-FIXED; decisions in candidates.md",
+    "qualification": "NO-NEW-RUNTIME-PROOF",
+    "independent_review": "PENDING"
+  },
+  {
+    "id": "CORE-B5-C006",
+    "canonical_accepted_id": null,
+    "unit_ids": [
+      "core-001:unit:d0ffb7eae3335674",
+      "core-001:unit:577cfa4781587da8",
+      "core-001:unit:dadba42da7a71e31",
+      "core-001:unit:1ded1b88a4f2dc3f",
+      "core-001:unit:19a71234f37d8c78",
+      "core-001:unit:f259753163fca89e",
+      "core-001:unit:1f868779a4f806bb",
+      "core-001:unit:590567486df6356f",
+      "core-001:unit:8a27fa7d810c3cba",
+      "core-001:unit:0803124846ae7828",
+      "core-001:unit:548fd4dd7ae8184d",
+      "core-001:unit:6c32785ea767d45d",
+      "core-001:unit:50b59c62c985ef8f",
+      "core-001:unit:33ae8acf2460be87",
+      "core-001:unit:f8d1989ef82a9138",
+      "core-001:unit:e71140522d6b64e9",
+      "core-001:unit:1fa9bd11b27d4e3d",
+      "core-001:unit:43f412b2ba5419ec",
+      "core-001:unit:34e9acc053297a26",
+      "core-001:unit:f763e705d2ad23a9",
+      "core-001:unit:2f36ecda10dcddef",
+      "core-001:unit:09450dba5e20108e",
+      "core-001:unit:6d80f9ba9d7f432d",
+      "core-001:unit:51e7819edbe9f97a",
+      "core-001:unit:d413feb148a21929",
+      "core-001:unit:5c7cf44780fe2554",
+      "core-001:unit:a200b65eb769e227",
+      "core-001:unit:bdd9b9ac44d12a98",
+      "core-001:unit:f2549f4b5f919f47",
+      "core-001:unit:77f6df12e9ecc416",
+      "core-001:unit:7b544f80417706f9",
+      "core-001:unit:11a0746ddf689437",
+      "core-001:unit:60849efdb8bed2c5",
+      "core-001:unit:f48af365dff7b56a",
+      "core-001:unit:3b82efe0a9a7aee3",
+      "core-001:unit:604b8d2421d76d79",
+      "core-001:unit:e69894b46c744fcb",
+      "core-001:unit:8f68ef659f5a0e3d",
+      "core-001:unit:8c70f4cf5a322fe9",
+      "core-001:unit:ce4f782aab106080"
+    ],
+    "candidate_associated_unchanged_paths": [
+      {
+        "path": "docs/SDK-HOUSE-STYLE.md",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      },
+      {
+        "path": "docs/architecture/raw-access-tiers.md",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      },
+      {
+        "path": "docs/migration/v1-to-v2.md",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      },
+      {
+        "path": "docs/usage/user-interaction.md",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "narrow dependency / future owner; no whole-file disposition"
+      },
+      {
+        "path": "src/Core/CLAUDE.md",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      },
+      {
+        "path": "src/Core/README.md",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      },
+      {
+        "path": "src/Core/src/Abstractions/IProtocol.cs",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      },
+      {
+        "path": "src/Core/src/Protocols/Otp/Hid/OtpHidProtocol.cs",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      },
+      {
+        "path": "src/Core/src/Sessions/ApplicationSession.cs",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      },
+      {
+        "path": "src/Core/src/Utilities/ExchangeGuard.cs",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      }
+    ],
+    "documentation": "CANDIDATE-TRIAGE",
+    "implementation": "NOT-FIXED; decisions in candidates.md",
+    "qualification": "NO-NEW-RUNTIME-PROOF",
+    "independent_review": "PENDING"
+  },
+  {
+    "id": "CORE-B5-C007",
+    "canonical_accepted_id": null,
+    "unit_ids": [
+      "core-001:unit:c8334c580b8db509",
+      "core-001:unit:1d6339a0b69bfbd4",
+      "core-001:unit:02212239c91ff162",
+      "core-001:unit:8d93a47c2c8333ae",
+      "core-001:unit:5f556e5d54b34f57",
+      "core-001:unit:943f149afa751236",
+      "core-001:unit:acc7509df1e3806b",
+      "core-001:unit:c23b9ece05351355",
+      "core-001:unit:bd1f52d2dd81686b",
+      "core-001:unit:919148aa6538c226",
+      "core-001:unit:d991f69c9564f534",
+      "core-001:unit:5902305ddcc386f6",
+      "core-001:unit:1d9a347723311f97",
+      "core-001:unit:dd0f053f6d649c0c"
+    ],
+    "candidate_associated_unchanged_paths": [
+      {
+        "path": "docs/architecture/raw-access-tiers.md",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      },
+      {
+        "path": "src/Core/src/Protocols/Otp/Hid/IOtpHidProtocol.cs",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      },
+      {
+        "path": "src/Core/src/Protocols/Otp/Hid/OtpConstants.cs",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      },
+      {
+        "path": "src/Core/src/Protocols/Otp/Hid/OtpHidProtocol.cs",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      },
+      {
+        "path": "src/YubiOtp/src/Backend/HidBackend.cs",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "narrow dependency / future owner; no whole-file disposition"
+      }
+    ],
+    "documentation": "CANDIDATE-TRIAGE",
+    "implementation": "NOT-FIXED; decisions in candidates.md",
+    "qualification": "NO-NEW-RUNTIME-PROOF",
+    "independent_review": "PENDING"
+  },
+  {
+    "id": "CORE-B5-C008",
+    "canonical_accepted_id": null,
+    "unit_ids": [
+      "core-001:unit:52a7d08d211c4c05",
+      "core-001:unit:d6e3daa547bca707",
+      "core-001:unit:fa8a6f636994b6a2",
+      "core-001:unit:7f6d5da6ca550b70",
+      "core-001:unit:9b3f4ce36036a497",
+      "core-001:unit:76c1c1d5394629ae",
+      "core-001:unit:97cdc1bfb84d3d12",
+      "core-001:unit:d39e5f334ae26a45",
+      "core-001:unit:8fc80a3415b48c91",
+      "core-001:unit:d80bcd699a83ed6c",
+      "core-001:unit:f84aa2d8196476f4",
+      "core-001:unit:4b34259a67cfe273",
+      "core-001:unit:cdda525387acbc71",
+      "core-001:unit:8471724a7e40de20",
+      "core-001:unit:0fcd2ecfdebb0cf3",
+      "core-001:unit:0b53788fa89bf09f",
+      "core-001:unit:a4e1bf076a3b4840",
+      "core-001:unit:10490e3a793bdfa6",
+      "core-001:unit:a15da83eb1afea27",
+      "core-001:unit:d0d2c0e955b1f1ba",
+      "core-001:unit:e1d1990346d59b06",
+      "core-001:unit:14cff0763747498f",
+      "core-001:unit:cd671fa8427092b8",
+      "core-001:unit:881562a0d67f7dc7",
+      "core-001:unit:be9a4106a0ed40f7",
+      "core-001:unit:38c672fd3533fbe8",
+      "core-001:unit:74d0a4541f5c87ef",
+      "core-001:unit:cc3d0c4d77c71644",
+      "core-001:unit:fb84bf00d7265a52",
+      "core-001:unit:f9630f456c40bf52",
+      "core-001:unit:2eddd78cc3dfde66",
+      "core-001:unit:f5e3d2063bbdcc03",
+      "core-001:unit:d029af1604c08072",
+      "core-001:unit:438ccf0a63c09b2d",
+      "core-001:unit:a499376ab9455cbe",
+      "core-001:unit:0c49929250489a41",
+      "core-001:unit:62b1a36ccd18de04",
+      "core-001:unit:4c1b12ddb5d74d97",
+      "core-001:unit:d9b8bcb65420654d",
+      "core-001:unit:a210f3f1e8eb3907",
+      "core-001:unit:10c5f1298a44ddd3",
+      "core-001:unit:c94022ab6a156076",
+      "core-001:unit:b70d16f057b7fd44",
+      "core-001:unit:405440f350e7769f",
+      "core-001:unit:577b33982783a0b8",
+      "core-001:unit:2eb636ac268bb9a6",
+      "core-001:unit:d8911e9de705c723",
+      "core-001:unit:055f8be0856730fc",
+      "core-001:unit:2135bf70d821de51",
+      "core-001:unit:bed644857f5d9c33",
+      "core-001:unit:e9d7aca8f4f68210",
+      "core-001:unit:d6af94e2c0b6b1a4",
+      "core-001:unit:8ed6169eb7c868fb",
+      "core-001:unit:6d021b292c7b1434",
+      "core-001:unit:8ff2e7094cc9295f",
+      "core-001:unit:e69894b46c744fcb"
+    ],
+    "candidate_associated_unchanged_paths": [
+      {
+        "path": "docs/architecture/raw-access-tiers.md",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      },
+      {
+        "path": "src/Core/CLAUDE.md",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      },
+      {
+        "path": "src/Core/README.md",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Fido/Hid/FidoHidProtocolConcurrencyTests.cs",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Fido/Hid/FidoHidProtocolTests.cs",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/Otp/Hid/OtpHidProtocolConcurrencyTests.cs",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/ApplicationSessionDisposalTests.cs",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/RawCtapHidSessionTests.cs",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/RawOtpHidSessionTests.cs",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/RawSessionYubiKeyExtensionsTests.cs",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/RawSmartCardSessionTests.cs",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/SessionConstructionGuardTests.cs",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/UserPresenceNotificationTests.cs",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Utilities/ExchangeGuardTests.cs",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      }
+    ],
+    "documentation": "CANDIDATE-TRIAGE",
+    "implementation": "NOT-FIXED; decisions in candidates.md",
+    "qualification": "NO-NEW-RUNTIME-PROOF",
+    "independent_review": "PENDING"
+  },
+  {
+    "id": "CORE-B5-C009",
+    "canonical_accepted_id": null,
+    "unit_ids": [
+      "core-001:unit:ccb24bb277015679",
+      "core-001:unit:f4d6b1f2bd76d6b3",
+      "core-001:unit:e04f646058d4dc11",
+      "core-001:unit:4a26f5eb924b0b4e",
+      "core-001:unit:dc1c19b8d927bb13",
+      "core-001:unit:77ee50d694a6b6f0",
+      "core-001:unit:b1c5a44497b2bdbb"
+    ],
+    "candidate_associated_unchanged_paths": [
+      {
+        "path": "docs/migration/v1-to-v2-changelog.md",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      },
+      {
+        "path": "docs/migration/v1-to-v2-map.yml",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      },
+      {
+        "path": "src/Core/src/Sessions/ConnectionSessionGuard.cs",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/ProtocolConnectionOwnershipTests.cs",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      },
+      {
+        "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Sessions/SessionConstructionGuardTests.cs",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      },
+      {
+        "path": "src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/AsyncSurfaceConventionTests.cs",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      },
+      {
+        "path": "src/PublicApi/tests/Yubico.YubiKit.PublicApi.UnitTests/FactoryShapeTests.cs",
+        "decision": "PRESERVE-BYTES; fresh editor/reviewer must retain or correct exact claim under candidates.md trigger",
+        "scope": "assigned B5 unit context"
+      }
+    ],
+    "documentation": "CANDIDATE-TRIAGE",
+    "implementation": "NOT-FIXED; decisions in candidates.md",
+    "qualification": "NO-NEW-RUNTIME-PROOF",
+    "independent_review": "PENDING"
+  }
+]

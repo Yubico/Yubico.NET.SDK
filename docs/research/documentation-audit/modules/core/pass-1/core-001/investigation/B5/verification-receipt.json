@@ -1,0 +1,18 @@
+{
+  "passed": true,
+  "primary_files": 43,
+  "primary_lines": 8830,
+  "primary_units": 893,
+  "shared_units": 39,
+  "selected_paths_verified": 59,
+  "original_raw_and_range_hashes_verified": 932,
+  "source_capture_rows_verified": 10,
+  "candidate_groups": 9,
+  "inherited_keys": 15,
+  "clean_nominees": 13,
+  "local_links_checked": 18,
+  "sdk_execution": false,
+  "compiler_execution": false,
+  "native_device_execution": false,
+  "scope": "Static identities, IDs, JSON, original captures and authored-record links/fences only; independent semantic review pending."
+}

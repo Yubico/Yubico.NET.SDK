@@ -1,0 +1,101 @@
+[
+  {
+    "key": "management-001:MGMT-XREF-001",
+    "inherited_state_preserved": "reproducible-from-source",
+    "original_definition": {
+      "path": "docs/research/documentation-audit/modules/management/pass-1/management-001/triage.md",
+      "start_line": 60,
+      "end_line": 60,
+      "text": "| MGMT-XREF-001 | A-13; Core DeviceInfo FIPS tags use application-bit decoder despite distinct local/sibling FIPS mapping; unused FromFips has an additional width concern. | Separately scoped Core/Pass-2 decoding and filter work needs authoritative fixtures and width tests. Re-review Core metadata XML, Management FIPS use/test comments and Tests.Shared filtering. Not hardware-qualified or a certification finding. |"
+    },
+    "boundary_return": "See boundary-Management.md inherited-outcomes table; original authoritative state remains unchanged."
+  },
+  {
+    "key": "management-001:MGMT-XREF-002",
+    "inherited_state_preserved": "reproducible-from-source",
+    "original_definition": {
+      "path": "docs/research/documentation-audit/modules/management/pass-1/management-001/triage.md",
+      "start_line": 61,
+      "end_line": 61,
+      "text": "| MGMT-XREF-002 | A-14; Core casts raw flagged form-factor byte to non-flags enum, so e.g. vendor 0x81 differs from UsbAKeychain. | Decide normalized/raw forward-compatible representation and verify flagged fixtures. Re-review Management display/filter guidance and Core/Tests.Shared contracts. Core runtime remains deferred. |"
+    },
+    "boundary_return": "See boundary-Management.md inherited-outcomes table; original authoritative state remains unchanged."
+  },
+  {
+    "key": "management-001:MGMT-XREF-003",
+    "inherited_state_preserved": "changed-reopen-docs",
+    "original_definition": {
+      "path": "docs/research/documentation-audit/modules/management/pass-1/management-001/triage.md",
+      "start_line": 62,
+      "end_line": 62,
+      "text": "| MGMT-XREF-003 | A-04; shared test-helper/CLAUDE claims about per-device rows and fresh metadata disagreed with actual one-placeholder/first-match/cached binding. | Narrowly relevant explanatory claims corrected and independently reviewed in Pass 1; runtime row policy unchanged. Documentation dependency resolved for this source checkpoint; reopen after binding/cache changes. |"
+    },
+    "boundary_return": "See boundary-Management.md inherited-outcomes table; original authoritative state remains unchanged."
+  },
+  {
+    "key": "management-001:MGMT-IMP-008",
+    "inherited_state_preserved": "still-candidate-boundary-review",
+    "original_definition": {
+      "path": "docs/research/documentation-audit/modules/management/pass-1/management-001/triage.md",
+      "start_line": 45,
+      "end_line": 45,
+      "text": "| MGMT-IMP-008 | A-09; 4.1 FeatureDeviceInfo is declared but read/factory paths do not enforce it. | Settle legacy-firmware read and initialization-probe policy, including override/development behavior, then regression-test it. | GetDeviceInfo API, README requirements/feature table, initialization guide and legacy tests. |"
+    },
+    "boundary_return": "See boundary-Management.md inherited-outcomes table; original authoritative state remains unchanged."
+  },
+  {
+    "key": "management-001:MGMT-IMP-009",
+    "inherited_state_preserved": "still-candidate-boundary-review",
+    "original_definition": {
+      "path": "docs/research/documentation-audit/modules/management/pass-1/management-001/triage.md",
+      "start_line": 46,
+      "end_line": 46,
+      "text": "| MGMT-IMP-009 | A-10; test MinFirmware=\"5.0\" is unparsable by three-component parser and silently ignored by shared filter. | Correct executable criterion; decide strict malformed-filter handling in Tests.Shared. | Test summary, filtering examples, shared attribute/helper XML and coverage claims. |"
+    },
+    "boundary_return": "See boundary-Management.md inherited-outcomes table; original authoritative state remains unchanged."
+  },
+  {
+    "key": "management-001:MGMT-IMP-010",
+    "inherited_state_preserved": "still-candidate-boundary-review",
+    "original_definition": {
+      "path": "docs/research/documentation-audit/modules/management/pass-1/management-001/triage.md",
+      "start_line": 47,
+      "end_line": 47,
+      "text": "| MGMT-IMP-010 | A-02; reset has generic firmware/transport gating but no family gate or reset-success invalidation. Management configuration/lock erasure and post-reset session behavior are unresolved. | Agree product/preflight/lifecycle contract with authoritative evidence; verify supported Bio MPE reset effects and connection/session boundaries. Do not copy OATH lifecycle policy automatically. | Reset API/example, README features/reset/security, contributor guide, ManagementTool and migration comparisons. |"
+    },
+    "boundary_return": "See boundary-Management.md inherited-outcomes table; original authoritative state remains unchanged."
+  },
+  {
+    "key": "management-001:MGMT-IMP-004",
+    "inherited_state_preserved": "still-candidate-boundary-review",
+    "original_definition": {
+      "path": "docs/research/documentation-audit/modules/management/pass-1/management-001/triage.md",
+      "start_line": 41,
+      "end_line": 41,
+      "text": "| MGMT-IMP-004 | A-07/B supporting evidence; lock-code test zeroing follows fallible restoration; simple configuration tests restore only after successful assertions; several restorations are not read back. C review also exposed undisposed caller-owned default SCP parameter objects in two executable tests (see correction note below). | Make secret zeroing independent of hardware cleanup, dispose owned SCP inputs, restore after failed assertions, preserve failure provenance and assert restored state. NFC false semantics additionally depend on MGMT-IMP-002. | Lock-code/simple/capability/SCP test comments, test guidance and any claims of verified restoration/cleanup. |"
+    },
+    "boundary_return": "See boundary-Management.md inherited-outcomes table; original authoritative state remains unchanged."
+  },
+  {
+    "key": "security-domain-001:SD-DEP-002",
+    "inherited_state_preserved": "source-mapped-review-pending",
+    "original_definition": {
+      "path": "docs/research/documentation-audit/modules/security-domain/pass-1/security-domain-001/findings.md",
+      "start_line": 51,
+      "end_line": 51,
+      "text": "| SD-DEP-002 | StaticKeys, Scp03/11KeyParameters, ECPrivateKey/ECPublicKey and certificate clone/borrow/ownership rules; SD `_scpKeyParams` and import/export/test creation | Ownership/security/setup examples, private-import explanation, SD-IMP-008 |"
+    },
+    "boundary_return": "See boundary-Management.md inherited-outcomes table; original authoritative state remains unchanged."
+  },
+  {
+    "key": "audit-v2-20261022-20261031:deviceinfo-FIPS-residual",
+    "inherited_state_preserved": "reproducible-from-source",
+    "original_definition": {
+      "path": "docs/research/audit-v2-execution.md",
+      "start_line": null,
+      "end_line": null,
+      "text": "Grouped source definition: consult this ledger and the module investigation; no exact-ID heading found."
+    },
+    "boundary_return": "See boundary-Management.md inherited-outcomes table; original authoritative state remains unchanged."
+  }
+]

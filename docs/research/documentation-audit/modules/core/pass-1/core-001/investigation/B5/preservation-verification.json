@@ -1,0 +1,14 @@
+{
+  "passed": true,
+  "checks": [
+    "exact43primarypaths",
+    "exact893primaryand39sharedIDs",
+    "allrawandrangesmatchinventory",
+    "allselectedpathsLFmatchsourcepin",
+    "all43authoredcontextnotes",
+    "all39sharedannotations",
+    "all15inheritedkeys",
+    "allcandidatepathsExist"
+  ],
+  "note": "Static record reconciliation supplies no additional semantic coverage or SDK execution."
+}

@@ -1,0 +1,75 @@
+{
+  "status": "PROVISIONAL-NOT-INDEPENDENTLY-SAMPLED",
+  "nominees": [
+    {
+      "id": "core-001:unit:982be8e7f147990c",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/FindHidInterfacesBoundaryTests.cs",
+      "first_line": 22,
+      "last_line": 75,
+      "label": "Yubico.YubiKit.Core.UnitTests.Transports.Hid.FindHidInterfacesBoundaryTests :: [Fact] public async Task WithheldScanReturnsPendingWithoutBlockingInvocationAndCancellationWaitsForEnumeration() ",
+      "reason": "Precancel zero calls, held invocation returns pending, midcancel remains pending, one failure instance/no replay; finally releases and actually drains worker before gates dispose. Exact unit: Yubico.YubiKit.Core.UnitTests.Transports.Hid.FindHidInterfacesBoundaryTests :: [Fact] public async Task WithheldScanReturnsPendingWithoutBlockingInvocationAndCancellationWaitsForEnumeration()  (22\u201375).",
+      "source_sha256": "2b4c17d56ab72d2a22c0e1c82d91c3d823e36f7fce38eb73fed6d2a5b3203b2d",
+      "range_sha256": "4140065dee5d30aa298976c56a912cbb3c039620fc69c4dd0e42c2dedd89be76"
+    },
+    {
+      "id": "core-001:unit:6059b9db1740aa4e",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/FindHidInterfacesBoundaryTests.cs",
+      "first_line": 75,
+      "last_line": 116,
+      "label": "Yubico.YubiKit.Core.UnitTests.Transports.Hid.FindHidInterfacesBoundaryTests :: [Fact] public async Task EnumerationFailureIsPreservedWithoutReplay() ",
+      "reason": "Precancel zero calls, held invocation returns pending, midcancel remains pending, one failure instance/no replay; finally releases and actually drains worker before gates dispose. Exact unit: Yubico.YubiKit.Core.UnitTests.Transports.Hid.FindHidInterfacesBoundaryTests :: [Fact] public async Task EnumerationFailureIsPreservedWithoutReplay()  (75\u2013116).",
+      "source_sha256": "2b4c17d56ab72d2a22c0e1c82d91c3d823e36f7fce38eb73fed6d2a5b3203b2d",
+      "range_sha256": "79b280a089a18b7f4717b437b968b92db0980318493e1f95724b7e80be54ea05"
+    },
+    {
+      "id": "core-001:unit:a791b5ae1d430f97",
+      "path": "src/Core/src/Transports/Hid/Windows/WindowsHidDeviceListener.cs",
+      "first_line": 233,
+      "last_line": 261,
+      "label": "Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsHidDeviceListener :: internal static string? ReadSymbolicLink(IntPtr eventData, int eventDataSize) ",
+      "reason": "Weak GCHandle/static callback/instance delegate field; success unregister waits callbacks; ignored failure frees state; Start after disposed can reacquire; callback exception boundary incomplete. Exact unit: Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsHidDeviceListener :: internal static string? ReadSymbolicLink(IntPtr eventData, int eventDataSize)  (233\u2013261).",
+      "source_sha256": "a46ba2ccf6bf9d4de559e472f074af6e5caaff9cf446e57fc827e6ef37fa3d4f",
+      "range_sha256": "7fa342255c16fac3ec6a81ca187c556f685045d8e7ea1582d80b5ec2b9994d0a"
+    },
+    {
+      "id": "core-001:unit:31321beb19407856",
+      "path": "src/Core/tests/Yubico.YubiKit.Core.UnitTests/Transports/Hid/WindowsHidDeviceListenerTests.cs",
+      "first_line": 103,
+      "last_line": 141,
+      "label": "Yubico.YubiKit.Core.UnitTests.Transports.Hid.WindowsHidDeviceListenerTests :: private static void RunWithEventData(string symbolicLink, bool trailingGarbage, Action<IntPtr, int> assert) ",
+      "reason": "Six parser vectors, offset24/UTF16, missing/early NUL, empty/short/null; sentinel after declared payload detects overread; unmanaged buffer always freed in finally. Exact unit: Yubico.YubiKit.Core.UnitTests.Transports.Hid.WindowsHidDeviceListenerTests :: private static void RunWithEventData(string symbolicLink, bool trailingGarbage, Action<IntPtr, int> assert)  (103\u2013141).",
+      "source_sha256": "5543e24c877c3e4afa1dcca1d0f1cfddabf7372dac07929228b8bf5678baf3a3",
+      "range_sha256": "b629b8c07a71ebf49230c1600c0a914126ba4aa5368688821b27f5c77e5fc918"
+    },
+    {
+      "id": "core-001:unit:9b95a812279deba5",
+      "path": "src/Core/src/Transports/Hid/IHidConnection.cs",
+      "first_line": 39,
+      "last_line": 50,
+      "label": "Yubico.YubiKit.Core.Transports.Hid.IHidConnection :: void SetReport(byte[] report);",
+      "reason": "Detailed borrowed SetReport lifetime and caller handling of escaped GetReport result are accurate; provider-specific lengths/sharing/timeouts avoid universal assumptions. Exact unit: Yubico.YubiKit.Core.Transports.Hid.IHidConnection :: void SetReport(byte[] report); (39\u201350).",
+      "source_sha256": "5f611f99e26910690b40bbddc68875a22084b9e11462fc7407eaffacc8952f2c",
+      "range_sha256": "9f75bff4906c0a199ca01938bae9f2b9636d891d148ec8e90521bd26f0e8dda7"
+    },
+    {
+      "id": "core-001:unit:618325296e7023d9",
+      "path": "src/Core/src/Transports/Hid/IHidConnection.cs",
+      "first_line": 50,
+      "last_line": 61,
+      "label": "Yubico.YubiKit.Core.Transports.Hid.IHidConnection :: byte[] GetReport();",
+      "reason": "Detailed borrowed SetReport lifetime and caller handling of escaped GetReport result are accurate; provider-specific lengths/sharing/timeouts avoid universal assumptions. Exact unit: Yubico.YubiKit.Core.Transports.Hid.IHidConnection :: byte[] GetReport(); (50\u201361).",
+      "source_sha256": "5f611f99e26910690b40bbddc68875a22084b9e11462fc7407eaffacc8952f2c",
+      "range_sha256": "671b2d2f3cb32c8cc79ea2c71508a251340dec03e4fc4dcc7df8e85a68e795e0"
+    },
+    {
+      "id": "core-001:unit:ceddba86243abd3f",
+      "path": "src/Core/src/Native/Windows/WinSCard/WinSCard.Interop.cs",
+      "first_line": 29,
+      "last_line": 46,
+      "label": "Yubico.YubiKit.Core.Native.Windows.WinSCard.NativeMethods :: [LibraryImport(Libraries.WinSCard, EntryPoint = \"SCardGetReaderDeviceInstanceIdW\", StringMarshalling = StringMarshalling.Utf16)] [DefaultDllImportSearchPaths(DllImportSearchPath.System32)] internal static partial uint SCardGetRead",
+      "reason": "Direct WinSCardW reader-instance query uses context handle, UTF16 name/char output and32-bit count; caller establishes/scopes separate topology context; no connection-context sharing. Exact unit: Yubico.YubiKit.Core.Native.Windows.WinSCard.NativeMethods :: [LibraryImport(Libraries.WinSCard, EntryPoint = \"SCardGetReaderDeviceInstanceIdW\", StringMarshalling = StringMarshalling.Utf16)] [DefaultDllImportSearchPaths(DllImportSearchPath.System32)] internal static partial uint SCardGetRead (29\u201346).",
+      "source_sha256": "aea659a17b7e754e4486ee8071a966af540d838cb85eff96809f5b67d429eef8",
+      "range_sha256": "2a80288ebb2abc62e3b30b82117fdaa4053c4a1d6fd631e76ae2acc7690c08ca"
+    }
+  ]
+}

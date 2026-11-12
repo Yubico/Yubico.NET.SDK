@@ -1,0 +1,35 @@
+{
+  "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "observed_metadata_head": "bb94f0884f63f260156227957d4cc112d984e300",
+  "packet_sha256": "1869ddeaed02256155eb155ea16d9985ced562b6a759388d845de5b3fecefc6a",
+  "assigned_units": 590,
+  "selected_files": 180,
+  "candidate_disposition_paths": 181,
+  "disposition_counts": {
+    "READ-CANDIDATE": 6,
+    "READ-CANDIDATE-CONTEXT": 492,
+    "READ-CLEAN": 91,
+    "READ-EXCLUSION": 1
+  },
+  "exact_unit_id_set": true,
+  "exact_candidate_path_set": true,
+  "all_source_and_range_hashes_match_inventory": true,
+  "all_candidate_paths_bom_crlf_normalized_match_source_pin": true,
+  "inherited_provenance_keys": 26,
+  "exact_inherited_key_set": true,
+  "narrow_dependency_paths": 26,
+  "clean_nominees": 9,
+  "sdk_builds": 0,
+  "sdk_tests": 0,
+  "formatter_runs": 0,
+  "crypto_native_device_executions": 0,
+  "commits_index_ref_writes": 0,
+  "subagents": 0,
+  "independent_content_review": "PENDING",
+  "mandatory_followups": [
+    "B4 Windows/support and later user-ready delta",
+    "B6 APDU/SCP",
+    "BOUNDARY-WebAuthn actor/recovery and selected WA aliases"
+  ],
+  "completion": "Assigned static investigation complete; separate mechanism follow-ups, independent review and qualification remain open."
+}

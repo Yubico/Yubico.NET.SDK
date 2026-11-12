@@ -1,0 +1,74 @@
+[
+  {
+    "name": "ctap20.html",
+    "url": "https://fidoalliance.org/specs/fido-v2.0-ps-20190130/fido-client-to-authenticator-protocol-v2.0-ps-20190130.html",
+    "accessed_utc": "2026-11-11T23:19:27.768451+00:00",
+    "status": 200,
+    "final_url": "https://fidoalliance.org/specs/fido-v2.0-ps-20190130/fido-client-to-authenticator-protocol-v2.0-ps-20190130.html",
+    "bytes": 332424,
+    "sha256": "2294baef2eb10827fc07ab031632269bfc61192e3e23395aa9355afb98cce58e"
+  },
+  {
+    "name": "ctap21.html",
+    "url": "https://fidoalliance.org/specs/fido-v2.1-ps-20210615/fido-client-to-authenticator-protocol-v2.1-ps-errata-20220621.html",
+    "accessed_utc": "2026-11-11T23:19:27.769182+00:00",
+    "status": 200,
+    "final_url": "https://fidoalliance.org/specs/fido-v2.1-ps-20210615/fido-client-to-authenticator-protocol-v2.1-ps-errata-20220621.html",
+    "bytes": 1059428,
+    "sha256": "9273020f60376b746d27cb5af840ecf7586bb35ab3f5c60e4373019df11aad61"
+  },
+  {
+    "name": "ctap23.html",
+    "url": "https://fidoalliance.org/specs/fido-v2.3-ps-20260226/fido-client-to-authenticator-protocol-v2.3-ps-20260226.html",
+    "accessed_utc": "2026-11-11T23:19:27.769600+00:00",
+    "status": 200,
+    "final_url": "https://fidoalliance.org/specs/fido-v2.3-ps-20260226/fido-client-to-authenticator-protocol-v2.3-ps-20260226.html",
+    "bytes": 1372350,
+    "sha256": "c8d8100f8b9153ce4daf5eba0fdfc663975e82ac6e18bfb899884f14e8c60722"
+  },
+  {
+    "name": "ykcore.c",
+    "url": "https://raw.githubusercontent.com/Yubico/yubikey-personalization/master/ykcore/ykcore.c",
+    "accessed_utc": "2026-11-11T23:19:27.770006+00:00",
+    "status": 200,
+    "final_url": "https://raw.githubusercontent.com/Yubico/yubikey-personalization/master/ykcore/ykcore.c",
+    "bytes": 19964,
+    "sha256": "89369ecce44fc853b0e502142e1696713b9f56e8138f28f77db026c1175e16f2"
+  },
+  {
+    "name": "ykdef.h",
+    "url": "https://raw.githubusercontent.com/Yubico/yubikey-personalization/master/ykcore/ykdef.h",
+    "accessed_utc": "2026-11-11T23:19:28.040368+00:00",
+    "status": 200,
+    "final_url": "https://raw.githubusercontent.com/Yubico/yubikey-personalization/master/ykcore/ykdef.h",
+    "bytes": 14457,
+    "sha256": "c0ca58a5c1870ab2e4ab820956dbb65b2836f3a0d4e489c34f904b764786523a"
+  },
+  {
+    "name": "ValueTask-v10.0.0.cs",
+    "url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.0/src/libraries/System.Private.CoreLib/src/System/Threading/Tasks/ValueTask.cs",
+    "accessed_utc": "2026-11-11T23:19:28.143944+00:00",
+    "status": 200,
+    "final_url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.0/src/libraries/System.Private.CoreLib/src/System/Threading/Tasks/ValueTask.cs",
+    "bytes": 39388,
+    "sha256": "c6af16cde689ee7920c565b9c5df245662d24471bf8eef27a08b99542f4188f3"
+  },
+  {
+    "name": "SemaphoreSlim-v10.0.0.cs",
+    "url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.0/src/libraries/System.Private.CoreLib/src/System/Threading/SemaphoreSlim.cs",
+    "accessed_utc": "2026-11-11T23:19:28.275118+00:00",
+    "status": 200,
+    "final_url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.0/src/libraries/System.Private.CoreLib/src/System/Threading/SemaphoreSlim.cs",
+    "bytes": 47409,
+    "sha256": "46b31ac7080ae49bc6965372d71b9a282a2d06e8db1b65a842aaab9435ccb620"
+  },
+  {
+    "name": "ExecutionContext-v10.0.0.cs",
+    "url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.0/src/libraries/System.Private.CoreLib/src/System/Threading/ExecutionContext.cs",
+    "accessed_utc": "2026-11-11T23:19:28.279244+00:00",
+    "status": 200,
+    "final_url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.0/src/libraries/System.Private.CoreLib/src/System/Threading/ExecutionContext.cs",
+    "bytes": 27075,
+    "sha256": "d9c7027cdfa9b5b574cd1cf7982619392db38b8e95c074a019c03b7feb0a05e6"
+  }
+]

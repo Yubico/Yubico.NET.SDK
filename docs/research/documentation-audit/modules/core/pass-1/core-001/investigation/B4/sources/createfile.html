@@ -1,0 +1,2738 @@
+ <!DOCTYPE html>
+		<html
+			class="layout layout-holy-grail   show-table-of-contents conceptual show-breadcrumb default-focus"
+			lang="en-us"
+			dir="ltr"
+			data-authenticated="false"
+			data-auth-status-determined="false"
+			data-target="docs"
+			x-ms-format-detection="none"
+		>
+			
+		<head>
+			<title>CreateFileW function (fileapi.h) - Win32 apps | Microsoft Learn</title>
+			<meta charset="utf-8" />
+			<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+			<meta name="color-scheme" content="light dark" />
+
+			<meta name="description" content="Creates or opens a file or I/O device. The most commonly used I/O devices are as follows:\_file, file stream, directory, physical disk, volume, console buffer, tape drive, communications resource, mailslot, and pipe. (Unicode)" />
+			<link rel="canonical" href="https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilew" /> 
+
+			<!-- Non-customizable open graph and sharing-related metadata -->
+			<meta name="twitter:card" content="summary_large_image" />
+			<meta name="twitter:site" content="@MicrosoftLearn" />
+			<meta property="og:type" content="website" />
+			<meta property="og:image:alt" content="Microsoft Learn" />
+			<meta property="og:image" content="https://learn.microsoft.com/en-us/media/open-graph-image.png" />
+			<!-- Page specific open graph and sharing-related metadata -->
+			<meta property="og:title" content="CreateFileW function (fileapi.h) - Win32 apps" />
+			<meta property="og:url" content="https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilew" />
+			<meta property="og:description" content="Creates or opens a file or I/O device. The most commonly used I/O devices are as follows:\_file, file stream, directory, physical disk, volume, console buffer, tape drive, communications resource, mailslot, and pipe. (Unicode)" />
+			<meta name="platform_id" content="1dfaed54-300c-f1d1-d325-01921484782f" /> <meta name="scope" content="Windows,Desktop" />
+			<meta name="locale" content="en-us" />
+			 
+			<meta name="uhfHeaderId" content="MSDocsHeader-WinDevCenter" />
+
+			<meta name="page_type" content="conceptual" />
+
+			<!--page specific meta tags-->
+			
+
+			<!-- custom meta tags -->
+			
+		<meta name="adobe-target" content="true" />
+	
+		<meta name="breadcrumb_path" content="/windows/desktop/api/breadcrumb/toc.json" />
+	
+		<meta name="ms.service" content="windows-api-desktop-tech" />
+	
+		<meta name="ms.subservice" content="sdk-api-reference" />
+	
+		<meta name="ms.topic" content="reference" />
+	
+		<meta name="ms.author" content="jken" />
+	
+		<meta name="author" content="GrantMeStrength" />
+	
+		<meta name="feedback_system" content="Standard" />
+	
+		<meta name="feedback_product_url" content="https://www.microsoft.com/en-us/windowsinsider/feedbackhub/fb" />
+	
+		<meta name="feedback_help_link_url" content="https://learn.microsoft.com/answers/tags/224/windows-api-win32/" />
+	
+		<meta name="feedback_help_link_type" content="get-help-at-qna" />
+	
+		<meta name="UID" content="NF:fileapi.CreateFileW" />
+	
+		<meta name="old-location" content="fs\createfile.htm" />
+	
+		<meta name="tech.root" content="fs" />
+	
+		<meta name="ms.assetid" content="80a96083-4de9-4422-9705-b8ad2b6cbd1b" />
+	
+		<meta name="ms.date" content="2022-08-16T00:00:00Z" />
+	
+		<meta name="ms.keywords" content="0, CREATE_ALWAYS, CREATE_NEW, CreateFile, CreateFile function [Files], CreateFileA, CreateFileW, FILE_ATTRIBUTE_ARCHIVE, FILE_ATTRIBUTE_ENCRYPTED, FILE_ATTRIBUTE_HIDDEN, FILE_ATTRIBUTE_NORMAL, FILE_ATTRIBUTE_OFFLINE, FILE_ATTRIBUTE_READONLY, FILE_ATTRIBUTE_SYSTEM, FILE_ATTRIBUTE_TEMPORARY, FILE_FLAG_BACKUP_SEMANTICS, FILE_FLAG_DELETE_ON_CLOSE, FILE_FLAG_NO_BUFFERING, FILE_FLAG_OPEN_NO_RECALL, FILE_FLAG_OPEN_REPARSE_POINT, FILE_FLAG_OVERLAPPED, FILE_FLAG_POSIX_SEMANTICS, FILE_FLAG_RANDOM_ACCESS, FILE_FLAG_SEQUENTIAL_SCAN, FILE_FLAG_SESSION_AWARE, FILE_FLAG_WRITE_THROUGH, FILE_SHARE_DELETE, FILE_SHARE_READ, FILE_SHARE_WRITE, OPEN_ALWAYS, OPEN_EXISTING, SECURITY_ANONYMOUS, SECURITY_CONTEXT_TRACKING, SECURITY_DELEGATION, SECURITY_EFFECTIVE_ONLY, SECURITY_IDENTIFICATION, SECURITY_IMPERSONATION, TRUNCATE_EXISTING, _win32_createfile, base.createfile, fileapi/CreateFile, fileapi/CreateFileA, fileapi/CreateFileW, fs.createfile, winbase/CreateFile, winbase/CreateFileA, winbase/CreateFileW" />
+	
+		<meta name="req.header" content="fileapi.h" />
+	
+		<meta name="req.include-header" content="Windows.h" />
+	
+		<meta name="req.target-type" content="Windows" />
+	
+		<meta name="req.target-min-winverclnt" content="Windows XP [desktop apps only]" />
+	
+		<meta name="req.target-min-winversvr" content="Windows Server 2003 [desktop apps only]" />
+	
+		<meta name="req.kmdf-ver" content="" />
+	
+		<meta name="req.umdf-ver" content="" />
+	
+		<meta name="req.ddi-compliance" content="" />
+	
+		<meta name="req.unicode-ansi" content="CreateFileW (Unicode) and CreateFileA (ANSI)" />
+	
+		<meta name="req.idl" content="" />
+	
+		<meta name="req.max-support" content="" />
+	
+		<meta name="req.namespace" content="" />
+	
+		<meta name="req.assembly" content="" />
+	
+		<meta name="req.type-library" content="" />
+	
+		<meta name="req.lib" content="Kernel32.lib" />
+	
+		<meta name="req.dll" content="Kernel32.dll" />
+	
+		<meta name="req.irql" content="" />
+	
+		<meta name="targetos" content="Windows" />
+	
+		<meta name="req.typenames" content="" />
+	
+		<meta name="req.redist" content="" />
+	
+		<meta name="ms.custom" content="19H1" />
+	
+		<meta name="TopicType" content="APIRef" />
+	
+		<meta name="TopicType" content="kbSyntax" />
+	
+		<meta name="APIType" content="DllExport" />
+	
+		<meta name="APILocation" content="api-ms-win-core-file-l1-2-5.dll" />
+	
+		<meta name="APILocation" content="api-ms-win-core-file-l1-2-4.dll" />
+	
+		<meta name="APILocation" content="api-ms-win-core-file-l1-2-3.dll" />
+	
+		<meta name="APILocation" content="Kernel32.dll" />
+	
+		<meta name="APILocation" content="API-MS-Win-Core-File-l1-1-0.dll" />
+	
+		<meta name="APILocation" content="KernelBase.dll" />
+	
+		<meta name="APILocation" content="API-MS-Win-Core-File-l1-2-0.dll" />
+	
+		<meta name="APILocation" content="API-MS-Win-Core-File-l1-2-1.dll" />
+	
+		<meta name="APILocation" content="API-MS-Win-Core-File-l1-2-2.dll" />
+	
+		<meta name="APILocation" content="API-MS-Win-DownLevel-Kernel32-l1-1-0.dll" />
+	
+		<meta name="APILocation" content="MinKernelBase.dll" />
+	
+		<meta name="APIName" content="CreateFile" />
+	
+		<meta name="APIName" content="CreateFileA" />
+	
+		<meta name="APIName" content="CreateFileW" />
+	
+		<meta name="document_id" content="14ae10d8-f467-e8d9-1436-b817e78017d0" />
+	
+		<meta name="document_version_independent_id" content="99f16c50-4048-7b5b-1ced-377555b8c80e" />
+	
+		<meta name="updated_at" content="2025-07-01T18:41:00Z" />
+	
+		<meta name="original_content_git_url" content="https://cpubwin.visualstudio.com/DefaultCollection/win32/_git/sdk-api-build?path=/sdk-api-src/content/fileapi/nf-fileapi-createfilew.md&amp;version=GBlive&amp;_a=contents" />
+	
+		<meta name="gitcommit" content="https://cpubwin.visualstudio.com/DefaultCollection/win32/_git/sdk-api-build/commit/fa53641576e3603fa7b66d3a4ad969d3ce49d6f3?path=/sdk-api-src/content/fileapi/nf-fileapi-createfilew.md&amp;_a=contents" />
+	
+		<meta name="git_commit_id" content="fa53641576e3603fa7b66d3a4ad969d3ce49d6f3" />
+	
+		<meta name="site_name" content="Docs" />
+	
+		<meta name="depot_name" content="MSDN.sdk-api-build" />
+	
+		<meta name="schema" content="Conceptual" />
+	
+		<meta name="toc_rel" content="../_fs/toc.json" />
+	
+		<meta name="pdf_url_template" content="https://learn.microsoft.com/pdfstore/en-us/MSDN.sdk-api-build/{branchName}{pdfName}" />
+	
+		<meta name="search.mshattr.devlang" content="c++" />
+	
+		<meta name="word_count" content="5838" />
+	
+		<meta name="asset_id" content="fileapi/nf-fileapi-createfilew" />
+	
+		<meta name="moniker_range_name" content="" />
+	
+		<meta name="item_type" content="Content" />
+	
+		<meta name="source_path" content="sdk-api-src/content/fileapi/nf-fileapi-createfilew.md" />
+	
+		<meta name="previous_tlsh_hash" content="43BC0603A60D8A11EF825E0B5917BD8555F4C88D3BE03A84023D39D2D16D1F4B5F06A8EBB763AF842376068302D25B1E91D2D735D0BC33AA53E4686DC258396697973FBEF8" />
+	
+		<meta name="github_feedback_content_git_url" content="https://github.com/MicrosoftDocs/sdk-api/blob/docs/sdk-api-src/content/fileapi/nf-fileapi-createfilew.md" />
+	
+		<meta name="markdown_url" content="https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilew?accept=text/markdown" />
+	 
+		<meta name="cmProducts" content="https://authoring-docs-microsoft.poolparty.biz/devrel/540ac133-a371-4dbb-8f94-28d6cc77a70b" data-source="generated" />
+	
+		<meta name="cmProducts" content="https://authoring-docs-microsoft.poolparty.biz/devrel/2d774b87-7dcb-40bf-a0b9-5a7a9efff0d1" data-source="generated" />
+	
+		<meta name="spProducts" content="https://authoring-docs-microsoft.poolparty.biz/devrel/60bfc045-f127-4841-9d00-ea35495a5800" data-source="generated" />
+	
+		<meta name="spProducts" content="https://authoring-docs-microsoft.poolparty.biz/devrel/89dc5f37-0e4e-4b05-ad87-5fcd2b941a8a" data-source="generated" />
+	
+
+			<!-- Apply persisted/system theme before first paint to prevent wrong-theme flash when scripts are deferred. -->
+			<script id="theme-preference">
+				(function () {
+			try {
+				var stored = localStorage.getItem('theme');
+				var theme = /^(light|dark|high-contrast)$/.test(stored)
+					? stored
+					: matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+				document.documentElement.classList.add('theme-' + theme);
+			} catch (e) {}
+		})();;
+			</script>
+
+			<script id="atlas-layout-preferences">
+				(function () {
+			try {
+				var state = JSON.parse(localStorage.getItem('atlas-layout-preferences') || '{}');
+				var view = state["docs-layout-persistence"] || {};
+				var excludesKey = "";
+				var blocked = {};
+				if (excludesKey) {
+					var exclusions = JSON.parse(localStorage.getItem('atlas-layout-exclusions') || '{}');
+					if (Object.prototype.hasOwnProperty.call(exclusions, excludesKey)) {
+						var scoped = exclusions[excludesKey];
+						if (scoped) {
+							if (typeof scoped === 'object') blocked = scoped;
+						}
+					}
+				}
+				var html = document.documentElement;
+				for (var c in view) {
+					if (Object.prototype.hasOwnProperty.call(blocked, c)) continue;
+					if (view[c]) html.classList.add(c);
+					else html.classList.remove(c);
+				}
+			} catch (e) {}
+		})();;
+			</script>
+
+			<!-- assets and js globals -->
+			
+			<link rel="stylesheet" href="/static/assets/0.4.03599.8368-c2fd945c/styles/site.css" />
+			
+			<script src="https://wcpstatic.microsoft.com/mscc/lib/v2/wcp-consent.js"></script>
+			<!-- Keep this URL in sync with oneDSScriptSelector in instrumentation/one-ds.ts. -->
+			<script async src="https://js.monitor.azure.com/scripts/c/ms.jsll-4.min.js"></script>
+			
+
+			<!-- msdocs global object -->
+			<script id="msdocs-script">
+		var msDocs = {
+  "environment": {
+    "accessLevel": "online",
+    "azurePortalHostname": "portal.azure.com",
+    "reviewFeatures": false,
+    "supportLevel": "production",
+    "systemContent": true,
+    "siteName": "learn",
+    "legacyHosting": false
+  },
+  "data": {
+    "contentLocale": "en-us",
+    "contentDir": "ltr",
+    "userLocale": "en-us",
+    "userDir": "ltr",
+    "pageTemplate": "Conceptual",
+    "layoutStateStorageKey": "docs-layout-persistence",
+    "brand": "",
+    "context": {},
+    "standardFeedback": true,
+    "showFeedbackReport": false,
+    "feedbackHelpLinkType": "get-help-at-qna",
+    "feedbackHelpLinkUrl": "https://learn.microsoft.com/answers/tags/224/windows-api-win32/",
+    "feedbackSystem": "Standard",
+    "feedbackGitHubRepo": "",
+    "feedbackProductUrl": "https://www.microsoft.com/en-us/windowsinsider/feedbackhub/fb",
+    "extendBreadcrumb": true,
+    "isEditDisplayable": true,
+    "isPrivateUnauthorized": false,
+    "hideViewSource": false,
+    "isPermissioned": false,
+    "hasRecommendations": false
+  },
+  "functions": {}
+};;
+	</script>
+
+			<!-- base scripts, msdocs global should be before this -->
+			<script
+				src="/static/assets/0.4.03599.8368-c2fd945c/scripts/en-us/index-docs.js"
+				async
+			></script>
+			
+
+			<!-- json-ld -->
+			
+		</head>
+	
+			<body
+				id="body"
+				data-bi-name="body"
+				class="layout-body "
+				lang="en-us"
+				dir="ltr"
+			>
+				<header class="layout-body-header background-color-body-medium">
+		<div class="header-holder has-default-focus">
+			
+		<a
+			href="#main"
+			
+			style="z-index: 1070"
+			class="outline-color-text visually-hidden-until-focused position-fixed inner-focus focus-visible top-0 left-0 right-0 padding-xs text-align-center background-color-body"
+			
+		>
+			Skip to main content
+		</a>
+	
+		<a
+			href="#"
+			data-skip-to-ask-learn
+			style="z-index: 1070"
+			class="outline-color-text visually-hidden-until-focused position-fixed inner-focus focus-visible top-0 left-0 right-0 padding-xs text-align-center background-color-body"
+			hidden
+		>
+			Skip to Ask Learn chat experience
+		</a>
+	
+
+			<div hidden id="cookie-consent-holder" data-test-id="cookie-consent-container"></div>
+			<!-- Unsupported browser warning -->
+			<div
+				id="unsupported-browser"
+				style="background-color: white; color: black; padding: 16px; border-bottom: 1px solid grey;"
+				hidden
+			>
+				<div style="max-width: 800px; margin: 0 auto;">
+					<p style="font-size: 24px">This browser is no longer supported.</p>
+					<p style="font-size: 16px; margin-top: 16px;">
+						Upgrade to Microsoft Edge to take advantage of the latest features, security updates, and technical support.
+					</p>
+					<div style="margin-top: 12px;">
+						<a
+							href="https://go.microsoft.com/fwlink/p/?LinkID=2092881 "
+							style="background-color: #0078d4; border: 1px solid #0078d4; color: white; padding: 6px 12px; border-radius: 2px; display: inline-block;"
+						>
+							Download Microsoft Edge
+						</a>
+						<a
+							href="https://learn.microsoft.com/en-us/lifecycle/faq/internet-explorer-microsoft-edge"
+							style="background-color: white; padding: 6px 12px; border: 1px solid #505050; color: #171717; border-radius: 2px; display: inline-block;"
+						>
+							More info about Internet Explorer and Microsoft Edge
+						</a>
+					</div>
+				</div>
+			</div>
+			<!-- site header -->
+			<div
+				id="ms--site-header"
+				data-test-id="site-header-wrapper"
+				itemscope="itemscope"
+				itemtype="http://schema.org/Organization"
+			>
+				<div
+					id="ms--mobile-nav"
+					class="site-header display-none-tablet padding-inline-none gap-none"
+					data-bi-name="mobile-header"
+					data-test-id="mobile-header"
+				></div>
+				<div
+					id="ms--primary-nav"
+					class="site-header display-none display-flex-tablet"
+					data-bi-name="L1-header"
+					data-test-id="primary-header"
+				></div>
+				<div
+					id="ms--secondary-nav"
+					class="site-header display-none display-flex-tablet"
+					data-bi-name="L2-header"
+					data-test-id="secondary-header"
+					
+				></div>
+			</div>
+			
+		<!-- banner -->
+		<div data-banner>
+			<div id="disclaimer-holder"></div>
+			
+		</div>
+		<!-- banner end -->
+	
+		</div>
+	</header>
+				 <section
+					id="layout-body-menu"
+					class="layout-body-menu border-right display-flex background-color-body-medium"
+					data-bi-name="menu"
+			  >
+					
+		<div
+			id="left-container"
+			class="left-container display-none padding-none display-block-tablet width-full display-none-until-layout-restored"
+			data-toc-container="true"
+		>
+			<div
+				id="ms--toc-content"
+				class="padding-left-sm padding-right-none padding-bottom-sm height-full"
+			>
+				<nav
+					id="affixed-left-container"
+					class="margin-top-xxs-tablet position-sticky display-flex flex-direction-column width-full"
+					aria-label="Primary"
+					data-bi-name="left-toc"
+					role="navigation"
+				>
+					<div
+						id="ms--collapsible-toc-header"
+						class="display-flex flex-direction-row-reverse justify-content-center align-items-center margin-bottom-xxs margin-right-xxs"
+					>
+						<button
+							type="button"
+							class="button button-clear button-sm inner-focus"
+							data-collapsible-toc-toggle
+							aria-expanded="true"
+							hidden
+							aria-controls="ms--toc-content"
+							aria-label="Table of contents"
+						>
+							<span class="icon icon-mirrored-rtl" aria-hidden="true">
+								<span
+									class="docon docon-panel-left-contract display-none-layout-menu-collapsed"
+								></span>
+								<span
+									class="docon docon-panel-left-expand display-none display-inline-layout-menu-collapsed"
+								></span>
+							</span>
+						</button>
+						<div
+							id="ms--collapsible-toc-moniker-slot"
+							class="flex-grow-1 display-none-layout-menu-collapsed"
+						></div>
+					</div>
+				</nav>
+			</div>
+		</div>
+	
+			  </section>
+
+				<main
+					id="main"
+					role="main"
+					class="layout-body-main "
+					data-bi-name="content"
+					lang="en-us"
+					dir="ltr"
+				>
+					
+			<div
+		id="ms--content-header"
+		class="content-header default-focus border-bottom-none"
+		data-bi-name="content-header"
+	>
+		<div class="content-header-controls margin-xxs margin-inline-sm-tablet">
+			<button
+				type="button"
+				class="contents-button button button-sm margin-right-xxs"
+				data-bi-name="contents-expand"
+				aria-haspopup="true"
+				data-contents-button
+			>
+				<span class="icon" aria-hidden="true"><span class="docon docon-menu"></span></span>
+				<span class="contents-expand-title"> Table of contents </span>
+			</button>
+			<button
+				type="button"
+				class="ap-collapse-behavior ap-expanded button button-sm"
+				data-bi-name="ap-collapse"
+				aria-controls="action-panel"
+			>
+				<span class="icon" aria-hidden="true"><span class="docon docon-exit-mode"></span></span>
+				<span>Exit editor mode</span>
+			</button>
+		</div>
+	</div> 
+		<div
+			id="action-panel"
+			role="region"
+			aria-label="Action Panel"
+			class="action-panel"
+			tabindex="-1"
+		></div>
+	
+			<div
+				data-main-column
+				class="reading-width margin-inline-auto layout-padding padding-top-none padding-top-sm-tablet padding-bottom-sm"
+			>
+				<div>
+					
+		<div id="article-header" class="background-color-body margin-bottom-xs display-none-print">
+			<div class="display-flex align-items-center justify-content-space-between">
+				
+		<details
+			id="article-header-breadcrumbs-overflow-popover"
+			class="popover popover-left"
+			data-for="article-header-breadcrumbs"
+		>
+			<summary
+				class="button button-clear button-primary button-sm inner-focus"
+				aria-label="All breadcrumbs"
+			>
+				<span class="icon" aria-hidden="true">
+					<span class="docon docon-more"></span>
+				</span>
+			</summary>
+			<div id="article-header-breadcrumbs-overflow" class="popover-content"></div>
+		</details>
+
+		<bread-crumbs
+			id="article-header-breadcrumbs"
+			role="group"
+			aria-label="Breadcrumbs"
+			data-test-id="article-header-breadcrumbs"
+			class="overflow-hidden flex-grow-1 margin-right-sm margin-right-md-tablet margin-right-lg-desktop margin-left-negative-xxs padding-left-xxs"
+		></bread-crumbs>
+	 
+		<div
+			id="article-header-page-actions"
+			class="opacity-none margin-left-auto display-flex flex-wrap-no-wrap align-items-stretch"
+		>
+			
+		<button
+			class="button button-sm border-none inner-focus display-none-tablet flex-shrink-0 "
+			data-bi-name="ask-learn-assistant-entry"
+			data-test-id="ask-learn-assistant-modal-entry-mobile"
+			data-ask-learn-modal-entry
+			
+			type="button"
+			style="min-width: max-content;"
+			aria-expanded="false"
+			aria-label="Ask Learn"
+			hidden
+		>
+			<span class="icon" aria-hidden="true">
+				<span class="docon docon-chat-sparkle-fill gradient-ask-learn-logo"></span>
+			</span>
+		</button>
+		<button
+			class="button button-sm display-none display-inline-flex-tablet display-none-desktop flex-shrink-0 margin-right-xxs border-color-ask-learn "
+			data-bi-name="ask-learn-assistant-entry"
+			
+			data-test-id="ask-learn-assistant-modal-entry-tablet"
+			data-ask-learn-modal-entry
+			type="button"
+			style="min-width: max-content;"
+			aria-expanded="false"
+			hidden
+		>
+			<span class="icon font-size-lg" aria-hidden="true">
+				<span class="docon docon-chat-sparkle-fill gradient-ask-learn-logo"></span>
+			</span>
+			<span>Ask Learn</span>
+		</button>
+		<button
+			class="button button-sm display-none flex-shrink-0 display-inline-flex-desktop margin-right-xxs border-color-ask-learn "
+			data-bi-name="ask-learn-assistant-entry"
+			
+			data-test-id="ask-learn-assistant-flyout-entry"
+			data-ask-learn-flyout-entry
+			data-flyout-button="toggle"
+			type="button"
+			style="min-width: max-content;"
+			aria-expanded="false"
+			aria-controls="ask-learn-flyout"
+			hidden
+		>
+			<span class="icon font-size-lg" aria-hidden="true">
+				<span class="docon docon-chat-sparkle-fill gradient-ask-learn-logo"></span>
+			</span>
+			<span>Ask Learn</span>
+		</button>
+	 
+
+			<details class="popover popover-right" id="article-header-page-actions-overflow">
+				<summary
+					class="justify-content-flex-start button button-clear button-sm button-primary inner-focus"
+					aria-label="More actions"
+					aria-expanded="false"
+					title="More actions"
+				>
+					<span class="icon" aria-hidden="true">
+						<span class="docon docon-more-vertical"></span>
+					</span>
+				</summary>
+				<div class="popover-content">
+					
+		<button
+			type="button"
+			id="ms--focus-mode-button"
+			data-focus-mode
+			data-bi-name="focus-mode-entry"
+			data-page-action-item="overflow-all"
+			data-popover-close
+			class="button button-clear button-sm button-block justify-content-flex-start text-align-left inner-focus display-none display-inline-flex-tablet"
+		>
+			<span class="icon" aria-hidden="true">
+				<span class="docon docon-glasses"></span>
+			</span>
+			<span>Reading mode</span>
+		</button>
+	 
+		<button
+			data-page-action-item="overflow-mobile"
+			type="button"
+			class="display-block-layout-menu-collapsed button-block button-sm inner-focus button button-clear display-none-tablet justify-content-flex-start text-align-left"
+			data-bi-name="contents-expand"
+			data-contents-button
+			data-popover-close
+		>
+			<span class="icon" aria-hidden="true"
+				><span class="docon docon-editor-list-bullet"></span
+			></span>
+			<span class="contents-expand-title">Table of contents</span>
+		</button>
+	 
+		<a
+			id="lang-link-overflow"
+			class="button-sm inner-focus button button-clear button-block justify-content-flex-start text-align-left"
+			data-bi-name="language-toggle"
+			data-page-action-item="overflow-all"
+			data-check-hidden="true"
+			data-read-in-link
+			href="#"
+			hidden
+		>
+			<span class="icon" aria-hidden="true" data-read-in-link-icon>
+				<span class="docon docon-locale-globe"></span>
+			</span>
+			<span data-read-in-link-text>Read in English</span>
+		</a>
+	
+					
+		<button
+			type="button"
+			class="collection button button-clear button-sm button-block justify-content-flex-start text-align-left inner-focus"
+			data-list-type="collection"
+			data-bi-name="collection"
+			data-page-action-item="overflow-all"
+			data-check-hidden="true"
+			data-popover-close
+		>
+			<span class="icon" aria-hidden="true">
+				<span class="docon docon-circle-addition"></span>
+			</span>
+			<span class="collection-status">Add</span>
+		</button>
+	 
+		<button
+			type="button"
+			class="collection button button-block button-clear button-sm justify-content-flex-start text-align-left inner-focus"
+			data-list-type="plan"
+			data-bi-name="plan"
+			data-page-action-item="overflow-all"
+			data-check-hidden="true"
+			data-popover-close
+			hidden
+		>
+			<span class="icon" aria-hidden="true">
+				<span class="docon docon-circle-addition"></span>
+			</span>
+			<span class="plan-status">Add to Plans</span>
+		</button>
+	 
+					
+		<a
+			data-contenteditbtn
+			class="button button-clear button-block button-sm inner-focus justify-content-flex-start text-align-left text-decoration-none"
+			data-bi-name="edit"
+			data-page-action-item="overflow-all"
+			data-check-hidden="true"
+			
+			href="https://github.com/MicrosoftDocs/sdk-api/blob/docs/sdk-api-src/content/fileapi/nf-fileapi-createfilew.md"
+			data-original_content_git_url="https://cpubwin.visualstudio.com/DefaultCollection/win32/_git/sdk-api-build?path=/sdk-api-src/content/fileapi/nf-fileapi-createfilew.md&amp;version=GBlive&amp;_a=contents"
+			data-original_content_git_url_template="{repo}?path=/sdk-api-src/content/fileapi/nf-fileapi-createfilew.md&amp;version=GB{branch}&amp;_a=contents"
+			data-pr_repo=""
+			data-pr_branch=""
+		>
+			<span class="icon" aria-hidden="true">
+				<span class="docon docon-edit-outline"></span>
+			</span>
+			<span>Edit</span>
+		</a>
+	  
+		<hr class="margin-block-xxs" />
+		
+				<button
+					class="button button-block button-clear button-sm justify-content-flex-start text-align-left inner-focus"
+					type="button"
+					data-bi-name="copy-markdown"
+					data-page-action-item="overflow-all"
+					data-copy-markdown
+					data-copy-state="idle"
+					data-check-hidden="true"
+				>
+					<span class="icon color-primary" aria-hidden="true">
+						<span data-show-when="idle" class="docon docon-code-lang"></span>
+						<span data-show-when="loading" class="loader" hidden></span>
+						<span data-show-when="success" class="docon docon-check-mark" hidden></span>
+					</span>
+					<span>Copy Markdown</span>
+				</button>
+		   
+				<button
+					class="button button-block button-clear button-sm justify-content-flex-start text-align-left inner-focus"
+					type="button"
+					data-bi-name="print"
+					data-page-action-item="overflow-all"
+					data-popover-close
+					data-print-page
+					data-check-hidden="true"
+				>
+					<span class="icon color-primary" aria-hidden="true">
+						<span class="docon docon-print"></span>
+					</span>
+					<span>Print</span>
+				</button>
+		  
+	
+				</div>
+			</details>
+		</div>
+	
+			</div>
+		</div>
+	  
+		<!-- privateUnauthorizedTemplate is hidden by default -->
+		<div unauthorized-private-section data-bi-name="permission-content-unauthorized-private" hidden>
+			<hr class="hr margin-top-xs margin-bottom-sm" />
+			<div class="notification notification-info">
+				<div class="notification-content">
+					<p class="margin-top-none notification-title">
+						<span class="icon" aria-hidden="true"
+							><span class="docon docon-exclamation-circle-solid"></span
+						></span>
+						<span>Note</span>
+					</p>
+					<p class="margin-top-none authentication-determined not-authenticated">
+						Access to this page requires authorization. You can try <a class="docs-sign-in" href="#" data-bi-name="permission-content-sign-in">signing in</a> or <a  class="docs-change-directory" data-bi-name="permisson-content-change-directory">changing directories</a>.
+					</p>
+					<p class="margin-top-none authentication-determined authenticated">
+						Access to this page requires authorization. You can try <a class="docs-change-directory" data-bi-name="permisson-content-change-directory">changing directories</a>.
+					</p>
+				</div>
+			</div>
+		</div>
+	
+					<div class="content"><h1 id="createfilew-function-fileapih">CreateFileW function (fileapi.h)</h1></div>
+					
+		<div
+			id="article-metadata"
+			data-bi-name="article-metadata"
+			data-test-id="article-metadata"
+			class="page-metadata-container display-flex gap-xxs justify-content-space-between align-items-center flex-wrap-wrap"
+		>
+			 
+				<div
+					id="user-feedback"
+					class="margin-block-xxs display-none display-none-print"
+					hidden
+					data-hide-on-archived
+				>
+					
+		<button
+			id="user-feedback-button"
+			data-test-id="conceptual-feedback-button"
+			class="button button-sm button-clear button-primary display-none"
+			type="button"
+			data-bi-name="user-feedback-button"
+			data-user-feedback-button
+			hidden
+		>
+			<span class="icon" aria-hidden="true">
+				<span class="docon docon-like"></span>
+			</span>
+			<span>Feedback</span>
+		</button>
+	
+				</div>
+		  
+		</div>
+	 
+		<div data-id="ai-summary" class="display-none-print">
+			<div id="ms--ai-summary-cta" class="margin-top-xs display-flex align-items-center">
+				<span class="icon" aria-hidden="true">
+					<span class="docon docon-sparkle-fill gradient-text-vivid"></span>
+				</span>
+				<button
+					id="ms--ai-summary"
+					type="button"
+					class="tag tag-sm tag-suggestion margin-left-xxs"
+					data-test-id="ai-summary-cta"
+					data-bi-name="ai-summary-cta"
+					data-an="ai-summary"
+				>
+					<span class="ai-summary-cta-text">
+						Summarize this article for me
+					</span>
+				</button>
+			</div>
+			<!-- Slot where the client will render the summary card after the user clicks the CTA -->
+			<div id="ms--ai-summary-header" class="margin-top-xs"></div>
+		</div>
+	 
+		<nav
+			id="center-doc-outline"
+			class="doc-outline display-none-desktop display-none-print margin-bottom-sm"
+			data-bi-name="intopic toc"
+			aria-label="In this article"
+		>
+			<h2 id="ms--in-this-article" class="title is-6 margin-block-xs">
+				In this article
+			</h2>
+		</nav>
+	 <div class="content"><p>Creates or opens a file or I/O device. The most commonly used I/O devices are as follows: file, file
+stream, directory, physical disk, volume, console buffer, tape drive, communications resource, mailslot, and
+pipe. The function returns a handle that can be used to access the file or device for various types of
+I/O depending on the file or device and the flags and attributes specified.</p>
+<p>To perform this operation as a transacted operation, which results in a handle that can be used for transacted
+I/O, use the <a href="/en-us/windows/desktop/api/winbase/nf-winbase-createfiletransacteda" data-linktype="absolute-path">CreateFileTransacted</a> function.</p>
+<h2 id="syntax">Syntax</h2>
+<pre><code class="lang-cpp">HANDLE CreateFileW(
+  [in]           LPCWSTR               lpFileName,
+  [in]           DWORD                 dwDesiredAccess,
+  [in]           DWORD                 dwShareMode,
+  [in, optional] LPSECURITY_ATTRIBUTES lpSecurityAttributes,
+  [in]           DWORD                 dwCreationDisposition,
+  [in]           DWORD                 dwFlagsAndAttributes,
+  [in, optional] HANDLE                hTemplateFile
+);
+</code></pre>
+<h2 id="parameters">Parameters</h2>
+<p><code>[in] lpFileName</code></p>
+<p>The name of the file or device to be created or opened. You may use either forward slashes (/) or backslashes (\) in this name.</p>
+<p>For information on special device names, see
+<a href="/en-us/windows/desktop/FileIO/defining-an-ms-dos-device-name" data-linktype="absolute-path">Defining an MS-DOS Device Name</a>.</p>
+<p>To create a file stream, specify the name of the file, a colon, and then the name of the stream. For more
+information, see <a href="/en-us/windows/desktop/FileIO/file-streams" data-linktype="absolute-path">File Streams</a>.</p>
+<p>By default, the name is limited to MAX_PATH characters. To extend this limit to 32,767 wide characters, prepend "\\?\" to the path. For more information, see <a href="/en-us/windows/win32/fileio/naming-a-file" data-linktype="absolute-path">Naming Files, Paths, and Namespaces</a>.</p>
+<div class="TIP">
+<p>Tip</p>
+<p>Starting with Windows 10, Version 1607, you can opt-in to remove the MAX_PATH limitation without prepending "\\?\". See the "Maximum Path Length Limitation" section of <a href="/en-us/windows/win32/fileio/naming-a-file" data-linktype="absolute-path">Naming Files, Paths, and Namespaces</a> for details.</p>
+</div>
+<p><code>[in] dwDesiredAccess</code></p>
+<p>The requested access to the file or device, which can be summarized as read, write, both or neither zero).</p>
+<p>The most commonly used values are <b>GENERIC_READ</b>,
+<b>GENERIC_WRITE</b>, or both
+(<code>GENERIC_READ | GENERIC_WRITE</code>). For more information, see
+<a href="/en-us/windows/desktop/SecAuthZ/generic-access-rights" data-linktype="absolute-path">Generic Access Rights</a>,
+<a href="/en-us/windows/desktop/FileIO/file-security-and-access-rights" data-linktype="absolute-path">File Security and Access Rights</a>,
+<a href="/en-us/windows/desktop/FileIO/file-access-rights-constants" data-linktype="absolute-path">File Access Rights Constants</a>, and
+<a href="/en-us/windows/desktop/SecAuthZ/access-mask" data-linktype="absolute-path">ACCESS_MASK</a>.</p>
+<p>If this parameter is zero, the application can query certain metadata such as file, directory, or device
+attributes without accessing that file or device, even if <b>GENERIC_READ</b> access would
+have been denied.</p>
+<p>You cannot request an access mode that conflicts with the sharing mode that is specified by the
+<i>dwShareMode</i> parameter in an open request that already has an open handle.</p>
+<p>For more information, see the Remarks section of this topic and
+<a href="/en-us/windows/desktop/FileIO/creating-and-opening-files" data-linktype="absolute-path">Creating and Opening Files</a>.</p>
+<p><code>[in] dwShareMode</code></p>
+<p>The requested sharing mode of the file or device, which can be read, write, both, delete, all of these, or
+none (refer to the following table). Access requests to attributes or extended attributes are not affected by
+this flag.</p>
+<p>If this parameter is zero and <b>CreateFile</b> succeeds, the
+file or device cannot be shared and cannot be opened again until the handle to the file or device is closed.
+For more information, see the Remarks section.</p>
+<p>You cannot request a sharing mode that conflicts with the access mode that is specified in an existing
+request that has an open handle. <b>CreateFile</b> would fail and
+the <a href="/en-us/windows/desktop/api/errhandlingapi/nf-errhandlingapi-getlasterror" data-linktype="absolute-path">GetLastError</a> function would return
+<b>ERROR_SHARING_VIOLATION</b>.</p>
+<p>To enable a process to share a file or device while another process has the file or device open, use a
+compatible combination of one or more of the following values. For more information about valid combinations of
+this parameter with the <i>dwDesiredAccess</i> parameter, see
+<a href="/en-us/windows/desktop/FileIO/creating-and-opening-files" data-linktype="absolute-path">Creating and Opening Files</a>.</p>
+<div class="alert"><b>Note</b>  The sharing options for each open handle remain in effect until that handle is closed, regardless of 
+       process context.</div>
+<div> </div>
+<table>
+<tbody><tr>
+<th>Value</th>
+<th>Meaning</th>
+</tr>
+<tr>
+<td width="40%"><a id="0"></a><dl>
+<dt><b>0</b></dt>
+<dt>0x00000000</dt>
+</dl>
+</td>
+<td width="60%">
+Prevents subsequent open operations on a file or device if they request delete, read, or write access.
+</td>
+</tr>
+<tr>
+<td width="40%"><a id="FILE_SHARE_DELETE"></a><a id="file_share_delete"></a><dl>
+<dt><b>FILE_SHARE_DELETE</b></dt>
+<dt>0x00000004</dt>
+</dl>
+</td>
+<td width="60%">
+Enables subsequent open operations on a file or device to request delete access.
+<p>Otherwise, no process can open the file or device if it requests delete access.</p>
+<p>If this flag is not specified, but the file or device has been opened for delete access, the function
+fails.</p>
+<div class="alert"><b>Note</b>  Delete access allows both delete and rename operations.</div>
+<div> </div>
+</td>
+</tr>
+<tr>
+<td width="40%"><a id="FILE_SHARE_READ"></a><a id="file_share_read"></a><dl>
+<dt><b>FILE_SHARE_READ</b></dt>
+<dt>0x00000001</dt>
+</dl>
+</td>
+<td width="60%">
+Enables subsequent open operations on a file or device to request read access.
+<p>Otherwise, no process can open the file or device if it requests read access.</p>
+<p>If this flag is not specified, but the file or device has been opened for read access, the function
+fails.</p>
+</td>
+</tr>
+<tr>
+<td width="40%"><a id="FILE_SHARE_WRITE"></a><a id="file_share_write"></a><dl>
+<dt><b>FILE_SHARE_WRITE</b></dt>
+<dt>0x00000002</dt>
+</dl>
+</td>
+<td width="60%">
+Enables subsequent open operations on a file or device to request write access.
+<p>Otherwise, no process can open the file or device if it requests write access.</p>
+<p>If this flag is not specified, but the file or device has been opened for write access or has a file mapping
+with write access, the function fails.</p>
+</td>
+</tr>
+</tbody></table>
+<p><code>[in, optional] lpSecurityAttributes</code></p>
+<p>A pointer to a <a href="/en-us/windows/win32/api/wtypesbase/ns-wtypesbase-security_attributes" data-linktype="absolute-path">SECURITY_ATTRIBUTES</a>
+structure that contains two separate but related data members: an optional security descriptor, and a Boolean
+value that determines whether the returned handle can be inherited by child processes.</p>
+<p>This parameter can be <b>NULL</b>.</p>
+<p>If this parameter is <b>NULL</b>, the handle returned by
+<b>CreateFile</b> cannot be inherited by any child processes the
+application may create and the file or device associated with the returned handle gets a default security
+descriptor.</p>
+<p>The <b>lpSecurityDescriptor</b> member of the structure specifies a
+<a href="/en-us/windows/desktop/api/winnt/ns-winnt-security_descriptor" data-linktype="absolute-path">SECURITY_DESCRIPTOR</a> for a file or device. If
+this member is <b>NULL</b>, the file or device associated with the returned handle is
+assigned a default security descriptor.</p>
+<p><b>CreateFile</b> ignores the
+<b>lpSecurityDescriptor</b> member when opening an existing file or device, but continues
+to use the <b>bInheritHandle</b> member.</p>
+<p>The <b>bInheritHandle</b> member of the structure specifies whether the returned handle
+can be inherited.</p>
+<p>For more information, see the Remarks section.</p>
+<p><code>[in] dwCreationDisposition</code></p>
+<p>An action to take on a file or device that exists or does not exist.</p>
+<p>For devices other than files, this parameter is usually set to <b>OPEN_EXISTING</b>.</p>
+<p>For more information, see the Remarks section.</p>
+<p>This parameter must be one of the following values, which cannot be combined:</p>
+<table>
+<tbody><tr>
+<th>Value</th>
+<th>Meaning</th>
+</tr>
+<tr>
+<td width="40%"><a id="CREATE_ALWAYS"></a><a id="create_always"></a><dl>
+<dt><b>CREATE_ALWAYS</b></dt>
+<dt>2</dt>
+</dl>
+</td>
+<td width="60%">
+Creates a new file, always.
+<p>If the specified file exists and is writable, the function truncates the file, the function succeeds, and
+last-error code is set to <b>ERROR_ALREADY_EXISTS</b> (183).</p>
+<p>If the specified file does not exist and is a valid path, a new file is created, the function succeeds, and
+the last-error code is set to zero.</p>
+<p>For more information, see the Remarks section of this topic.</p>
+</td>
+</tr>
+<tr>
+<td width="40%"><a id="CREATE_NEW"></a><a id="create_new"></a><dl>
+<dt><b>CREATE_NEW</b></dt>
+<dt>1</dt>
+</dl>
+</td>
+<td width="60%">
+Creates a new file, only if it does not already exist.
+<p>If the specified file exists, the function fails and the last-error code is set to
+<b>ERROR_FILE_EXISTS</b> (80).</p>
+<p>If the specified file does not exist and is a valid path to a writable location, a new file is created.</p>
+</td>
+</tr>
+<tr>
+<td width="40%"><a id="OPEN_ALWAYS"></a><a id="open_always"></a><dl>
+<dt><b>OPEN_ALWAYS</b></dt>
+<dt>4</dt>
+</dl>
+</td>
+<td width="60%">
+Opens a file, always.
+<p>If the specified file exists, the function succeeds and the last-error code is set to
+<b>ERROR_ALREADY_EXISTS</b> (183).</p>
+<p>If the specified file does not exist and is a valid path to a writable location, the function creates a
+file and the last-error code is set to zero.</p>
+</td>
+</tr>
+<tr>
+<td width="40%"><a id="OPEN_EXISTING"></a><a id="open_existing"></a><dl>
+<dt><b>OPEN_EXISTING</b></dt>
+<dt>3</dt>
+</dl>
+</td>
+<td width="60%">
+Opens a file or device, only if it exists.
+<p>If the specified file or device does not exist, the function fails and the last-error code is set to
+<b>ERROR_FILE_NOT_FOUND</b> (2).</p>
+<p>For more information about devices, see the Remarks section.</p>
+</td>
+</tr>
+<tr>
+<td width="40%"><a id="TRUNCATE_EXISTING"></a><a id="truncate_existing"></a><dl>
+<dt><b>TRUNCATE_EXISTING</b></dt>
+<dt>5</dt>
+</dl>
+</td>
+<td width="60%">
+Opens a file and truncates it so that its size is zero bytes, only if it exists.
+<p>If the specified file does not exist, the function fails and the last-error code is set to
+<b>ERROR_FILE_NOT_FOUND</b> (2).</p>
+<p>The calling process must open the file with the <b>GENERIC_WRITE</b> bit set as part of
+the <i>dwDesiredAccess</i> parameter.</p>
+</td>
+</tr>
+</tbody></table>
+<p><code>[in] dwFlagsAndAttributes</code></p>
+<p>The file or device attributes and flags, <b>FILE_ATTRIBUTE_NORMAL</b> being the most
+common default value for files.</p>
+<p>This parameter can include any combination of the available file attributes
+(<b>FILE_ATTRIBUTE_*</b>). All other file attributes override
+<b>FILE_ATTRIBUTE_NORMAL</b>.</p>
+<p>This parameter can also contain combinations of flags (<b>FILE_FLAG_<em></em></b><em>) for control of
+file or device caching behavior, access modes, and other special-purpose flags. These combine with any
+<b>FILE_ATTRIBUTE_</b></em> values.</p>
+<p>This parameter can also contain Security Quality of Service (SQOS) information by specifying the
+<b>SECURITY_SQOS_PRESENT</b> flag. Additional SQOS-related flags information is presented in
+the table following the attributes and flags tables.</p>
+<div class="alert"><b>Note</b>  When <b>CreateFile</b> opens an existing file, it generally 
+       combines the file flags with the file attributes of the existing file, and ignores any file attributes supplied 
+       as part of <i>dwFlagsAndAttributes</i>. Special cases are detailed in 
+       <a href="/en-us/windows/desktop/FileIO/creating-and-opening-files" data-linktype="absolute-path">Creating and Opening Files</a>.</div>
+<div> </div>
+Some of the following file attributes and flags may only apply to files and not necessarily all other types 
+       of devices that <b>CreateFile</b> can open. For additional 
+       information, see the Remarks section of this topic and 
+       <a href="/en-us/windows/desktop/FileIO/creating-and-opening-files" data-linktype="absolute-path">Creating and Opening Files</a>.
+<p>For more advanced access to file attributes, see
+<a href="/en-us/windows/desktop/api/fileapi/nf-fileapi-setfileattributesa" data-linktype="absolute-path">SetFileAttributes</a>. For a complete list
+of all file attributes with their values and descriptions, see
+<a href="/en-us/windows/desktop/FileIO/file-attribute-constants" data-linktype="absolute-path">File Attribute Constants</a>.</p>
+<table>
+<tbody><tr>
+<th>Attribute</th>
+<th>Meaning</th>
+</tr>
+<tr>
+<td width="40%"><a id="FILE_ATTRIBUTE_ARCHIVE"></a><a id="file_attribute_archive"></a><dl>
+<dt><b>FILE_ATTRIBUTE_ARCHIVE</b></dt>
+<dt>32 (0x20)</dt>
+</dl>
+</td>
+<td width="60%">
+The file should be archived. Applications use this attribute to mark files for backup or removal.
+</td>
+</tr>
+<tr>
+<td width="40%"><a id="FILE_ATTRIBUTE_ENCRYPTED"></a><a id="file_attribute_encrypted"></a><dl>
+<dt><b>FILE_ATTRIBUTE_ENCRYPTED</b></dt>
+<dt>16384 (0x4000)</dt>
+</dl>
+</td>
+<td width="60%">
+The file or directory is encrypted. For a file, this means that all data in the file is encrypted. For a 
+         directory, this means that encryption is the default for newly created files and subdirectories. For more 
+         information, see <a href="/en-us/windows/desktop/FileIO/file-encryption" data-linktype="absolute-path">File Encryption</a>.
+<p>This flag has no effect if <b>FILE_ATTRIBUTE_SYSTEM</b> is also specified.</p>
+<p>This flag is not supported on Home, Home Premium, Starter, or ARM editions of Windows.</p>
+</td>
+</tr>
+<tr>
+<td width="40%"><a id="FILE_ATTRIBUTE_HIDDEN"></a><a id="file_attribute_hidden"></a><dl>
+<dt><b>FILE_ATTRIBUTE_HIDDEN</b></dt>
+<dt>2 (0x2)</dt>
+</dl>
+</td>
+<td width="60%">
+The file is hidden. Do not include it in an ordinary directory listing.
+</td>
+</tr>
+<tr>
+<td width="40%"><a id="FILE_ATTRIBUTE_NORMAL"></a><a id="file_attribute_normal"></a><dl>
+<dt><b>FILE_ATTRIBUTE_NORMAL</b></dt>
+<dt>128 (0x80)</dt>
+</dl>
+</td>
+<td width="60%">
+The file does not have other attributes set. This attribute is valid only if used alone.
+</td>
+</tr>
+<tr>
+<td width="40%"><a id="FILE_ATTRIBUTE_OFFLINE"></a><a id="file_attribute_offline"></a><dl>
+<dt><b>FILE_ATTRIBUTE_OFFLINE</b></dt>
+<dt>4096 (0x1000)</dt>
+</dl>
+</td>
+<td width="60%">
+The data of a file is not immediately available. This attribute indicates that file data is physically 
+         moved to offline storage. This attribute is used by Remote Storage, the hierarchical storage management 
+         software. Applications should not arbitrarily change this attribute.
+</td>
+</tr>
+<tr>
+<td width="40%"><a id="FILE_ATTRIBUTE_READONLY"></a><a id="file_attribute_readonly"></a><dl>
+<dt><b>FILE_ATTRIBUTE_READONLY</b></dt>
+<dt>1 (0x1)</dt>
+</dl>
+</td>
+<td width="60%">
+The file is read only. Applications can read the file, but cannot write to or delete it.
+</td>
+</tr>
+<tr>
+<td width="40%"><a id="FILE_ATTRIBUTE_SYSTEM"></a><a id="file_attribute_system"></a><dl>
+<dt><b>FILE_ATTRIBUTE_SYSTEM</b></dt>
+<dt>4 (0x4)</dt>
+</dl>
+</td>
+<td width="60%">
+The file is part of or used exclusively by an operating system.
+</td>
+</tr>
+<tr>
+<td width="40%"><a id="FILE_ATTRIBUTE_TEMPORARY"></a><a id="file_attribute_temporary"></a><dl>
+<dt><b>FILE_ATTRIBUTE_TEMPORARY</b></dt>
+<dt>256 (0x100)</dt>
+</dl>
+</td>
+<td width="60%">
+The file is being used for temporary storage.
+<p>For more information, see the <a href="#caching_behavior" data-linktype="self-bookmark">Caching Behavior</a> section of this
+topic.</p>
+</td>
+</tr>
+</tbody></table>
+ 
+<table>
+<tbody><tr>
+<th>Flag</th>
+<th>Meaning</th>
+</tr>
+<tr>
+<td width="40%"><a id="FILE_FLAG_BACKUP_SEMANTICS"></a><a id="file_flag_backup_semantics"></a><dl>
+<dt><b>FILE_FLAG_BACKUP_SEMANTICS</b></dt>
+<dt>0x02000000</dt>
+</dl>
+</td>
+<td width="60%">
+The file is being opened or created for a backup or restore operation. The system ensures that the calling 
+         process overrides file security checks when the process has <b>SE_BACKUP_NAME</b> and 
+         <b>SE_RESTORE_NAME</b> privileges. For more information, see 
+         <a href="/en-us/windows/desktop/SecBP/changing-privileges-in-a-token" data-linktype="absolute-path">Changing Privileges in a Token</a>.
+<p>You must set this flag to obtain a handle to a directory. A directory handle can be passed to some
+functions instead of a file handle. For more information, see the Remarks section.</p>
+</td>
+</tr>
+<tr>
+<td width="40%"><a id="FILE_FLAG_DELETE_ON_CLOSE"></a><a id="file_flag_delete_on_close"></a><dl>
+<dt><b>FILE_FLAG_DELETE_ON_CLOSE</b></dt>
+<dt>0x04000000</dt>
+</dl>
+</td>
+<td width="60%">
+The file is to be deleted immediately after all of its handles are closed, which includes the specified 
+         handle and any other open or duplicated handles.
+<p>If there are existing open handles to a file, the call fails unless they were all opened with the
+<b>FILE_SHARE_DELETE</b> share mode.</p>
+<p>Subsequent open requests for the file fail, unless the <b>FILE_SHARE_DELETE</b> share
+mode is specified.</p>
+</td>
+</tr>
+<tr>
+<td width="40%"><a id="FILE_FLAG_NO_BUFFERING"></a><a id="file_flag_no_buffering"></a><dl>
+<dt><b>FILE_FLAG_NO_BUFFERING</b></dt>
+<dt>0x20000000</dt>
+</dl>
+</td>
+<td width="60%">
+The file or device is being opened with no system caching for data reads and writes. This flag does not 
+         affect hard disk caching or memory mapped files.
+<p>There are strict requirements for successfully working with files opened with
+<b>CreateFile</b> using the
+<b>FILE_FLAG_NO_BUFFERING</b> flag, for details see
+<a href="/en-us/windows/desktop/FileIO/file-buffering" data-linktype="absolute-path">File Buffering</a>.</p>
+</td>
+</tr>
+<tr>
+<td width="40%"><a id="FILE_FLAG_OPEN_NO_RECALL"></a><a id="file_flag_open_no_recall"></a><dl>
+<dt><b>FILE_FLAG_OPEN_NO_RECALL</b></dt>
+<dt>0x00100000</dt>
+</dl>
+</td>
+<td width="60%">
+The file data is requested, but it should continue to be located in remote storage. It should not be 
+         transported back to local storage. This flag is for use by remote storage systems.
+</td>
+</tr>
+<tr>
+<td width="40%"><a id="FILE_FLAG_OPEN_REPARSE_POINT"></a><a id="file_flag_open_reparse_point"></a><dl>
+<dt><b>FILE_FLAG_OPEN_REPARSE_POINT</b></dt>
+<dt>0x00200000</dt>
+</dl>
+</td>
+<td width="60%">
+Normal <a href="/en-us/windows/desktop/FileIO/reparse-points" data-linktype="absolute-path">reparse point</a> processing will not 
+         occur; <b>CreateFile</b> will attempt to open the reparse 
+         point. When a file is opened, a file handle is returned, whether or not the filter that controls the reparse 
+         point is operational.
+<p>This flag cannot be used with the <b>CREATE_ALWAYS</b> flag.</p>
+<p>If the file is not a reparse point, then this flag is ignored.</p>
+<p>For more information, see the Remarks section.</p>
+</td>
+</tr>
+<tr>
+<td width="40%"><a id="FILE_FLAG_OVERLAPPED"></a><a id="file_flag_overlapped"></a><dl>
+<dt><b>FILE_FLAG_OVERLAPPED</b></dt>
+<dt>0x40000000</dt>
+</dl>
+</td>
+<td width="60%">
+The file or device is being opened or created for asynchronous I/O.
+<p>When subsequent I/O operations are completed on this handle, the event specified in the
+<a href="/en-us/windows/desktop/api/minwinbase/ns-minwinbase-overlapped" data-linktype="absolute-path">OVERLAPPED</a> structure will be set to the
+signaled state.</p>
+<p>If this flag is specified, the file can be used for simultaneous read and write operations.</p>
+<p>If this flag is not specified, then I/O operations are serialized, even if the calls to the read and write
+functions specify an <a href="/en-us/windows/desktop/api/minwinbase/ns-minwinbase-overlapped" data-linktype="absolute-path">OVERLAPPED</a> structure.</p>
+<p>For information about considerations when using a file handle created with this flag, see the
+<a href="#synchronous_and_asynchronous_i_o_handles" data-linktype="self-bookmark">Synchronous and Asynchronous I/O Handles</a>
+section of this topic.</p>
+</td>
+</tr>
+<tr>
+<td width="40%"><a id="FILE_FLAG_POSIX_SEMANTICS"></a><a id="file_flag_posix_semantics"></a><dl>
+<dt><b>FILE_FLAG_POSIX_SEMANTICS</b></dt>
+<dt>0x01000000</dt>
+</dl>
+</td>
+<td width="60%">
+Access will occur according to POSIX rules. This includes allowing multiple files with names, differing 
+         only in case, for file systems that support that naming. Use care when using this option, because files 
+         created with this flag may not be accessible by applications that are written for MS-DOS or 16-bit 
+         Windows.
+</td>
+</tr>
+<tr>
+<td width="40%"><a id="FILE_FLAG_RANDOM_ACCESS"></a><a id="file_flag_random_access"></a><dl>
+<dt><b>FILE_FLAG_RANDOM_ACCESS</b></dt>
+<dt>0x10000000</dt>
+</dl>
+</td>
+<td width="60%">
+Access is intended to be random. The system can use this as a hint to optimize file caching.
+<p>This flag has no effect if the file system does not support cached I/O and
+<b>FILE_FLAG_NO_BUFFERING</b>.</p>
+<p>For more information, see the <a href="#caching_behavior" data-linktype="self-bookmark">Caching Behavior</a> section of this
+topic.</p>
+</td>
+</tr>
+<tr>
+<td width="40%"><a id="FILE_FLAG_SESSION_AWARE"></a><a id="file_flag_session_aware"></a><dl>
+<dt><b>FILE_FLAG_SESSION_AWARE</b></dt>
+<dt>0x00800000</dt>
+</dl>
+</td>
+<td width="60%">
+The file or device is being opened with session awareness. If this flag is not specified, then per-session 
+         devices (such as a device using RemoteFX USB Redirection) cannot be opened by processes running in session 0. 
+         This flag has no effect for callers not in session 0. This flag is supported only on server editions of 
+         Windows.
+<p><b>Windows Server 2008 R2 and Windows Server 2008:  </b>This flag is not supported before Windows Server 2012.</p>
+</td>
+</tr>
+<tr>
+<td width="40%"><a id="FILE_FLAG_SEQUENTIAL_SCAN"></a><a id="file_flag_sequential_scan"></a><dl>
+<dt><b>FILE_FLAG_SEQUENTIAL_SCAN</b></dt>
+<dt>0x08000000</dt>
+</dl>
+</td>
+<td width="60%">
+Access is intended to be sequential from beginning to end. The system can use this as a hint to optimize 
+         file caching.
+<p>This flag should not be used if read-behind (that is, reverse scans) will be used.</p>
+<p>This flag has no effect if the file system does not support cached I/O and
+<b>FILE_FLAG_NO_BUFFERING</b>.</p>
+<p>For more information, see the <a href="#caching_behavior" data-linktype="self-bookmark">Caching Behavior</a> section of this
+topic.</p>
+</td>
+</tr>
+<tr>
+<td width="40%"><a id="FILE_FLAG_WRITE_THROUGH"></a><a id="file_flag_write_through"></a><dl>
+<dt><b>FILE_FLAG_WRITE_THROUGH</b></dt>
+<dt>0x80000000</dt>
+</dl>
+</td>
+<td width="60%">
+Write operations will not go through any intermediate cache, they will go directly to disk.
+<p>For additional information, see the <a href="#caching_behavior" data-linktype="self-bookmark">Caching Behavior</a> section of this
+topic.</p>
+</td>
+</tr>
+</tbody></table>
+ 
+<p>The <i>dwFlagsAndAttributes</i> parameter can also specify SQOS information. For more
+information, see
+<a href="/en-us/windows/desktop/SecAuthZ/impersonation-levels" data-linktype="absolute-path">Impersonation Levels</a>. When the
+calling application specifies the <b>SECURITY_SQOS_PRESENT</b> flag as part of
+<i>dwFlagsAndAttributes</i>, it can also contain one or more of the following values.</p>
+<table>
+<tbody><tr>
+<th>Security flag</th>
+<th>Meaning</th>
+</tr>
+<tr>
+<td width="40%"><a id="SECURITY_ANONYMOUS"></a><a id="security_anonymous"></a><dl>
+<dt><b>SECURITY_ANONYMOUS</b></dt>
+</dl>
+</td>
+<td width="60%">
+Impersonates a client at the Anonymous impersonation level.
+</td>
+</tr>
+<tr>
+<td width="40%"><a id="SECURITY_CONTEXT_TRACKING"></a><a id="security_context_tracking"></a><dl>
+<dt><b>SECURITY_CONTEXT_TRACKING</b></dt>
+</dl>
+</td>
+<td width="60%">
+The security tracking mode is dynamic. If this flag is not specified, the security tracking mode is 
+         static.
+</td>
+</tr>
+<tr>
+<td width="40%"><a id="SECURITY_DELEGATION"></a><a id="security_delegation"></a><dl>
+<dt><b>SECURITY_DELEGATION</b></dt>
+</dl>
+</td>
+<td width="60%">
+Impersonates a client at the Delegation impersonation level.
+</td>
+</tr>
+<tr>
+<td width="40%"><a id="SECURITY_EFFECTIVE_ONLY"></a><a id="security_effective_only"></a><dl>
+<dt><b>SECURITY_EFFECTIVE_ONLY</b></dt>
+</dl>
+</td>
+<td width="60%">
+Only the enabled aspects of the client's security context are available to the server. If you do not 
+         specify this flag, all aspects of the client's security context are available.
+<p>This allows the client to limit the groups and privileges that a server can use while impersonating the
+client.</p>
+</td>
+</tr>
+<tr>
+<td width="40%"><a id="SECURITY_IDENTIFICATION"></a><a id="security_identification"></a><dl>
+<dt><b>SECURITY_IDENTIFICATION</b></dt>
+</dl>
+</td>
+<td width="60%">
+Impersonates a client at the Identification impersonation level.
+</td>
+</tr>
+<tr>
+<td width="40%"><a id="SECURITY_IMPERSONATION"></a><a id="security_impersonation"></a><dl>
+<dt><b>SECURITY_IMPERSONATION</b></dt>
+</dl>
+</td>
+<td width="60%">
+Impersonate a client at the impersonation level. This is the default behavior if no other flags are 
+         specified along with the <b>SECURITY_SQOS_PRESENT</b> flag.
+</td>
+</tr>
+</tbody></table>
+<p><code>[in, optional] hTemplateFile</code></p>
+<p>A valid handle to a template file with the <b>GENERIC_READ</b> access right. The template
+file supplies file attributes and extended attributes for the file that is being created.</p>
+<p>This parameter can be <b>NULL</b>.</p>
+<p>When opening an existing file, <b>CreateFile</b> ignores this
+parameter.</p>
+<p>When opening a new encrypted file, the file inherits the discretionary access control list from its parent
+directory. For additional information, see
+<a href="/en-us/windows/desktop/FileIO/file-encryption" data-linktype="absolute-path">File Encryption</a>.</p>
+<h2 id="return-value">Return value</h2>
+<p>If the function succeeds, the return value is an open handle to the specified file, device, named pipe, or
+mail slot.</p>
+<p>If the function fails, the return value is <b>INVALID_HANDLE_VALUE</b>. To get extended
+error information, call <a href="/en-us/windows/desktop/api/errhandlingapi/nf-errhandlingapi-getlasterror" data-linktype="absolute-path">GetLastError</a>.</p>
+<h2 id="remarks">Remarks</h2>
+<p><b>CreateFile</b> was originally developed specifically for file
+interaction but has since been expanded and enhanced to include most other types of I/O devices and mechanisms
+available to Windows developers. This section attempts to cover the varied issues developers may experience when
+using <b>CreateFile</b> in different contexts and with different I/O
+types. The text attempts to use the word <i>file</i> only when referring specifically to data stored in an
+actual file on a file system. However, some uses of <i>file</i> may be referring more generally to an I/O
+object that supports file-like mechanisms. This liberal use of the term <i>file</i> is particularly
+prevalent in constant names and parameter names because of the previously mentioned historical reasons.</p>
+<p>When an application is finished using the object handle returned by
+<b>CreateFile</b>, use the
+<a href="/en-us/windows/desktop/api/handleapi/nf-handleapi-closehandle" data-linktype="absolute-path">CloseHandle</a> function to close the handle. This not only
+frees up system resources, but can have wider influence on things like sharing the file or device and committing
+data to disk. Specifics are noted within this topic as appropriate.</p>
+<p><b>Windows Server 2003 and Windows XP:  </b>A sharing violation occurs if an attempt is made to open a file or directory for deletion on a remote
+computer when the value of the <i>dwDesiredAccess</i> parameter is the
+<b>DELETE</b> access flag (0x00010000) <b>OR</b>'ed with any other access flag, and the remote file
+or directory has not been opened with <b>FILE_SHARE_DELETE</b>. To avoid the sharing violation
+in this scenario, open the remote file or directory with the <b>DELETE</b> access right only,
+or call <a href="/en-us/windows/desktop/api/fileapi/nf-fileapi-deletefilea" data-linktype="absolute-path">DeleteFile</a> without first opening the file or
+directory for deletion.</p>
+<p>Some file systems, such as the NTFS file system, support compression or encryption for individual files and
+directories. On volumes that have a mounted file system with this support, a new file inherits the compression
+and encryption attributes of its directory.</p>
+<p>You cannot use <b>CreateFile</b> to control compression,
+decompression, or decryption on a file or directory. For more information, see
+<a href="/en-us/windows/desktop/FileIO/creating-and-opening-files" data-linktype="absolute-path">Creating and Opening Files</a>,
+<a href="/en-us/windows/desktop/FileIO/file-compression-and-decompression" data-linktype="absolute-path">File Compression and Decompression</a>,
+and <a href="/en-us/windows/desktop/FileIO/file-encryption" data-linktype="absolute-path">File Encryption</a>.</p>
+<p><b>Windows Server 2003 and Windows XP:  </b>For backward compatibility purposes, <b>CreateFile</b> does
+not apply inheritance rules when you specify a security descriptor in
+<i>lpSecurityAttributes</i>. To support inheritance, functions that later query the security
+descriptor of this file may heuristically determine and report that inheritance is in effect. For more
+information, see
+<a href="/en-us/windows/desktop/SecAuthZ/automatic-propagation-of-inheritable-aces" data-linktype="absolute-path">Automatic Propagation of Inheritable ACEs</a>.</p>
+<p>As stated previously, if the <i>lpSecurityAttributes</i> parameter is
+<b>NULL</b>, the handle returned by
+<b>CreateFile</b> cannot be inherited by any child processes your
+application may create. The following information regarding this parameter also applies:</p>
+<ul>
+<li>If the <b>bInheritHandle</b> member variable is not <b>FALSE</b>, 
+      which is any nonzero value, then the handle can be inherited. Therefore it is critical this structure member be 
+      properly initialized to <b>FALSE</b> if you do not intend the handle to be inheritable.</li>
+<li>The access control lists (ACL) in the default security descriptor for a file or directory are inherited 
+      from its parent directory.</li>
+<li>The target file system must support security on files and directories for the 
+      <b>lpSecurityDescriptor</b> member to have an effect on them, which can be determined by 
+      using <a href="/en-us/windows/desktop/api/fileapi/nf-fileapi-getvolumeinformationa" data-linktype="absolute-path">GetVolumeInformation</a>.</li>
+</ul>
+In Windows 8 and Windows Server 2012, this function is supported by the following technologies.
+<table>
+<tbody><tr>
+<th>Technology</th>
+<th>Supported</th>
+</tr>
+<tr>
+<td>
+Server Message Block (SMB) 3.0 protocol
+</td>
+<td>
+Yes
+</td>
+</tr>
+<tr>
+<td>
+SMB 3.0 Transparent Failover (TFO)
+</td>
+<td>
+See remarks
+</td>
+</tr>
+<tr>
+<td>
+SMB 3.0 with Scale-out File Shares (SO)
+</td>
+<td>
+See remarks
+</td>
+</tr>
+<tr>
+<td>
+Cluster Shared Volume File System (CsvFS)
+</td>
+<td>
+Yes
+</td>
+</tr>
+<tr>
+<td>
+Resilient File System (ReFS)
+</td>
+<td>
+Yes
+</td>
+</tr>
+</tbody></table>
+ 
+<p>Note that <b>CreateFile</b> with supersede disposition will fail if performed on a file where there is already an open alternate data stream.</p>
+<h3><a id="Symbolic_Link_Behavior"></a><a id="symbolic_link_behavior"></a><a id="SYMBOLIC_LINK_BEHAVIOR"></a>Symbolic Link Behavior</h3>
+If the call to this function creates a file, there is no change in behavior. Also, consider the following 
+      information regarding <b>FILE_FLAG_OPEN_REPARSE_POINT</b>:
+<ul>
+<li>
+If <b>FILE_FLAG_OPEN_REPARSE_POINT</b> is specified:
+<ul>
+<li>If an existing file is opened and it is a symbolic link, the handle returned is a handle to the 
+         symbolic link.</li>
+<li>If <b>TRUNCATE_EXISTING</b> or <b>FILE_FLAG_DELETE_ON_CLOSE</b> 
+         are specified, the file affected is a symbolic link.</li>
+</ul>
+</li>
+<li>
+If <b>FILE_FLAG_OPEN_REPARSE_POINT</b> is not specified:
+<ul>
+<li>If an existing file is opened and it is a symbolic link, the handle returned is a handle to the 
+         target.</li>
+<li>If <b>CREATE_ALWAYS</b>, <b>TRUNCATE_EXISTING</b>, or 
+         <b>FILE_FLAG_DELETE_ON_CLOSE</b> are specified, the file affected is the target.</li>
+</ul>
+</li>
+</ul>
+<h3><a id="caching_behavior"></a><a id="CACHING_BEHAVIOR"></a>Caching Behavior</h3>
+Several of the possible values for the <i>dwFlagsAndAttributes</i> parameter are used by 
+      <b>CreateFile</b> to control or affect how the data associated 
+      with the handle is cached by the system. They are:
+<ul>
+<li><b>FILE_FLAG_NO_BUFFERING</b></li>
+<li><b>FILE_FLAG_RANDOM_ACCESS</b></li>
+<li><b>FILE_FLAG_SEQUENTIAL_SCAN</b></li>
+<li><b>FILE_FLAG_WRITE_THROUGH</b></li>
+<li><b>FILE_ATTRIBUTE_TEMPORARY</b></li>
+</ul>
+If none of these flags is specified, the system uses a default general-purpose caching scheme. Otherwise, the 
+      system caching behaves as specified for each flag.
+<p>Some of these flags should not be combined. For instance, combining
+<b>FILE_FLAG_RANDOM_ACCESS</b> with <b>FILE_FLAG_SEQUENTIAL_SCAN</b> is
+self-defeating.</p>
+<p>Specifying the <b>FILE_FLAG_SEQUENTIAL_SCAN</b> flag can increase performance for
+applications that read large files using sequential access. Performance gains can be even more noticeable for
+applications that read large files mostly sequentially, but occasionally skip forward over small ranges of
+bytes. If an application moves the file pointer for random access, optimum caching performance most likely will
+not occur. However, correct operation is still guaranteed.</p>
+<p>The flags <b>FILE_FLAG_WRITE_THROUGH</b> and
+<b>FILE_FLAG_NO_BUFFERING</b> are independent and may be combined.</p>
+<p>If <b>FILE_FLAG_WRITE_THROUGH</b> is used but
+<b>FILE_FLAG_NO_BUFFERING</b> is not also specified, so that system caching is in effect,
+then the data is written to the system cache but is flushed to disk without delay.</p>
+<p>If <b>FILE_FLAG_WRITE_THROUGH</b> and <b>FILE_FLAG_NO_BUFFERING</b> are
+both specified, so that system caching is not in effect, then the data is immediately flushed to disk without
+going through the Windows system cache. The operating system also requests a write-through of the hard disk's
+local hardware cache to persistent media.</p>
+<div class="alert"><b>Note</b>  Not all hard disk hardware supports this write-through capability.</div>
+<div> </div>
+Proper use of the <b>FILE_FLAG_NO_BUFFERING</b> flag requires special application 
+      considerations. For more information, see 
+      <a href="/en-us/windows/desktop/FileIO/file-buffering" data-linktype="absolute-path">File Buffering</a>.
+<p>A write-through request via <b>FILE_FLAG_WRITE_THROUGH</b> also causes NTFS to flush any
+metadata changes, such as a time stamp update or a rename operation, that result from processing the request.
+For this reason, the <b>FILE_FLAG_WRITE_THROUGH</b> flag is often used with the
+<b>FILE_FLAG_NO_BUFFERING</b> flag as a replacement for calling the
+<a href="/en-us/windows/desktop/api/fileapi/nf-fileapi-flushfilebuffers" data-linktype="absolute-path">FlushFileBuffers</a> function after each write, which can
+cause unnecessary performance penalties. Using these flags together avoids those penalties. For general
+information about the caching of files and metadata, see
+<a href="/en-us/windows/desktop/FileIO/file-caching" data-linktype="absolute-path">File Caching</a>.</p>
+<p>When <b>FILE_FLAG_NO_BUFFERING</b> is combined with
+<b>FILE_FLAG_OVERLAPPED</b>, the flags give maximum asynchronous performance, because the I/O
+does not rely on the synchronous operations of the memory manager. However, some I/O operations take more time,
+because data is not being held in the cache. Also, the file metadata may still be cached (for example, when
+creating an empty file). To ensure that the metadata is flushed to disk, use the
+<a href="/en-us/windows/desktop/api/fileapi/nf-fileapi-flushfilebuffers" data-linktype="absolute-path">FlushFileBuffers</a> function.</p>
+<p>Specifying the <b>FILE_ATTRIBUTE_TEMPORARY</b> attribute causes file systems to avoid
+writing data back to mass storage if sufficient cache memory is available, because an application deletes a
+temporary file after a handle is closed. In that case, the system can entirely avoid writing the data. Although
+it does not directly control data caching in the same way as the previously mentioned flags, the
+<b>FILE_ATTRIBUTE_TEMPORARY</b> attribute does tell the system to hold as much as possible in
+the system cache without writing and therefore may be of concern for certain applications.</p>
+<h3><a id="Files"></a><a id="files"></a><a id="FILES"></a>Files</h3>
+If you rename or delete a file and then restore it shortly afterward, the system searches the cache for file 
+      information to restore. Cached information includes its short/long name pair and creation time.
+<p>If you call <b>CreateFile</b> on a file that is pending deletion
+as a result of a previous call to <a href="/en-us/windows/desktop/api/fileapi/nf-fileapi-deletefilea" data-linktype="absolute-path">DeleteFile</a>, the function
+fails. The operating system delays file deletion until all handles to the file are closed.
+<a href="/en-us/windows/desktop/api/errhandlingapi/nf-errhandlingapi-getlasterror" data-linktype="absolute-path">GetLastError</a> returns
+<b>ERROR_ACCESS_DENIED</b>.</p>
+<p>The <i>dwDesiredAccess</i> parameter can be zero, allowing the application to query file
+attributes without accessing the file if the application is running with adequate security settings. This is
+useful to test for the existence of a file without opening it for read and/or write access, or to obtain other
+statistics about the file or directory. See
+<a href="/en-us/windows/desktop/FileIO/obtaining-and-setting-file-information" data-linktype="absolute-path">Obtaining and Setting File Information</a>
+and <a href="/en-us/windows/desktop/api/fileapi/nf-fileapi-getfileinformationbyhandle" data-linktype="absolute-path">GetFileInformationByHandle</a>.</p>
+<p>If <b>CREATE_ALWAYS</b> and <b>FILE_ATTRIBUTE_NORMAL</b> are
+specified, <b>CreateFile</b> fails and sets the last error to
+<b>ERROR_ACCESS_DENIED</b> if the file exists and has the
+<b>FILE_ATTRIBUTE_HIDDEN</b> or <b>FILE_ATTRIBUTE_SYSTEM</b> attribute.
+To avoid the error, specify the same attributes as the existing file.</p>
+<p>When an application creates a file across a network, it is better to use
+<code>GENERIC_READ | GENERIC_WRITE</code> for
+<i>dwDesiredAccess</i> than to use <b>GENERIC_WRITE</b> alone. The
+resulting code is faster, because the redirector can use the cache manager and send fewer SMBs with more data.
+This combination also avoids an issue where writing to a file across a network can occasionally return
+<b>ERROR_ACCESS_DENIED</b>.</p>
+<p>For more information, see
+<a href="/en-us/windows/desktop/FileIO/creating-and-opening-files" data-linktype="absolute-path">Creating and Opening Files</a>.</p>
+<h3><a id="synchronous_and_asynchronous_i_o_handles"></a><a id="SYNCHRONOUS_AND_ASYNCHRONOUS_I_O_HANDLES"></a>Synchronous and Asynchronous I/O Handles</h3>
+<b>CreateFile</b> provides for creating a file or device handle 
+      that is either synchronous or asynchronous. A synchronous handle behaves such that I/O function calls using that 
+      handle are blocked until they complete, while an asynchronous file handle makes it possible for the system to 
+      return immediately from I/O function calls, whether they completed the I/O operation or not. As stated 
+      previously, this synchronous versus asynchronous behavior is determined by specifying 
+      <b>FILE_FLAG_OVERLAPPED</b> within the <i>dwFlagsAndAttributes</i> 
+      parameter. There are several complexities and potential pitfalls when using asynchronous I/O; for more 
+      information, see 
+      <a href="/en-us/windows/desktop/FileIO/synchronous-and-asynchronous-i-o" data-linktype="absolute-path">Synchronous and Asynchronous I/O</a>.
+<h3><a id="File_Streams"></a><a id="file_streams"></a><a id="FILE_STREAMS"></a>File Streams</h3>
+On NTFS file systems, you can use <b>CreateFile</b> to create 
+      separate streams within a file. For more information, see 
+      <a href="/en-us/windows/desktop/FileIO/file-streams" data-linktype="absolute-path">File Streams</a>.
+<h3><a id="Directories"></a><a id="directories"></a><a id="DIRECTORIES"></a>Directories</h3>
+An application cannot create a directory by using 
+      <b>CreateFile</b>, therefore only the 
+      <b>OPEN_EXISTING</b> value is valid for 
+      <i>dwCreationDisposition</i> for this use case. To create a directory, the application must 
+      call <a href="/en-us/windows/desktop/api/fileapi/nf-fileapi-createdirectorya" data-linktype="absolute-path">CreateDirectory</a> or 
+      <a href="/en-us/windows/desktop/api/winbase/nf-winbase-createdirectoryexa" data-linktype="absolute-path">CreateDirectoryEx</a>.
+<p>To open a directory using <b>CreateFile</b>, specify the
+<b>FILE_FLAG_BACKUP_SEMANTICS</b> flag as part of
+<i>dwFlagsAndAttributes</i>. Appropriate security checks still apply when this flag is used
+without <b>SE_BACKUP_NAME</b> and <b>SE_RESTORE_NAME</b> privileges.</p>
+<p>When using <b>CreateFile</b> to open a directory during
+defragmentation of a FAT or FAT32 file system volume, do not specify the
+<b>MAXIMUM_ALLOWED</b> access right. Access to the directory is denied if this is done.
+Specify the <b>GENERIC_READ</b> access right instead.</p>
+<p>For more information, see
+<a href="/en-us/windows/desktop/FileIO/about-directory-management" data-linktype="absolute-path">About Directory Management</a>.</p>
+<h3><a id="Physical_Disks_and_Volumes"></a><a id="physical_disks_and_volumes"></a><a id="PHYSICAL_DISKS_AND_VOLUMES"></a>Physical Disks and Volumes</h3>
+Direct access to the disk or to a volume is restricted. 
+<p><b>Windows Server 2003 and Windows XP:  </b>Direct access to the disk or to a volume is not restricted in this manner.</p>
+<p>You can use the <b>CreateFile</b> function to open a physical
+disk drive or a volume, which returns a direct access storage device (DASD) handle that can be used with the
+<a href="/en-us/windows/desktop/api/ioapiset/nf-ioapiset-deviceiocontrol" data-linktype="absolute-path">DeviceIoControl</a> function. This enables you to access
+the disk or volume directly, for example such disk metadata as the partition table. However, this type of access
+also exposes the disk drive or volume to potential data loss, because an incorrect write to a disk using this
+mechanism could make its contents inaccessible to the operating system. To ensure data integrity, be sure to
+become familiar with <b>DeviceIoControl</b> and how other
+APIs behave differently with a direct access handle as opposed to a file system handle.</p>
+<p>The following requirements must be met for such a call to succeed:</p>
+<ul>
+<li>The caller must have administrative privileges. For more information, see 
+       <a href="/en-us/windows/desktop/SecBP/running-with-special-privileges" data-linktype="absolute-path">Running with Special Privileges</a>.</li>
+<li>The <i>dwCreationDisposition</i> parameter must have the 
+      <b>OPEN_EXISTING</b> flag.</li>
+<li>When opening a volume or floppy disk, the <i>dwShareMode</i> parameter must have the 
+      <b>FILE_SHARE_WRITE</b> flag.</li>
+</ul>
+<div class="alert"><b>Note</b>  The <i>dwDesiredAccess</i> parameter can be zero, allowing the application to query 
+      device attributes without accessing a device. This is useful for an application to determine the size of a 
+      floppy disk drive and the formats it supports without requiring a floppy disk in a drive, for instance. It can 
+      also be used for reading statistics without requiring higher-level data read/write permission.</div>
+<div> </div>
+When opening a physical drive <i>x</i>:, the 
+      <i>lpFileName</i> string should be the following form: 
+      "\\.\PhysicalDrive<i>X</i>". Hard disk numbers 
+      start at zero. The following table shows some examples of physical drive strings.
+<table>
+<tbody><tr>
+<th>String</th>
+<th>Meaning</th>
+</tr>
+<tr>
+<td>"\\.\PhysicalDrive0"</td>
+<td>Opens the first physical drive.</td>
+</tr>
+<tr>
+<td>"\\.\PhysicalDrive2"</td>
+<td>Opens the third physical drive.</td>
+</tr>
+</tbody></table>
+ 
+<p>To obtain the physical drive identifier for a volume, open a handle to the volume and call the
+<a href="/en-us/windows/desktop/api/ioapiset/nf-ioapiset-deviceiocontrol" data-linktype="absolute-path">DeviceIoControl</a> function with
+<a href="/en-us/windows/desktop/api/winioctl/ni-winioctl-ioctl_volume_get_volume_disk_extents" data-linktype="absolute-path">IOCTL_VOLUME_GET_VOLUME_DISK_EXTENTS</a>.
+This control code returns the disk number and offset for each of the volume's one or more extents; a volume can
+span multiple physical disks.</p>
+<p>For an example of opening a physical drive, see
+<a href="/en-us/windows/desktop/DevIO/calling-deviceiocontrol" data-linktype="absolute-path">Calling DeviceIoControl</a>.</p>
+<p>When opening a volume or removable media drive (for example, a floppy disk drive or flash memory thumb drive),
+the <i>lpFileName</i> string should be the following form:
+"\\.\<i>X</i>:". Do not use a trailing backslash
+(\), which indicates the root directory of a drive. The following table shows some examples of drive strings.</p>
+<table>
+<tbody><tr>
+<th>String</th>
+<th>Meaning</th>
+</tr>
+<tr>
+<td>"\\.\A:"</td>
+<td>Opens floppy disk drive A.</td>
+</tr>
+<tr>
+<td>"\\.\C:"</td>
+<td>Opens the C: volume.</td>
+</tr>
+<tr>
+<td>"\\.\C:\"</td>
+<td>Opens the file system of the C: volume.</td>
+</tr>
+</tbody></table>
+ 
+<p>You can also open a volume by referring to its volume name. For more information, see
+<a href="/en-us/windows/desktop/FileIO/naming-a-volume" data-linktype="absolute-path">Naming a Volume</a>.</p>
+<p>A volume contains one or more mounted file systems. Volume handles can be opened as noncached at the
+discretion of the particular file system, even when the noncached option is not specified in
+<b>CreateFile</b>. You should assume that all Microsoft file
+systems open volume handles as noncached. The restrictions on noncached I/O for files also apply to volumes.</p>
+<p>A file system may or may not require buffer alignment even though the data is noncached. However, if the
+noncached option is specified when opening a volume, buffer alignment is enforced regardless of the file system
+on the volume. It is recommended on all file systems that you open volume handles as noncached, and follow the
+noncached I/O restrictions.</p>
+<div class="alert"><b>Note</b>  To read or write to the last few sectors of the volume, you must call 
+      <a href="/en-us/windows/desktop/api/ioapiset/nf-ioapiset-deviceiocontrol" data-linktype="absolute-path">DeviceIoControl</a> and specify 
+      <a href="/en-us/windows/desktop/api/winioctl/ni-winioctl-fsctl_allow_extended_dasd_io" data-linktype="absolute-path">FSCTL_ALLOW_EXTENDED_DASD_IO</a>. This signals 
+      the file system driver not to perform any I/O boundary checks on partition read or write calls. Instead, 
+      boundary checks are performed by the device driver.</div>
+<div> </div>
+<h3><a id="Changer_Device"></a><a id="changer_device"></a><a id="CHANGER_DEVICE"></a>Changer Device</h3>
+The <b>IOCTL_CHANGER_*</b> control codes for 
+      <a href="/en-us/windows/desktop/api/ioapiset/nf-ioapiset-deviceiocontrol" data-linktype="absolute-path">DeviceIoControl</a> accept a handle to a changer device. 
+      To open a changer device, use a file name of the following form: 
+      "\\.\Changer<i>x</i>" where 
+      <i>x</i> is a number that indicates which device to open, starting with zero. To open 
+      changer device zero in an application that is written in C or C++, use the following file name: 
+      "\\\\.\\Changer0".
+<h3><a id="Tape_Drives"></a><a id="tape_drives"></a><a id="TAPE_DRIVES"></a>Tape Drives</h3>
+You can open tape drives by using a file name of the following form: 
+      "\\.\TAPE<i>x</i>" where 
+      <i>x</i> is a number that indicates which drive to open, starting with tape drive zero. To 
+      open tape drive zero in an application that is written in C or C++, use the following file name: 
+      "\\\\.\\TAPE0".
+<p>For more information, see <a href="/en-us/windows/desktop/Backup/backup" data-linktype="absolute-path">Backup</a>.</p>
+<h3><a id="Communications_Resources"></a><a id="communications_resources"></a><a id="COMMUNICATIONS_RESOURCES"></a>Communications Resources</h3>
+The <b>CreateFile</b> function can create a handle to a 
+      communications resource, such as the serial port COM1. For communications resources, 
+      the <i>dwCreationDisposition</i> parameter must be 
+      <b>OPEN_EXISTING</b>, the <i>dwShareMode</i> parameter must be zero 
+      (exclusive access), and the <i>hTemplateFile</i> parameter must be 
+      <b>NULL</b>. Read, write, or read/write access can be specified, and the handle can be opened 
+      for overlapped I/O.
+<p>To specify a COM port number greater than 9, use the following syntax:
+"\.\COM10". This syntax works for all port numbers and hardware that
+allows COM port numbers to be specified.</p>
+<p>For more information about communications, see
+<a href="/en-us/windows/desktop/DevIO/communications-resources" data-linktype="absolute-path">Communications</a>.</p>
+<h3><a id="Consoles"></a><a id="consoles"></a><a id="CONSOLES"></a>Consoles</h3>
+The <b>CreateFile</b> function can create a handle to console 
+      input (CONIN$). If the process has an open handle to it as a result of inheritance or 
+      duplication, it can also create a handle to the active screen buffer (CONOUT$). The 
+      calling process must be attached to an inherited console or one allocated by the 
+      <a href="/en-us/windows/console/allocconsole" data-linktype="absolute-path">AllocConsole</a> function. For console handles, set the 
+      <b>CreateFile</b> parameters as follows.
+<table>
+<tbody><tr>
+<th>Parameters</th>
+<th>Value</th>
+</tr>
+<tr>
+<td>
+<i>lpFileName</i>
+</td>
+<td>
+Use the CONIN$ value to specify console input.
+<p>Use the CONOUT$ value to specify console output.</p>
+<p>CONIN$ gets a handle to the console input buffer, even if the
+<a href="/en-us/windows/console/setstdhandle" data-linktype="absolute-path">SetStdHandle</a> function redirects the standard input
+handle. To get the standard input handle, use the
+<a href="/en-us/windows/console/getstdhandle" data-linktype="absolute-path">GetStdHandle</a> function.</p>
+<p>CONOUT$ gets a handle to the active screen buffer, even if
+<a href="/en-us/windows/console/setstdhandle" data-linktype="absolute-path">SetStdHandle</a> redirects the standard output handle. To
+get the standard output handle, use <a href="/en-us/windows/console/getstdhandle" data-linktype="absolute-path">GetStdHandle</a>.</p>
+</td>
+</tr>
+<tr>
+<td>
+<i>dwDesiredAccess</i>
+</td>
+<td>
+<code>GENERIC_READ | GENERIC_WRITE</code> is preferred, but either one can 
+         limit access.
+</td>
+</tr>
+<tr>
+<td>
+<i>dwShareMode</i>
+</td>
+<td>
+When opening CONIN$, specify 
+         <b>FILE_SHARE_READ</b>. When opening CONOUT$, specify 
+         <b>FILE_SHARE_WRITE</b>.
+<p>If the calling process inherits the console, or if a child process should be able to access the console,
+this parameter must be <code>FILE_SHARE_READ | FILE_SHARE_WRITE</code>.</p>
+</td>
+</tr>
+<tr>
+<td>
+<i>lpSecurityAttributes</i>
+</td>
+<td>
+If you want the console to be inherited, the <b>bInheritHandle</b> member of the 
+         <a href="/en-us/windows/win32/api/wtypesbase/ns-wtypesbase-security_attributes" data-linktype="absolute-path">SECURITY_ATTRIBUTES</a> structure 
+         must be <b>TRUE</b>.
+</td>
+</tr>
+<tr>
+<td>
+<i>dwCreationDisposition</i>
+</td>
+<td>
+You should specify <b>OPEN_EXISTING</b> when using 
+         <b>CreateFile</b> to open the console.
+</td>
+</tr>
+<tr>
+<td>
+<i>dwFlagsAndAttributes</i>
+</td>
+<td>
+Ignored.
+</td>
+</tr>
+<tr>
+<td>
+<i>hTemplateFile</i>
+</td>
+<td>
+Ignored.
+</td>
+</tr>
+</tbody></table>
+ 
+<p>The following table shows various settings of <i>dwDesiredAccess</i> and
+<i>lpFileName</i>.</p>
+<table>
+<tbody><tr>
+<th><i>lpFileName</i></th>
+<th><i>dwDesiredAccess</i></th>
+<th>Result</th>
+</tr>
+<tr>
+<td>"CON"</td>
+<td><b>GENERIC_READ</b></td>
+<td>Opens console for input.</td>
+</tr>
+<tr>
+<td>"CON"</td>
+<td><b>GENERIC_WRITE</b></td>
+<td>Opens console for output.</td>
+</tr>
+<tr>
+<td>"CON"</td>
+<td><code>GENERIC_READ | GENERIC_WRITE</code></td>
+<td>Causes <b>CreateFile</b> to fail; 
+        <a href="/en-us/windows/desktop/api/errhandlingapi/nf-errhandlingapi-getlasterror" data-linktype="absolute-path">GetLastError</a> returns 
+        <b>ERROR_FILE_NOT_FOUND</b>.</td>
+</tr>
+</tbody></table>
+ 
+<h3><a id="Mailslots"></a><a id="mailslots"></a><a id="MAILSLOTS"></a>Mailslots</h3>
+If <b>CreateFile</b> opens the client end of a mailslot, the 
+      function returns <b>INVALID_HANDLE_VALUE</b> if the mailslot client attempts to open a local 
+      mailslot before the mailslot server has created it with the 
+      <a href="/en-us/windows/desktop/api/winbase/nf-winbase-createmailslota" data-linktype="absolute-path">CreateMailSlot</a> function.
+<p>For more information, see <a href="/en-us/windows/desktop/ipc/mailslots" data-linktype="absolute-path">Mailslots</a>.</p>
+<h3><a id="Pipes"></a><a id="pipes"></a><a id="PIPES"></a>Pipes</h3>
+If <b>CreateFile</b> opens the client end of a named pipe, the 
+      function uses any instance of the named pipe that is in the listening state. The opening process can duplicate 
+      the handle as many times as required, but after it is opened, the named pipe instance cannot be opened by 
+      another client. The access that is specified when a pipe is opened must be compatible with the access that is 
+      specified in the <i>dwOpenMode</i> parameter of the 
+      <a href="/en-us/windows/desktop/api/winbase/nf-winbase-createnamedpipea" data-linktype="absolute-path">CreateNamedPipe</a> function.
+<p>If the <a href="/en-us/windows/desktop/api/winbase/nf-winbase-createnamedpipea" data-linktype="absolute-path">CreateNamedPipe</a> function was not
+successfully called on the server prior to this operation, a pipe will not exist and
+<b>CreateFile</b> will fail with
+<b>ERROR_FILE_NOT_FOUND</b>.</p>
+<p>If there is at least one active pipe instance but there are no available listener pipes on the server, which
+means all pipe instances are currently connected,
+<b>CreateFile</b> fails with
+<b>ERROR_PIPE_BUSY</b>.</p>
+<p>For more information, see <a href="/en-us/windows/desktop/ipc/pipes" data-linktype="absolute-path">Pipes</a>.</p>
+<h4 id="examples">Examples</h4>
+<p>Example file operations are shown in the following topics:</p>
+<ul>
+<li>
+<a href="/en-us/windows/desktop/FileIO/appending-one-file-to-another-file" data-linktype="absolute-path">Appending One File to Another File</a>
+</li>
+<li>
+<a href="/en-us/windows/desktop/FileIO/canceling-pending-i-o-operations" data-linktype="absolute-path">Canceling Pending I/O Operations</a>
+</li>
+<li>
+<a href="/en-us/windows/desktop/ProcThread/creating-a-child-process-with-redirected-input-and-output" data-linktype="absolute-path">Creating a Child Process with Redirected Input and Output</a>
+</li>
+<li>
+<a href="/en-us/windows/desktop/FileIO/creating-and-using-a-temporary-file" data-linktype="absolute-path">Creating and Using a Temporary File</a>
+</li>
+<li>
+<a href="/en-us/windows/desktop/api/winioctl/ni-winioctl-fsctl_recall_file" data-linktype="absolute-path">FSCTL_RECALL_FILE</a>
+</li>
+<li>
+<a href="/en-us/windows/desktop/api/fileapi/nf-fileapi-getfinalpathnamebyhandlea" data-linktype="absolute-path">GetFinalPathNameByHandle</a>
+</li>
+<li>
+<a href="/en-us/windows/desktop/FileIO/locking-and-unlocking-byte-ranges-in-files" data-linktype="absolute-path">Locking and Unlocking Byte Ranges in Files</a>
+</li>
+<li>
+<a href="/en-us/windows/desktop/Memory/obtaining-a-file-name-from-a-file-handle" data-linktype="absolute-path">Obtaining a File Name From a File Handle</a>
+</li>
+<li>
+<a href="/en-us/windows/desktop/FileIO/obtaining-file-system-recognition-information" data-linktype="absolute-path">Obtaining File System Recognition Information</a>
+</li>
+<li>
+<a href="/en-us/windows/desktop/FileIO/opening-a-file-for-reading-or-writing" data-linktype="absolute-path">Opening a File for Reading or Writing</a>
+</li>
+<li>
+<a href="/en-us/windows/desktop/SysInfo/retrieving-the-last-write-time" data-linktype="absolute-path">Retrieving the Last-Write Time</a>
+</li>
+<li>
+<a href="/en-us/windows/desktop/api/fileapi/nf-fileapi-setfileinformationbyhandle" data-linktype="absolute-path">SetFileInformationByHandle</a>
+</li>
+<li>
+<a href="/en-us/windows/desktop/FileIO/testing-for-the-end-of-a-file" data-linktype="absolute-path">Testing for the End of a File</a>
+</li>
+<li>
+<a href="/en-us/windows/desktop/ProcThread/using-fibers" data-linktype="absolute-path">Using Fibers</a>
+</li>
+<li>
+<a href="/en-us/windows/desktop/FileIO/using-streams" data-linktype="absolute-path">Using Streams</a>
+</li>
+<li>
+<a href="/en-us/windows/desktop/FileIO/walking-a-buffer-of-change-journal-records" data-linktype="absolute-path">Walking a Buffer of Change Journal Records</a>
+</li>
+<li>
+<a href="/en-us/windows/win32/api/wow64apiset/nf-wow64apiset-wow64disablewow64fsredirection" data-linktype="absolute-path">Wow64DisableWow64FsRedirection</a>
+</li>
+<li>
+<a href="/en-us/windows/win32/api/wow64apiset/nf-wow64apiset-wow64enablewow64fsredirection" data-linktype="absolute-path">Wow64EnableWow64FsRedirection</a>
+</li>
+</ul>
+Physical device I/O is demonstrated in the following topics:
+<ul>
+<li>
+<a href="/en-us/windows/desktop/DevIO/calling-deviceiocontrol" data-linktype="absolute-path">Calling DeviceIoControl</a>
+</li>
+<li>
+<a href="/en-us/windows/desktop/DevIO/configuring-a-communications-resource" data-linktype="absolute-path">Configuring a Communications Resource</a>
+</li>
+<li>
+<a href="/en-us/windows/desktop/DevIO/monitoring-communications-events" data-linktype="absolute-path">Monitoring Communications Events</a>
+</li>
+<li>
+<a href="/en-us/windows/desktop/DevIO/processing-a-request-to-remove-a-device" data-linktype="absolute-path">Processing a Request to Remove a Device</a>
+</li>
+</ul>
+An example using named pipes is located at 
+      <a href="/en-us/windows/desktop/ipc/named-pipe-client" data-linktype="absolute-path">Named Pipe Client</a>.
+<p>Working with a mailslot is shown in
+<a href="/en-us/windows/desktop/ipc/writing-to-a-mailslot" data-linktype="absolute-path">Writing to a Mailslot</a>.</p>
+<p>A tape backup code snippet can found at
+<a href="/en-us/windows/desktop/Backup/creating-a-backup-application" data-linktype="absolute-path">Creating a Backup Application</a>.</p>
+<div class="code"></div>
+<div class="NOTE">
+<p>Note</p>
+<p>The fileapi.h header defines CreateFile as an alias that automatically selects the ANSI or Unicode version of this function based on the definition of the UNICODE preprocessor constant. Mixing usage of the encoding-neutral alias with code that is not encoding-neutral can lead to mismatches that result in compilation or runtime errors. For more information, see <a href="/en-us/windows/win32/intl/conventions-for-function-prototypes" data-linktype="absolute-path">Conventions for Function Prototypes</a>.</p>
+</div>
+<h2 id="requirements">Requirements</h2>
+<table>
+<thead>
+<tr>
+<th>Requirement</th>
+<th style="text-align: left;">Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Minimum supported client</strong></td>
+<td style="text-align: left;">Windows XP [desktop apps only]</td>
+</tr>
+<tr>
+<td><strong>Minimum supported server</strong></td>
+<td style="text-align: left;">Windows Server 2003 [desktop apps only]</td>
+</tr>
+<tr>
+<td><strong>Target Platform</strong></td>
+<td style="text-align: left;">Windows</td>
+</tr>
+<tr>
+<td><strong>Header</strong></td>
+<td style="text-align: left;">fileapi.h (include Windows.h)</td>
+</tr>
+<tr>
+<td><strong>Library</strong></td>
+<td style="text-align: left;">Kernel32.lib</td>
+</tr>
+<tr>
+<td><strong>DLL</strong></td>
+<td style="text-align: left;">Kernel32.dll</td>
+</tr>
+</tbody>
+</table>
+<h2 id="see-also">See also</h2>
+<p><a href="/en-us/windows/desktop/FileIO/about-directory-management" data-linktype="absolute-path">About Directory Management</a></p>
+<p><a href="/en-us/windows/desktop/FileIO/about-volume-management" data-linktype="absolute-path">About Volume Management</a></p>
+<p><a href="/en-us/windows/desktop/Backup/backup" data-linktype="absolute-path">Backup</a></p>
+<p><a href="/en-us/windows/desktop/api/handleapi/nf-handleapi-closehandle" data-linktype="absolute-path">CloseHandle</a></p>
+<p><a href="/en-us/windows/desktop/DevIO/communications-resources" data-linktype="absolute-path">Communications</a></p>
+<p><a href="/en-us/windows/desktop/api/fileapi/nf-fileapi-createdirectorya" data-linktype="absolute-path">CreateDirectory</a></p>
+<p><a href="/en-us/windows/desktop/api/winbase/nf-winbase-createdirectoryexa" data-linktype="absolute-path">CreateDirectoryEx</a></p>
+<p><a href="/en-us/windows/desktop/api/winbase/nf-winbase-createfiletransacteda" data-linktype="absolute-path">CreateFileTransacted</a></p>
+<p><a href="/en-us/windows/desktop/api/winbase/nf-winbase-createmailslota" data-linktype="absolute-path">CreateMailSlot</a></p>
+<p><a href="/en-us/windows/desktop/api/winbase/nf-winbase-createnamedpipea" data-linktype="absolute-path">CreateNamedPipe</a></p>
+<p><a href="/en-us/windows/desktop/FileIO/creating--deleting--and-maintaining-files" data-linktype="absolute-path">Creating, Deleting, and Maintaining Files</a></p>
+<p><a href="/en-us/windows/desktop/api/fileapi/nf-fileapi-deletefilea" data-linktype="absolute-path">DeleteFile</a></p>
+<p><a href="/en-us/windows/desktop/DevIO/device-input-and-output-control-ioctl-" data-linktype="absolute-path">Device Input and Output Control (IOCTL)</a></p>
+<p><a href="/en-us/windows/desktop/api/ioapiset/nf-ioapiset-deviceiocontrol" data-linktype="absolute-path">DeviceIoControl</a></p>
+<p><a href="/en-us/windows/desktop/FileIO/file-compression-and-decompression" data-linktype="absolute-path">File Compression and Decompression</a></p>
+<p><a href="/en-us/windows/desktop/FileIO/file-encryption" data-linktype="absolute-path">File Encryption</a></p>
+<p><a href="/en-us/windows/desktop/FileIO/file-management-functions" data-linktype="absolute-path">File Management Functions</a></p>
+<p><a href="/en-us/windows/desktop/FileIO/file-security-and-access-rights" data-linktype="absolute-path">File Security and Access Rights</a></p>
+<p><a href="/en-us/windows/desktop/FileIO/file-streams" data-linktype="absolute-path">File Streams</a></p>
+<p><b>Functions</b></p>
+<p><a href="/en-us/windows/desktop/api/errhandlingapi/nf-errhandlingapi-getlasterror" data-linktype="absolute-path">GetLastError</a></p>
+<p><a href="/en-us/windows/desktop/FileIO/i-o-completion-ports" data-linktype="absolute-path">I/O Completion Ports</a></p>
+<p><a href="/en-us/windows/desktop/FileIO/i-o-concepts" data-linktype="absolute-path">I/O Concepts</a></p>
+<p><a href="/en-us/windows/desktop/ipc/mailslots" data-linktype="absolute-path">Mailslots</a></p>
+<p><a href="/en-us/windows/desktop/FileIO/obtaining-and-setting-file-information" data-linktype="absolute-path">Obtaining and Setting File Information</a></p>
+<p><b>Overview Topics</b></p>
+<p><a href="/en-us/windows/desktop/ipc/pipes" data-linktype="absolute-path">Pipes</a></p>
+<p><a href="/en-us/windows/desktop/api/fileapi/nf-fileapi-readfile" data-linktype="absolute-path">ReadFile</a></p>
+<p><a href="/en-us/windows/desktop/api/fileapi/nf-fileapi-readfileex" data-linktype="absolute-path">ReadFileEx</a></p>
+<p><a href="/en-us/windows/desktop/SecBP/running-with-special-privileges" data-linktype="absolute-path">Running with Special Privileges</a></p>
+<p><a href="/en-us/windows/desktop/api/fileapi/nf-fileapi-setfileattributesa" data-linktype="absolute-path">SetFileAttributes</a></p>
+<p><a href="/en-us/windows/desktop/api/fileapi/nf-fileapi-writefile" data-linktype="absolute-path">WriteFile</a></p>
+<p><a href="/en-us/windows/desktop/api/fileapi/nf-fileapi-writefileex" data-linktype="absolute-path">WriteFileEx</a></p>
+</div>
+					
+		<div
+			id="ms--inline-notifications"
+			class="margin-block-xs"
+			data-bi-name="inline-notification"
+		></div>
+	 
+		<div
+			id="assertive-live-region"
+			role="alert"
+			aria-live="assertive"
+			class="visually-hidden"
+			aria-relevant="additions"
+			aria-atomic="true"
+		></div>
+		<div
+			id="polite-live-region"
+			role="status"
+			aria-live="polite"
+			class="visually-hidden"
+			aria-relevant="additions"
+			aria-atomic="true"
+		></div>
+	
+					
+		<!-- feedback section -->
+		<section
+			id="site-user-feedback-footer"
+			class="font-size-sm margin-top-md display-none-print display-none-desktop"
+			data-test-id="site-user-feedback-footer"
+			data-bi-name="site-feedback-section"
+		>
+			<hr class="hr" />
+			<h2 id="ms--feedback" class="title is-3">Feedback</h2>
+			<div class="display-flex flex-wrap-wrap align-items-center">
+				<p class="font-weight-semibold margin-xxs margin-left-none">
+					Was this page helpful?
+				</p>
+				<div class="buttons">
+					<button
+						class="thumb-rating-button like button button-primary button-sm"
+						data-test-id="footer-rating-yes"
+						data-binary-rating-response="rating-yes"
+						type="button"
+						title="This article is helpful"
+						data-bi-name="button-rating-yes"
+						aria-pressed="false"
+					>
+						<span class="icon" aria-hidden="true">
+							<span class="docon docon-like"></span>
+						</span>
+						<span>Yes</span>
+					</button>
+					<button
+						class="thumb-rating-button dislike button button-primary button-sm"
+						id="standard-rating-no-button"
+						hidden
+						data-test-id="footer-rating-no"
+						data-binary-rating-response="rating-no"
+						type="button"
+						title="This article is not helpful"
+						data-bi-name="button-rating-no"
+						aria-pressed="false"
+					>
+						<span class="icon" aria-hidden="true">
+							<span class="docon docon-dislike"></span>
+						</span>
+						<span>No</span>
+					</button>
+					<details
+						class="popover popover-top"
+						id="mobile-help-popover"
+						data-test-id="footer-feedback-popover"
+					>
+						<summary
+							class="thumb-rating-button dislike button button-primary button-sm"
+							data-test-id="details-footer-rating-no"
+							data-binary-rating-response="rating-no"
+							title="This article is not helpful"
+							data-bi-name="button-rating-no"
+							aria-pressed="false"
+							data-bi-an="feedback-unhelpful-popover"
+						>
+							<span class="icon" aria-hidden="true">
+								<span class="docon docon-dislike"></span>
+							</span>
+							<span>No</span>
+						</summary>
+						<div
+							class="popover-content width-200 width-300-tablet"
+							role="dialog"
+							aria-labelledby="popover-heading"
+							aria-describedby="popover-description"
+						>
+							<p id="popover-heading" class="font-size-lg margin-bottom-xxs font-weight-semibold">
+								Need help with this topic?
+							</p>
+							<p id="popover-description" class="font-size-sm margin-bottom-xs">
+								Want to try using Ask Learn to clarify or guide you through this topic?
+							</p>
+							
+		<div class="buttons flex-direction-row flex-wrap justify-content-center gap-xxs">
+			<div>
+		<button
+			class="button button-sm border inner-focus display-none margin-right-xxs"
+			data-bi-name="ask-learn-assistant-entry-troubleshoot"
+			data-test-id="ask-learn-assistant-modal-entry-mobile-feedback"
+			data-ask-learn-modal-entry-feedback
+			data-bi-an=feedback-unhelpful-popover
+			type="button"
+			style="min-width: max-content;"
+			aria-expanded="false"
+			aria-label="Ask Learn"
+			hidden
+		>
+			<span class="icon" aria-hidden="true">
+				<span class="docon docon-chat-sparkle-fill gradient-ask-learn-logo"></span>
+			</span>
+		</button>
+		<button
+			class="button button-sm display-inline-flex display-none-desktop flex-shrink-0 margin-right-xxs border-color-ask-learn margin-right-xxs"
+			data-bi-name="ask-learn-assistant-entry-troubleshoot"
+			data-bi-an=feedback-unhelpful-popover
+			data-test-id="ask-learn-assistant-modal-entry-tablet-feedback"
+			data-ask-learn-modal-entry-feedback
+			type="button"
+			style="min-width: max-content;"
+			aria-expanded="false"
+			hidden
+		>
+			<span class="icon font-size-lg" aria-hidden="true">
+				<span class="docon docon-chat-sparkle-fill gradient-ask-learn-logo"></span>
+			</span>
+			<span>Ask Learn</span>
+		</button>
+		<button
+			class="button button-sm display-none flex-shrink-0 display-inline-flex-desktop margin-right-xxs border-color-ask-learn margin-right-xxs"
+			data-bi-name="ask-learn-assistant-entry-troubleshoot"
+			data-bi-an=feedback-unhelpful-popover
+			data-test-id="ask-learn-assistant-flyout-entry-feedback"
+			data-ask-learn-flyout-entry-show-only
+			data-flyout-button="toggle"
+			type="button"
+			style="min-width: max-content;"
+			aria-expanded="false"
+			aria-controls="ask-learn-flyout"
+			hidden
+		>
+			<span class="icon font-size-lg" aria-hidden="true">
+				<span class="docon docon-chat-sparkle-fill gradient-ask-learn-logo"></span>
+			</span>
+			<span>Ask Learn</span>
+		</button>
+	</div>
+			<button
+				type="button"
+				class="button button-sm margin-right-xxs"
+				data-help-option="suggest-fix"
+				data-bi-name="feedback-suggest"
+				data-bi-an="feedback-unhelpful-popover"
+				data-test-id="suggest-fix"
+			>
+				<span class="icon" aria-hidden="true">
+					<span class="docon docon-feedback"></span>
+				</span>
+				<span> Suggest a fix? </span>
+			</button>
+		</div>
+	
+						</div>
+					</details>
+				</div>
+			</div>
+		</section>
+		<!-- end feedback section -->
+	
+				</div>
+				
+		<div id="ms--additional-resources-mobile" class="display-none-print">
+			<hr class="hr" hidden />
+			<h2 id="ms--additional-resources-mobile-heading" class="title is-3" hidden>
+				Additional resources
+			</h2>
+			 
+		<section
+			id="right-rail-training-mobile"
+			class=""
+			data-bi-name="learning-resource-card"
+			hidden
+		></section>
+	 
+		<section
+			id="right-rail-events-mobile"
+			class=""
+			data-bi-name="events-card"
+			hidden
+		></section>
+	
+		</div>
+	 
+		<div
+			id="article-metadata-footer"
+			data-bi-name="article-metadata-footer"
+			data-test-id="article-metadata-footer"
+			class="page-metadata-container"
+		>
+			<hr class="hr" />
+			<ul class="metadata page-metadata" data-bi-name="page info" lang="en-us" dir="ltr">
+				<li class="visibility-hidden-visual-diff">
+			<span class="badge badge-sm text-wrap-pretty">
+				<span>Last updated on <local-time format="twoDigitNumeric"
+		datetime="2023-02-09T00:00:00.000Z"
+		data-article-date-source="calculated"
+		class="is-invisible"
+	>
+		2023-02-09
+	</local-time></span>
+			</span>
+		</li>
+			</ul>
+		</div>
+	
+			</div>
+		
+				</main>
+				<aside
+					id="layout-body-aside"
+					class="layout-body-aside  "
+					data-bi-name="aside"
+					aria-label="Additional resources"
+			  >
+					
+		<div
+			id="ms--additional-resources"
+			class="right-container padding-sm display-none display-block-desktop height-full"
+			data-bi-name="pageactions"
+		>
+			<div id="affixed-right-container" data-bi-name="right-column">
+				
+		<nav
+			id="side-doc-outline"
+			class="doc-outline border-bottom padding-bottom-xs margin-bottom-xs scrollbar-width-thin"
+			data-bi-name="intopic toc"
+			aria-label="In this article"
+		>
+			<h3>In this article</h3>
+		</nav>
+	
+				<!-- Feedback -->
+				
+		<section
+			id="ms--site-user-feedback-right-rail"
+			class="font-size-sm display-none-print"
+			data-test-id="site-user-feedback-right-rail"
+			data-bi-name="site-feedback-right-rail"
+		>
+			<div class="display-flex flex-wrap-wrap align-items-center">
+				<p class="font-weight-semibold margin-xxs margin-left-none">
+					Was this page helpful?
+				</p>
+				<div class="display-flex flex-wrap-nowrap">
+					<button
+						class="thumb-rating-button like inner-focus"
+						data-test-id="right-rail-rating-yes"
+						data-binary-rating-response="rating-yes"
+						type="button"
+						title="This article is helpful"
+						aria-label="This article is helpful"
+						data-bi-name="button-rating-yes"
+						aria-pressed="false"
+					>
+						<span class="icon" aria-hidden="true">
+							<span class="docon docon-like"></span>
+						</span>
+					</button>
+					<button
+						class="thumb-rating-button dislike inner-focus"
+						id="right-rail-no-button"
+						hidden
+						data-test-id="right-rail-rating-no"
+						data-binary-rating-response="rating-no"
+						type="button"
+						title="This article is not helpful"
+						aria-label="This article is not helpful"
+						data-bi-name="button-rating-no"
+						aria-pressed="false"
+					>
+						<span class="icon" aria-hidden="true">
+							<span class="docon docon-dislike"></span>
+						</span>
+					</button>
+					<details class="popover popover-right" id="help-popover" data-test-id="feedback-popover">
+						<summary
+							tabindex="0"
+							class="thumb-rating-button dislike inner-focus"
+							data-test-id="details-right-rail-rating-no"
+							data-binary-rating-response="rating-no"
+							title="This article is not helpful"
+							aria-label="This article is not helpful"
+							data-bi-name="button-rating-no"
+							aria-pressed="false"
+							data-bi-an="feedback-unhelpful-popover"
+						>
+							<span class="icon" aria-hidden="true">
+								<span class="docon docon-dislike"></span>
+							</span>
+						</summary>
+						<div
+							class="popover-content width-200 width-300-tablet"
+							role="dialog"
+							aria-labelledby="popover-heading-right-rail"
+							aria-describedby="popover-description-right-rail"
+						>
+							<p
+								id="popover-heading-right-rail"
+								class="font-size-lg margin-bottom-xxs font-weight-semibold"
+							>
+								Need help with this topic?
+							</p>
+							<p id="popover-description-right-rail" class="font-size-sm margin-bottom-xs">
+								Want to try using Ask Learn to clarify or guide you through this topic?
+							</p>
+							
+		<div class="buttons flex-direction-row flex-wrap justify-content-center gap-xxs">
+			<div>
+		<button
+			class="button button-sm border inner-focus display-none margin-right-xxs"
+			data-bi-name="ask-learn-assistant-entry-troubleshoot"
+			data-test-id="ask-learn-assistant-modal-entry-mobile-feedback"
+			data-ask-learn-modal-entry-feedback
+			data-bi-an=feedback-unhelpful-popover
+			type="button"
+			style="min-width: max-content;"
+			aria-expanded="false"
+			aria-label="Ask Learn"
+			hidden
+		>
+			<span class="icon" aria-hidden="true">
+				<span class="docon docon-chat-sparkle-fill gradient-ask-learn-logo"></span>
+			</span>
+		</button>
+		<button
+			class="button button-sm display-inline-flex display-none-desktop flex-shrink-0 margin-right-xxs border-color-ask-learn margin-right-xxs"
+			data-bi-name="ask-learn-assistant-entry-troubleshoot"
+			data-bi-an=feedback-unhelpful-popover
+			data-test-id="ask-learn-assistant-modal-entry-tablet-feedback"
+			data-ask-learn-modal-entry-feedback
+			type="button"
+			style="min-width: max-content;"
+			aria-expanded="false"
+			hidden
+		>
+			<span class="icon font-size-lg" aria-hidden="true">
+				<span class="docon docon-chat-sparkle-fill gradient-ask-learn-logo"></span>
+			</span>
+			<span>Ask Learn</span>
+		</button>
+		<button
+			class="button button-sm display-none flex-shrink-0 display-inline-flex-desktop margin-right-xxs border-color-ask-learn margin-right-xxs"
+			data-bi-name="ask-learn-assistant-entry-troubleshoot"
+			data-bi-an=feedback-unhelpful-popover
+			data-test-id="ask-learn-assistant-flyout-entry-feedback"
+			data-ask-learn-flyout-entry-show-only
+			data-flyout-button="toggle"
+			type="button"
+			style="min-width: max-content;"
+			aria-expanded="false"
+			aria-controls="ask-learn-flyout"
+			hidden
+		>
+			<span class="icon font-size-lg" aria-hidden="true">
+				<span class="docon docon-chat-sparkle-fill gradient-ask-learn-logo"></span>
+			</span>
+			<span>Ask Learn</span>
+		</button>
+	</div>
+			<button
+				type="button"
+				class="button button-sm margin-right-xxs"
+				data-help-option="suggest-fix"
+				data-bi-name="feedback-suggest"
+				data-bi-an="feedback-unhelpful-popover"
+				data-test-id="suggest-fix"
+			>
+				<span class="icon" aria-hidden="true">
+					<span class="docon docon-feedback"></span>
+				</span>
+				<span> Suggest a fix? </span>
+			</button>
+		</div>
+	
+						</div>
+					</details>
+				</div>
+			</div>
+		</section>
+	
+			</div>
+		</div>
+	
+			  </aside> <section
+					id="layout-body-flyout"
+					class="layout-body-flyout "
+					data-bi-name="flyout"
+			  >
+					 <div
+	class="height-full border-left background-color-body-medium"
+	id="ask-learn-flyout"
+></div>
+			  </section> <div class="layout-body-footer " data-bi-name="layout-footer">
+		<footer
+			id="footer"
+			data-test-id="footer"
+			data-bi-name="footer"
+			class="footer-layout padding-xs padding-sm-desktop has-default-focus border-top"
+			role="contentinfo"
+		>
+			<div class="display-flex gap-xs flex-wrap-wrap is-full-height padding-right-lg-desktop">
+				
+		<a
+			data-mscc-ic="false"
+			href="#"
+			data-bi-name="select-locale"
+			class="locale-selector-link flex-shrink-0 button button-sm button-clear external-link-indicator"
+			id=""
+			title=""
+			><span class="icon" aria-hidden="true"
+				><span class="docon docon-world"></span></span
+			><span class="local-selector-link-text">en-us</span></a
+		>
+	 <div class="ccpa-privacy-link" data-ccpa-privacy-link hidden>
+		
+		<a
+			data-mscc-ic="false"
+			href="https://aka.ms/yourcaliforniaprivacychoices"
+			data-bi-name="your-privacy-choices"
+			class="button button-sm button-clear flex-shrink-0 external-link-indicator"
+			id=""
+			title=""
+			>
+		<svg
+			xmlns="http://www.w3.org/2000/svg"
+			viewBox="0 0 30 14"
+			xml:space="preserve"
+			height="16"
+			width="43"
+			aria-hidden="true"
+			focusable="false"
+		>
+			<path
+				d="M7.4 12.8h6.8l3.1-11.6H7.4C4.2 1.2 1.6 3.8 1.6 7s2.6 5.8 5.8 5.8z"
+				style="fill-rule:evenodd;clip-rule:evenodd;fill:#fff"
+			></path>
+			<path
+				d="M22.6 0H7.4c-3.9 0-7 3.1-7 7s3.1 7 7 7h15.2c3.9 0 7-3.1 7-7s-3.2-7-7-7zm-21 7c0-3.2 2.6-5.8 5.8-5.8h9.9l-3.1 11.6H7.4c-3.2 0-5.8-2.6-5.8-5.8z"
+				style="fill-rule:evenodd;clip-rule:evenodd;fill:#06f"
+			></path>
+			<path
+				d="M24.6 4c.2.2.2.6 0 .8L22.5 7l2.2 2.2c.2.2.2.6 0 .8-.2.2-.6.2-.8 0l-2.2-2.2-2.2 2.2c-.2.2-.6.2-.8 0-.2-.2-.2-.6 0-.8L20.8 7l-2.2-2.2c-.2-.2-.2-.6 0-.8.2-.2.6-.2.8 0l2.2 2.2L23.8 4c.2-.2.6-.2.8 0z"
+				style="fill:#fff"
+			></path>
+			<path
+				d="M12.7 4.1c.2.2.3.6.1.8L8.6 9.8c-.1.1-.2.2-.3.2-.2.1-.5.1-.7-.1L5.4 7.7c-.2-.2-.2-.6 0-.8.2-.2.6-.2.8 0L8 8.6l3.8-4.5c.2-.2.6-.2.9 0z"
+				style="fill:#06f"
+			></path>
+		</svg>
+	
+			<span>Your Privacy Choices</span></a
+		>
+	
+	</div>
+				<div class="flex-shrink-0">
+		<div class="dropdown has-caret-up">
+			<button
+				data-test-id="theme-selector-button"
+				class="dropdown-trigger button button-clear button-sm inner-focus theme-dropdown-trigger"
+				aria-controls="{{ themeMenuId }}"
+				aria-haspopup="true"
+				aria-expanded="false"
+				data-bi-name="theme"
+			>
+				<span class="icon" aria-hidden="true"><span class="docon docon-sun"></span></span>
+				<span>Theme</span>
+				<span class="icon expanded-indicator" aria-hidden="true">
+					<span class="docon docon-chevron-down-light"></span>
+				</span>
+			</button>
+			<div class="dropdown-menu" id="{{ themeMenuId }}" role="menu">
+				<ul class="theme-selector padding-xxs" data-test-id="theme-dropdown-menu" role="none">
+					<li class="theme display-block" role="none">
+						<button
+							class="button button-clear button-sm theme-control button-block justify-content-flex-start text-align-left"
+							role="menuitemradio"
+							aria-checked="false"
+							data-theme-to="light"
+							tabindex="-1"
+						>
+							<span class="theme-light margin-right-xxs">
+								<span
+									class="theme-selector-icon border display-inline-block has-body-background"
+									aria-hidden="true"
+								>
+									<svg class="svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 14">
+										<rect width="22" height="14" class="has-fill-body-background" />
+										<rect x="5" y="5" width="12" height="4" class="has-fill-secondary" />
+										<rect x="5" y="2" width="2" height="1" class="has-fill-secondary" />
+										<rect x="8" y="2" width="2" height="1" class="has-fill-secondary" />
+										<rect x="11" y="2" width="3" height="1" class="has-fill-secondary" />
+										<rect x="1" y="1" width="2" height="2" class="has-fill-secondary" />
+										<rect x="5" y="10" width="7" height="2" rx="0.3" class="has-fill-primary" />
+										<rect x="19" y="1" width="2" height="2" rx="1" class="has-fill-secondary" />
+									</svg>
+								</span>
+							</span>
+							<span> Light </span>
+						</button>
+					</li>
+					<li class="theme display-block" role="none">
+						<button
+							class="button button-clear button-sm theme-control button-block justify-content-flex-start text-align-left"
+							role="menuitemradio"
+							aria-checked="false"
+							data-theme-to="dark"
+							tabindex="-1"
+						>
+							<span class="theme-dark margin-right-xxs">
+								<span
+									class="border theme-selector-icon display-inline-block has-body-background"
+									aria-hidden="true"
+								>
+									<svg class="svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 14">
+										<rect width="22" height="14" class="has-fill-body-background" />
+										<rect x="5" y="5" width="12" height="4" class="has-fill-secondary" />
+										<rect x="5" y="2" width="2" height="1" class="has-fill-secondary" />
+										<rect x="8" y="2" width="2" height="1" class="has-fill-secondary" />
+										<rect x="11" y="2" width="3" height="1" class="has-fill-secondary" />
+										<rect x="1" y="1" width="2" height="2" class="has-fill-secondary" />
+										<rect x="5" y="10" width="7" height="2" rx="0.3" class="has-fill-primary" />
+										<rect x="19" y="1" width="2" height="2" rx="1" class="has-fill-secondary" />
+									</svg>
+								</span>
+							</span>
+							<span> Dark </span>
+						</button>
+					</li>
+					<li class="theme display-block" role="none">
+						<button
+							class="button button-clear button-sm theme-control button-block justify-content-flex-start text-align-left"
+							role="menuitemradio"
+							aria-checked="false"
+							data-theme-to="high-contrast"
+							tabindex="-1"
+						>
+							<span class="theme-high-contrast margin-right-xxs">
+								<span
+									class="border theme-selector-icon display-inline-block has-body-background"
+									aria-hidden="true"
+								>
+									<svg class="svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 14">
+										<rect width="22" height="14" class="has-fill-body-background" />
+										<rect x="5" y="5" width="12" height="4" class="has-fill-secondary" />
+										<rect x="5" y="2" width="2" height="1" class="has-fill-secondary" />
+										<rect x="8" y="2" width="2" height="1" class="has-fill-secondary" />
+										<rect x="11" y="2" width="3" height="1" class="has-fill-secondary" />
+										<rect x="1" y="1" width="2" height="2" class="has-fill-secondary" />
+										<rect x="5" y="10" width="7" height="2" rx="0.3" class="has-fill-primary" />
+										<rect x="19" y="1" width="2" height="2" rx="1" class="has-fill-secondary" />
+									</svg>
+								</span>
+							</span>
+							<span> High contrast </span>
+						</button>
+					</li>
+				</ul>
+			</div>
+		</div>
+	</div>
+			</div>
+			<ul class="links" data-bi-name="footerlinks">
+				<li class="manage-cookies-holder" hidden=""></li>
+				<li>
+		
+		<a
+			data-mscc-ic="false"
+			href="https://learn.microsoft.com/en-us/principles-for-ai-generated-content"
+			data-bi-name="aiDisclaimer"
+			class=" external-link-indicator"
+			id=""
+			title=""
+			>AI Disclaimer</a
+		>
+	
+	</li><li>
+		
+		<a
+			data-mscc-ic="false"
+			href="https://learn.microsoft.com/en-us/previous-versions/"
+			data-bi-name="archivelink"
+			class=" external-link-indicator"
+			id=""
+			title=""
+			>Previous Versions</a
+		>
+	
+	</li> <li>
+		
+		<a
+			data-mscc-ic="false"
+			href="https://techcommunity.microsoft.com/t5/microsoft-learn-blog/bg-p/MicrosoftLearnBlog"
+			data-bi-name="bloglink"
+			class=" external-link-indicator"
+			id=""
+			title=""
+			>Blog</a
+		>
+	
+	</li> <li>
+		
+		<a
+			data-mscc-ic="false"
+			href="https://learn.microsoft.com/en-us/contribute"
+			data-bi-name="contributorGuide"
+			class=" external-link-indicator"
+			id=""
+			title=""
+			>Contribute</a
+		>
+	
+	</li><li>
+		
+		<a
+			data-mscc-ic="false"
+			href="https://go.microsoft.com/fwlink/?LinkId=521839"
+			data-bi-name="privacy"
+			class=" external-link-indicator"
+			id=""
+			title=""
+			>Privacy</a
+		>
+	
+	</li><li>
+		
+		<a
+			data-mscc-ic="false"
+			href="https://go.microsoft.com/fwlink/?linkid=2259814"
+			data-bi-name="consumer-health-privacy"
+			class=" external-link-indicator"
+			id=""
+			title=""
+			>Consumer Health Privacy</a
+		>
+	
+	</li><li>
+		
+		<a
+			data-mscc-ic="false"
+			href="https://learn.microsoft.com/en-us/legal/termsofuse"
+			data-bi-name="termsofuse"
+			class=" external-link-indicator"
+			id=""
+			title=""
+			>Terms of Use</a
+		>
+	
+	</li><li>
+		
+		<a
+			data-mscc-ic="false"
+			href="https://www.microsoft.com/legal/intellectualproperty/Trademarks/"
+			data-bi-name="trademarks"
+			class=" external-link-indicator"
+			id=""
+			title=""
+			>Trademarks</a
+		>
+	
+	</li>
+				<li>&copy; Microsoft 2026</li>
+			</ul>
+		</footer>
+	</footer>
+			</body>
+		</html>

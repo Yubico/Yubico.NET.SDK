@@ -1,0 +1,38 @@
+{
+  "kind": "FINAL-STATIC-RECORD-VERIFICATION",
+  "source_pin": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "metadata_head": "bb94f0884f63f260156227957d4cc112d984e300",
+  "ids_checked": 684,
+  "primary_files_checked": 50,
+  "primary_lines": 9441,
+  "shared_ids_checked": 16,
+  "dispositions": {
+    "READ-CONTEXT": 267,
+    "READ-CANDIDATE": 137,
+    "READ-CLEAN": 278,
+    "READ-HISTORICAL-CONTEXT": 2
+  },
+  "unread_or_awaiting_context": 0,
+  "clean_nominees": 16,
+  "local_candidates": 16,
+  "inherited_keys": 8,
+  "unchanged_path_records": 80,
+  "historical_artifacts_preserved": 17,
+  "retained_source_entries_verified": 20,
+  "byte_exact_original_pdfs": [
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B6/sources/scp03-1.1.2.pdf",
+      "sha256": "973a10834f7fe8befd98da9af65393622234b80745092bd85248804c57b648dd"
+    },
+    {
+      "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B6/sources/scp11-public-review-1.3.0.13.pdf",
+      "sha256": "5db47b3df3c4e565a5ad91257395604f3482ed5db70c64853544c3b0e289fde0"
+    }
+  ],
+  "failed_original_requests_preserved": 10,
+  "complete_fixture_records": 100,
+  "actual_embedded_vector_triples": 20,
+  "authored_links_checked": 21,
+  "new_sdk_execution_count": 0,
+  "limits": "Identity/partition/record/source-data consistency checks follow authored semantic reading. They are not independent content review, new cryptographic computations, SDK tests, compiler validation, hardware/native qualification or accepted Core finding triage."
+}

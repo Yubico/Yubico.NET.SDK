@@ -1,0 +1,28 @@
+{
+  "source_pin": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "observed_metadata_head": "bb94f0884f63f260156227957d4cc112d984e300",
+  "packet_sha256": "c688144c377edc718aa530296747c13b17695e52ee0140822fbf0612e4e964d8",
+  "primary_unit_count": 331,
+  "shared_primary_count": 0,
+  "candidate_disposition_paths": 55,
+  "primary_source_paths": 47,
+  "unit_status_counts": {
+    "READ-CANDIDATE-CONTEXT": 127,
+    "READ-CLEAN": 204
+  },
+  "all_assigned_ids_exact": true,
+  "all_raw_range_and_normalized_git_hashes_match": true,
+  "unread_units": 0,
+  "builds": 0,
+  "tests": 0,
+  "runtime_experiments": 0,
+  "native_operations": 0,
+  "device_operations": 0,
+  "formatter_runs": 0,
+  "commits": 0,
+  "subagents": 0,
+  "independent_content_review": "PENDING",
+  "B4": "PENDING-RETURN + future user-ready Windows delta",
+  "B6": "PENDING-RETURN",
+  "claim_scope": "Complete assigned Management source investigation with explicit deferred mechanisms; not whole-Core or nine-boundary closeout."
+}

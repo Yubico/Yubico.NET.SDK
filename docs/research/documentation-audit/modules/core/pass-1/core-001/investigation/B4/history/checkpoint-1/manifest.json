@@ -1,0 +1,80 @@
+[
+  {
+    "original": "investigation-B4.md",
+    "history": "investigation-B4.md",
+    "bytes": 11661,
+    "sha256": "d05fe7d466abfdb175a2a56f55893fb18e7498993e996e9f80b87f6e63e2b903"
+  },
+  {
+    "original": "investigation/B4/unit-dispositions.json",
+    "history": "unit-dispositions.json",
+    "bytes": 2905168,
+    "sha256": "11e7dd4fa3a034ee48e932a354e9d6e3165addaba055d957059bdd028bdadbf6"
+  },
+  {
+    "original": "investigation/B4/coverage-summary.json",
+    "history": "coverage-summary.json",
+    "bytes": 5891,
+    "sha256": "657c3f2d724b4f8d68b7e2848e601060d59ed25425af6524aa80c047b0d19089"
+  },
+  {
+    "original": "investigation/B4/continuation.json",
+    "history": "continuation.json",
+    "bytes": 889275,
+    "sha256": "4b8d24e539f4e72c6edf81943238b8cdecfcbf1b5c7b31cf07d9f63b10e017eb"
+  },
+  {
+    "original": "investigation/B4/file-evidence.md",
+    "history": "file-evidence.md",
+    "bytes": 28355,
+    "sha256": "d3272dfe1ba80a56a8c4478e54b854c70efdcab61df33a664d403c3b439e8a9f"
+  },
+  {
+    "original": "investigation/B4/file-identities.json",
+    "history": "file-identities.json",
+    "bytes": 135421,
+    "sha256": "b7fd378248382ed1ea5ba5fefc52ae53db18c19703b00e225b26bb3ce85bb782"
+  },
+  {
+    "original": "investigation/B4/candidate-index.json",
+    "history": "candidate-index.json",
+    "bytes": 19654,
+    "sha256": "777bbb62745810e7799522fe63c24675bf45554952b4aecd9aa2da11b1a33b7a"
+  },
+  {
+    "original": "investigation/B4/candidates.md",
+    "history": "candidates.md",
+    "bytes": 26920,
+    "sha256": "9b644aa8ae0d621a87272ac3c064f03fa15467a584af020d966c053d05860969"
+  },
+  {
+    "original": "investigation/B4/continuation-and-verification.md",
+    "history": "continuation-and-verification.md",
+    "bytes": 14634,
+    "sha256": "d2fd560a9d641992288e86d8977c8062fe7301ab035b38afa2d76c5927414a48"
+  },
+  {
+    "original": "investigation/B4/preservation-verification.json",
+    "history": "preservation-verification.json",
+    "bytes": 1055,
+    "sha256": "caefa31ba0e8a20af8de118e639a8e3656c1106ecede37691cc86872bfc88557"
+  },
+  {
+    "original": "investigation/B4/checkpoint-verification.json",
+    "history": "checkpoint-verification.json",
+    "bytes": 2574,
+    "sha256": "a45bdff89982e9a80bb4a3b0351b060d2a5f6b2f5bbf8fc0843dbe6ef9a40ba1"
+  },
+  {
+    "original": "investigation/B4/record_checkpoint.py",
+    "history": "record_checkpoint.py",
+    "bytes": 29693,
+    "sha256": "f41abd204993b2b749f815178235389f9aa03d8587c3426946e5b2dbca695e87"
+  },
+  {
+    "original": "investigation/B4/verify_checkpoint.py",
+    "history": "verify_checkpoint.py",
+    "bytes": 4842,
+    "sha256": "1e892fa590603437a439a69c9c8a3234e1dc95470d4857ed6a897f4b64680c8a"
+  }
+]

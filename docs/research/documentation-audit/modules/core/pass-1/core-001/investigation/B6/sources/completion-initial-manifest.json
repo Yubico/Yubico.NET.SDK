@@ -1,0 +1,20 @@
+[
+  {
+    "name": "nist-component-testing.html",
+    "url": "https://csrc.nist.gov/projects/cryptographic-algorithm-validation-program/component-testing",
+    "requested_utc": "2026-11-11T23:47:51.954506+00:00",
+    "error": "HTTP Error 403: Forbidden"
+  },
+  {
+    "name": "nist-askdfvs.pdf",
+    "url": "https://csrc.nist.gov/csrc/media/projects/cryptographic-algorithm-validation-program/documents/components/askdfvs.pdf",
+    "requested_utc": "2026-11-11T23:47:52.320867+00:00",
+    "error": "HTTP Error 403: Forbidden"
+  },
+  {
+    "name": "iso7816-4-2020.html",
+    "url": "https://www.iso.org/standard/77180.html",
+    "requested_utc": "2026-11-11T23:47:52.657289+00:00",
+    "error": "HTTP Error 403: Forbidden"
+  }
+]

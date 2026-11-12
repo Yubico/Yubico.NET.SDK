@@ -1,0 +1,202 @@
+{
+  "task": "CTAP2 boundary named B4/B6 follow-ups only",
+  "source_pin": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+  "observed_metadata_head": "bb94f0884f63f260156227957d4cc112d984e300",
+  "report": "followup-B4-B6.md",
+  "report_sha256": "5bb19dd111642976aae6f446ccd0625bf01720fe7bc45169ad3b8deae9e8c4fd",
+  "overall_status": "NAMED-PINNED-SOURCE-FOLLOWUPS-RECONCILED-WITH-QUALIFICATIONS",
+  "independent_review": "PENDING",
+  "accepted_ids_allocated": 0,
+  "preservation": {
+    "original_records": 17,
+    "original_record_bundle_sha256": "9ea0e5bae189bd86cf54f8a69d14149d14bd88725cb398c82a05cc8f711542e2",
+    "bundle_algorithm": "SHA256 of UTF8 canonical JSON (sort_keys=True, separators=(',',':')) array of {path,sha256}, sorted by path, covering all original boundaries/Ctap2 files and boundary-Ctap2.md; exclude exactly followup-B4-B6.md/json.",
+    "prior_receipt_entries_verified": 16,
+    "original_unit_count": 590,
+    "original_590_unit_ledger_sha256": "49a22ea23bd2c6090e67b51e74989d02f330f96f90956126317203e8db6872d5",
+    "original_inherited_key_count": 26,
+    "original_26_key_ledger_sha256": "1cdb2d23eee6ca5c7a659251c18d5f6b9a7aac2d6fb8137cbdecdfbb6201bfe4",
+    "original_report_sha256": "35fe15e38608882555a619b1cd79a41d89a86cbc90c412b50836d9aa660f6005",
+    "original_candidates_sha256": "d719f307b97710eef252790cc4efe289a2935b670188903a05609b5766f4f759",
+    "original_verification_sha256": "6bfafe8f8026610b2bd64e8c5a89000db7faafa8c8f31e6618827fd88d316a0e",
+    "unit_and_inherited_identity_sets_match_original_packets": true,
+    "original_dispositions_changed": false
+  },
+  "family_coverage_qualification": {
+    "B4": "Completed 105 full primary-file reads plus one qualified API-snapshot support-entry/type reconciliation; 2350 IDs. Non-B4 signatures retain related-context status. Ten local groups, five external gaps; no independent all-member or runtime acceptance.",
+    "B6": "Completed all 50 files and 684 IDs, with 16 local concerns. Wire/copy/phase/profile source outcomes are distinct from independent review and runtime qualification."
+  },
+  "followups": [
+    {
+      "scope": "B4 Windows HID factory, native admission, cancel, disposal and access",
+      "source_status": "RECONCILED",
+      "local_ids": ["CORE-CTAP-X001", "CORE-CTAP-X002", "CORE-CTAP-X018", "CORE-CTAP-X019", "CORE-CTAP-X022"],
+      "family_ids": ["CORE-B4-C001", "CORE-B4-C003", "CORE-B4-C004", "CORE-B4-C007", "CORE-B4-C008", "CORE-B1-C005"],
+      "outcome": "One selected route, no transport fallback. Windows report open/Get/Set execute synchronously and ignore compatibility tokens. Keepalive-driven CANCEL drains the original response; inner adapter supplies no terminal wake. Session exchange drain differs from another thread's raw connection disposal, whose SafeHandle borrow may outlast registry release. Nested report staging remains independent of cleared adapter copies.",
+      "remaining": "Windows driver/ABI/access/runtime evidence and selected repairs remain open; no observed race or universal elevation rule."
+    },
+    {
+      "scope": "B4 built-in CCID native owner and conditional PCI applicability",
+      "source_status": "RECONCILED",
+      "local_ids": ["CORE-CTAP-X004", "CORE-CTAP-X017", "CORE-CTAP-X022"],
+      "family_ids": ["CORE-B4-C006", "B4-Q001", "B4-Q002"],
+      "outcome": "CTAP APDUs reach the single-worker PCSC native owner, actual transmit, checked disconnect/context release and exact claim outcome. Managed PCI reaches the published shim without conversion. Conditional Linux LP64 pcsc-lite target has 16-byte PCI versus managed 8; Windows two-DWORD layout and macOS framework selection remain separate.",
+      "remaining": "Installed JIT/AOT producer/header/flags, string boundary and actual successful native transmit are unqualified. Source drain order supplies no physical unpower/app-state proof."
+    },
+    {
+      "scope": "B6 CTAP APDU format, configuration, status and recovery",
+      "source_status": "RECONCILED",
+      "local_ids": ["CORE-CTAP-X004", "CORE-CTAP-X017", "CORE-CTAP-X018", "CORE-CTAP-X022"],
+      "family_ids": ["CORE-B6-C001", "CORE-B6-C002", "CORE-B6-C003", "CORE-B6-C012"],
+      "outcome": "INS10 wraps nonempty command-prefixed CTAP request with CLA80/P1P2 zero/Le zero. Both formatters append encoded Le. Initial SELECT/GetInfo precede options configuration; major-zero Configure ignores ForceShortApdus. Plain 61xx follow-ups use configured instruction and zero CLA/P1/P2/Le; no 6C resend. APDU errors/warnings precede CTAP status classification; first plain chained-fragment uncertainty can miss recovery latch.",
+      "remaining": "Chosen APDU/profile policy, exact ISO clauses, stronger recovery/copy guarantees and device interoperability remain open."
+    },
+    {
+      "scope": "B6 SCP factory/rebind and post-handshake applet/authentication state",
+      "source_status": "RECONCILED",
+      "local_ids": ["CORE-CTAP-X002", "CORE-CTAP-X004", "CORE-CTAP-X017"],
+      "family_ids": ["CORE-B6-C006", "CORE-B6-C007", "CORE-B6-C009", "CORE-B6-C010", "CORE-B6-C015"],
+      "outcome": "FIDO SELECT/GetInfo and detected USB gate precede configure/SCP. CTAP rebinds backend without another SELECT and issues no post-handshake protected CTAP probe during creation. Helpers issue handshake commands but no additional SELECT. Historical IsAuthenticated flag after setup is separate from SD-side first correct-MAC a/c authentication and CTAP PIN/UV permissions.",
+      "remaining": "Actual FIDO selection survival, vendor operation/profile acceptance and final SCP11 1.4 clauses remain open. A plain SELECT after SCP is not an adopted recovery action."
+    },
+    {
+      "scope": "B6 secure empty-command, counter, phase and response chaining applicability",
+      "source_status": "RECONCILED",
+      "local_ids": ["CORE-CTAP-X002", "CORE-CTAP-X017", "CORE-CTAP-X018", "CORE-CTAP-X022"],
+      "family_ids": ["CORE-B6-C004", "CORE-B6-C005", "CORE-B6-C011", "CORE-B6-C012"],
+      "outcome": "Ordinary CTAP data is nonempty; protected empty-data remaining C0 commands reach current empty encryption. Encrypt's counter mutation can precede stateAdvanced/failure notification. INS82 exemption is instruction-based; normal CTAP INS10/default C0 do not directly select it, while unvalidated custom remaining instruction can select that path without implying profile support. Secure receiver protects each follow-up and unmacs/decrypts each response before assembly; synthetic signed61xx/6A82 fake is not an independent conforming wire oracle.",
+      "remaining": "Independent split-block/RMAC/bare-error wire/profile evidence, provider failure handling, phase policy and physical interoperability remain open. No new exploit or test result."
+    },
+    {
+      "scope": "B6 request/response/fragment/plaintext and setup failure owners",
+      "source_status": "RECONCILED",
+      "local_ids": ["CORE-CTAP-X004", "CORE-CTAP-X020"],
+      "family_ids": ["CORE-B6-C002", "CORE-B6-C006", "CORE-B6-C007"],
+      "inherited_aliases": ["ctap2-001:CTAP-IMP-004", "ctap2-001:CTAP-IMP-027", "ctap2-001:CTAP-IMP-035"],
+      "outcome": "Actual formatted output clears after transport await; stack/raw/fragment/failure-assembly/protected/decrypted-temporary owners remain separate. Core APDU error before return leaves backend responseData unassigned. Returned CTAP failure normally clears backend Data; success transfers before decode. Parameters share contained disposable owners; post-state-return setup guard differs from earlier SCP03 derivation failure window. Original X020 diagnostic-callback failure remains independent.",
+      "remaining": "Selected cleanup implementation/owner changes, independent review and actual-array/failure/native/provider qualification remain open."
+    }
+  ],
+  "mandatory_open": [
+    {
+      "owner": "BOUNDARY-WebAuthn and maintainer/coordinator",
+      "status": "OPEN-RETURN-NOT-RECEIVED",
+      "keys": ["ctap2-001:CTAP-DEC-002", "webauthn-001:WA-IMP-010", "webauthn-001:WA-IMP-006", "webauthn-001:WA-IMP-007", "webauthn-001:WA-IMP-013", "webauthn-001:WA-IMP-017", "webauthn-001:WA-IMP-019"],
+      "action": "Receive current ceremony/result/prompt dependency review. Keep native selected-user actor/serializer decision, descriptor recovery and sensitive result ownership distinct; old resolved CTAP/WA documentation review does not close this gate."
+    },
+    {
+      "owner": "User and separately assigned Windows delta reviewer",
+      "status": "UNREADY-UNREVIEWED",
+      "action": "Wait for explicit ready handoff, pin its source/evidence delta and reopen actual CTAP factory/admission/cancel/disposal/access claims. No unfinished checkout or branch inspected."
+    },
+    {
+      "owner": "B4 qualification owners",
+      "status": "OPEN",
+      "gaps": ["B4-Q001", "B4-Q002", "B4-Q003", "B4-Q004", "B4-Q005"],
+      "action": "Retain deployed producer/header; exact historical Windows artifacts; SmartCard class-GUID provenance; HIDAPI revision; historical serial9681620 failure cause. Q003/Q004 are family qualifications, not demonstrated CTAP exchange failures."
+    },
+    {
+      "owner": "Core/B6, vendor/profile evidence owner and coordinator validation",
+      "status": "OPEN",
+      "action": "Retain unavailable code-cited SCP03 review clauses, final SCP11/vendor/ISO clauses, hidden-buffer/oracle and runtime/native/device qualification. Exact final SCP03 passages are narrower authority. Preserve PIV physical deferrals."
+    }
+  ],
+  "reopening_map": [
+    {
+      "trigger": "Windows owner/admission/wake/release/access changes or separately ready delta",
+      "paths": ["src/Core/src/Devices/HidConnectionSlot.cs", "src/Core/src/Devices/RegisteredConnections.cs", "src/Core/src/Protocols/Fido/Hid/FidoHidConnection.cs", "src/Core/src/Native/Windows/HidD/WindowsHidReportAccess.cs", "src/Core/src/Transports/Hid/Windows/WindowsHidIOReportConnection.cs", "src/Ctap2/src/IYubiKeyExtensions.cs", "src/Ctap2/src/Ctap2Session.cs", "src/Ctap2/src/ICtap2Session.cs", "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/TestExtensions/Ctap2TestStateExtensions.cs", "docs/architecture/raw-access-tiers.md"]
+    },
+    {
+      "trigger": "Producer/header or APDU/SCP/configuration/recovery/ownership changes",
+      "paths": ["src/Core/src/Native/Desktop/SCard/SCard.Interop.cs", "src/Core/src/Native/Desktop/SCard/SCardIORequest.cs", "src/Core/src/Transports/SmartCard/PcscNativeResources.cs", "src/Core/src/Protocols/SmartCard/Apdu/PcscProtocol.cs", "src/Core/src/Protocols/SmartCard/Apdu/ProtocolConfiguration.cs", "src/Core/src/Protocols/SmartCard/Apdu/ChainedResponseReceiver.cs", "src/Core/src/Protocols/SmartCard/Scp/ScpInitializer.cs", "src/Core/src/Protocols/SmartCard/Scp/ScpProcessor.cs", "src/Core/src/Protocols/SmartCard/Scp/ScpState.cs", "src/Core/src/Protocols/SmartCard/Scp/PcscProtocolScp.cs", "src/Core/src/Sessions/ApplicationSession.cs", "src/Ctap2/src/Backend/SmartCardBackend.cs", "src/Ctap2/README.md", "src/Ctap2/CLAUDE.md", "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2SmartCardTests.cs", "src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/Ctap2TransportTests.cs"]
+    }
+  ],
+  "input_paths_relative_to": "docs/research/documentation-audit/modules/core/pass-1/core-001",
+  "input_hashes": {
+    "investigation-B4.md": "a6743e926ffdedd3157c80097736048f7ab287b7f5c60a904b804d4f23bf098b",
+    "investigation-B6.md": "146bd5a53f6f1ca3971c8ea8151b6aaee980295e730f5ebfb5c723e55817fdc9",
+    "investigation/B4/candidates.md": "826f81471b10f7a213478fc6188e916b041b748307a866f75de2a2b30c61f148",
+    "investigation/B4/qualification-gaps.json": "0567a173db177bd59ad9e10bbe438bfa03b03d4634a578b80ac4f60d185cda2b",
+    "investigation/B4/sources/register.md": "2befee4bdc5b00b65fd599a5d15893ab7527426496cb60766e0497032f466b5e",
+    "investigation/B4/completion-verification.json": "272b9d47aed3693c9904926c1dad144f283bde942c049c1e5f97ee27b2bf80fd",
+    "investigation/B6/candidates.md": "785d9adbf29a66b00fda79a5f8c47c4191e501340c249e2e49f38c2ba2027341",
+    "investigation/B6/ownership-and-handoffs.md": "a73c1b3bc43b98b50494f04807964fe9af1a71a1cd1e22d9dd13ff6be8c9d3c7",
+    "investigation/B6/sources/final-source-register.md": "6f3edcfba098920dd43e3e2a6db59c03108e39bfbb4ab81373e87d2c74731727",
+    "investigation/B6/sources/final-manifest.json": "45e64aebedf728bb3f91553e301a7eb75a736876470fbbb3bd0ee1cfd8bbe16c",
+    "investigation/B6/final-verification.json": "4d023614638011606bf6a65b92f7f05a18946b581846f7172e10b2da981bebdf"
+  },
+  "retained_original_hashes": {
+    "investigation/B4/sources/safehandle-marshaller.cs": "d40e582fc5f12e671d741fe7d1734e46e86a20e3b9f1a9ac933f07c1ec4d12c1",
+    "investigation/B4/sources/shim-pcsc.c": "10654d81c4468bc1bf712667875c918fbeff335eba513458be692ba80051e39a",
+    "investigation/B6/sources/scp03-1.1.2.pdf": "973a10834f7fe8befd98da9af65393622234b80745092bd85248804c57b648dd",
+    "investigation/B6/sources/scp03-1.1.2.txt": "921d503eea2e236a95430358e553cc9ce029b41ef6d4e874b355515d79bef6b7",
+    "investigation/B6/sources/scp11-public-review-1.3.0.13.pdf": "5db47b3df3c4e565a5ad91257395604f3482ed5db70c64853544c3b0e289fde0",
+    "investigation/B6/sources/scp11-public-review-1.3.0.13.txt": "59dddee8b2baa28964d5c3acb4d603f45c48a6055aef5452840a920849e55543"
+  },
+  "retained_original_passage_scopes": {
+    "safehandle-marshaller.cs": "dotnet/runtime v10.0.0 ManagedToUnmanagedIn, lines20–50; versioned implementation behavior, not deployed-driver evidence",
+    "shim-pcsc.c": "Published1.18.1 Native_SCardTransmit, lines183–205; wrapper implementation, not installed producer attestation",
+    "scp03-1.1.2": "GlobalPlatform AmendmentD SCP03 v1.1.2 Public Release March2019, sections6.2.5/6.2.6; card status-only error obligations and off-card counter/no-empty-data-encryption obligations at selected security level; text lines1023–1030/1149–1173 inspected",
+    "scp11-public-review-1.3.0.13": "GlobalPlatform AmendmentF SCP11 v1.3.0.13 Public Review August2023 section4.3; draft a/c OCE/SD authentication phase including first correct-MAC APDU and certificate/allowlist conditions; text lines1083–1103 inspected, final1.4/vendor qualification retained"
+  },
+  "source_rows_schema": ["repository_relative_path", "raw_file_sha256", "inclusive_read_line_ranges"],
+  "source_rows": [
+    ["src/Ctap2/src/IYubiKeyExtensions.cs", "4a456736bcb7c35d25cbbee5508dde57a4dfed04a9f039f56740a9ad6c411673", [[140,207]]],
+    ["src/Ctap2/src/Ctap2Session.cs", "870046812fe2802a82ef3c84ab1af7bd118e283a0e2f3ce21934e8c5c8087729", [[98,223]]],
+    ["src/Ctap2/src/Backend/HidBackend.cs", "14941f940c60035457b0d3edf6b6f87b2422aba25ad62f28fe900ec4e6ef6c55", [[43,118]]],
+    ["src/Ctap2/src/Backend/SmartCardBackend.cs", "d684c8aaedfc9c407f6e0830ee088af490b7ea06ab5c3cf597b54bdf88a602fa", [[45,149]]],
+    ["src/Ctap2/tests/Yubico.YubiKit.Ctap2.IntegrationTests/TestExtensions/Ctap2TestStateExtensions.cs", "5484a5fb10f15f6e60cfb9c3d0f0ce57a6545cdbde153f5dadaac3794aefbe45", [[148,198]]],
+    ["src/Core/src/Sessions/ApplicationSession.cs", "9a3e226e7845b9143fd3b576a40a40d7f35272beffa8f74cc35aab254f497ced", [[247,397],[399,569]]],
+    ["src/Core/src/Devices/YubiKeyConnectionExtensions.cs", "c5de6f57fc55f0286ab654ee8b8080bac69697eaf2f1f3b7a756e49cc6da366f", [[246,305]]],
+    ["src/Core/src/Devices/HidConnectionSlot.cs", "29ca3ec49bf3333417b8a1fcb9d967e10bbb4b085c9f0eacc65fce755d1586d7", [[40,132]]],
+    ["src/Core/src/Devices/RegisteredConnections.cs", "7dafef7f99f9024d492c72c35bb5cc1ac5404604cebe8ac859f15356ea4f0968", [[1,107]]],
+    ["src/Core/src/Protocols/Fido/Hid/FidoHidConnection.cs", "960807ea73d08a7c9e4e211b63faea08a14329c0dc0b851336ee54824d556f44", [[1,76]]],
+    ["src/Core/src/Protocols/Fido/Hid/FidoHidProtocol.cs", "fc50686f051f5fb6f3ee01aca09f3b9f2175f9fc60cc6c97bbc7f2ed308c62a2", [[273,387],[529,562]]],
+    ["src/Core/src/Native/Windows/HidD/WindowsHidReportAccess.cs", "0c877aeab9d9cb6134ce2fbf50197a16efde08c47fcd9ed7c04bd7e4c9e3a1e7", [[1,320]]],
+    ["src/Core/src/Transports/Hid/Windows/WindowsHidIOReportConnection.cs", "510af458af29afaa8d1f2cadfc1fea54380836ac96d639cdd0d9cbe5251d4e0d", [[1,84]]],
+    ["src/Core/src/Transports/SmartCard/UsbSmartCardConnection.cs", "05fc9d236b6e2b3defa1543a4ae43a33cb1535acc69805e0a7789357e721705f", [[100,182]]],
+    ["src/Core/src/Transports/SmartCard/PcscConnectionNativeState.cs", "5be7be482f6585ebcf930fad36fe1ceb47b4536b27fe26a778998d0e8609a3b8", [[80,189],[286,445]]],
+    ["src/Core/src/Transports/SmartCard/PcscNativeResources.cs", "657cf8862442fc697cfa675186ab9f7b29c5c1e1c7773885591acf8946783584", [[70,163]]],
+    ["src/Core/src/Transports/SmartCard/ISCardConnectionApi.cs", "20d7373e88426adc7b14a5f366abb321108716b603fb0ca229a873a6c0d605b5", [[40,92]]],
+    ["src/Core/src/Native/Desktop/SCard/SCardIORequest.cs", "0fc62af77b2186afb0f93f5041aa1f97899f33d28b622669fec072c3265ec698", [[1,47]]],
+    ["src/Core/src/Native/Desktop/SCard/SCard.Interop.cs", "379b9d00f73f25e0c67053c4577997a88e6e5a00eb45fb21e25d192f1e0cca8d", [[130,167]]],
+    ["src/Core/src/Protocols/SmartCard/Apdu/PcscProtocol.cs", "e1bd7f6dc139821f4ba1c211d185d362a6bb271c2f651ae38b17c4efaf3a1091", [[44,95],[114,207]]],
+    ["src/Core/src/Protocols/SmartCard/Apdu/ProtocolConfiguration.cs", "2a1561c92c2b9a8c7b23df18c7ffd4d66332b5fd919f005ca26e6252d35ecfe0", [[1,22]]],
+    ["src/Core/src/Protocols/SmartCard/Apdu/ApduFormatterShort.cs", "53f5b7ec2f80657d1fbf50f9ee8f1b1fdf6874f49e1b9bac4915d0136899521b", [[1,58]]],
+    ["src/Core/src/Protocols/SmartCard/Apdu/ApduFormatterExtended.cs", "ff39ab5e3a4bdf57971c60a66b76cd27041b2ce4139d2a6e17bfee06b0efcf9b", [[1,71]]],
+    ["src/Core/src/Protocols/SmartCard/Apdu/ApduTransmitter.cs", "28e84f9216000b9b15ba3e98abe903868fcbaf946804969f3dda2b8124dd421b", [[1,49]]],
+    ["src/Core/src/Protocols/SmartCard/Apdu/ChainedApduTransmitter.cs", "bd6cb4b312e35f1b2d6f9f8d0c8ea469de500fd4df5529044e1fae9dc7ee0dfb", [[1,66]]],
+    ["src/Core/src/Protocols/SmartCard/Apdu/ChainedResponseReceiver.cs", "9c822dbc7396fd459f6686b08fe9b71d9fb4533e0194fb778e3391f81d55df78", [[1,77]]],
+    ["src/Core/src/Protocols/SmartCard/Apdu/ApduException.cs", "7512b65eba1c0bb65fb6794bf07a7149a9568bdb269c611763d1a4a34c374d76", [[1,142]]],
+    ["src/Core/src/Protocols/SmartCard/Scp/ScpInitializer.cs", "ab373887cb8b92f5877d26b3aa06d29815048f1e3606e56c6f449f7ecf807f67", [[1,210]]],
+    ["src/Core/src/Protocols/SmartCard/Scp/ScpProcessor.cs", "685642e5d7db7a7e7fe0d6bcc8cab2f4495d6ef9d37bcfb6e02ed450884fdef1", [[1,198]]],
+    ["src/Core/src/Protocols/SmartCard/Scp/ScpState.cs", "9e03845d5e0c87e951eb8879cd51fbb5014a009e8f4c537015599d1512bb2039", [[1,312]]],
+    ["src/Core/src/Protocols/SmartCard/Scp/ScpState.Scp03.cs", "7f1a6dc602033053506fc1daf1f72beb4adceb3271b65be72d370f639e55fe0e", [[1,94]]],
+    ["src/Core/src/Protocols/SmartCard/Scp/ScpState.Scp11.cs", "99f937de3413a0072eb0171a13eab0a9612eaa99c3c58aab55f8620f71009302", [[1,188]]],
+    ["src/Core/src/Protocols/SmartCard/Scp/PcscProtocolScp.cs", "e2dfec983fc288544ab05cd64f11424e6e5369f1ce4c9baa5cd2242192e840f3", [[1,144]]],
+    ["src/Core/src/Protocols/SmartCard/Scp/Scp03KeyParameters.cs", "e20542d76082ed682371ee922dfcfe6d6eea99f730e5ce6ff70b1931f8048232", [[1,60]]],
+    ["src/Core/src/Protocols/SmartCard/Scp/Scp11KeyParameters.cs", "e4a5084923662f09de9055d54beb5de4dada4059b9b54b6235343c2cbb8138c3", [[1,121]]],
+    ["src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/PcscProtocolScpTests.cs", "e13b64ec028edea56a14933074dc06af1da8ecf3c951f391379f18e1dd2e310e", [[540,721]]],
+    ["src/Core/tests/Yubico.YubiKit.Core.UnitTests/Protocols/SmartCard/Scp/ScpEmptyResponseTests.cs", "4ef6538074e642794ebd34cabf9061f0056e9c0a473401fe1a9ec943e114fb49", [[1,85]]]
+  ],
+  "static_verification": {
+    "source_files": 37,
+    "all_source_raw_hashes_verified": true,
+    "all_source_files_match_fixed_pin_after_explicit_bom_crlf_normalization": true,
+    "input_report_hashes_verified": 11,
+    "retained_original_hashes_verified": 6,
+    "original_boundary_records_preserved": 17,
+    "original_unit_and_inherited_identity_sets_preserved": true,
+    "kind": "read-only Python/Git source and record identity checks; no SDK or cryptographic implementation execution",
+    "independent_content_review": false,
+    "runtime_qualification": false
+  },
+  "execution": {
+    "sdk_builds_tests": 0,
+    "formatter_runs": 0,
+    "native_device_crypto_provider_executions": 0,
+    "commits_index_ref_writes": 0,
+    "subagents": 0,
+    "owned_writes": ["boundaries/Ctap2/followup-B4-B6.md", "boundaries/Ctap2/followup-B4-B6.json"]
+  }
+}

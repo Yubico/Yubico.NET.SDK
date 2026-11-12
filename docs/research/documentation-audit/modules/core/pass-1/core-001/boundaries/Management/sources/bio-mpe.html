@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+      <title>YubiKey Bio Multi-protocol Edition considerations and quirks </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="YubiKey Bio Multi-protocol Edition considerations and quirks ">
+      
+      
+      <link rel="icon" href="../.././images/favicon.ico">
+      <link rel="stylesheet" href="../../public/docfx.min.css">
+      <link rel="stylesheet" href="../../public/main.css">
+      <meta name="docfx:navrel" content="../../toc.html">
+      <meta name="docfx:tocrel" content="../toc.html">
+      
+      <meta name="docfx:rel" content="../../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/Yubico/Yubico.NET.SDK/blob/develop/docs/users-manual/sdk-programming-guide/bio-mpe.md/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-WLE96T8XZ3"></script>
+      <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-WLE96T8XZ3');
+      </script>
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../../index.html">
+            <img id="logo" class="svg" src="../.././images/yubico-circle-y-mark-white.png" alt="Yubico">
+            Yubico
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="UsersManualBioMpe">
+<h1 id="yubikey-bio-multi-protocol-edition-considerations-and-quirks">YubiKey Bio Multi-protocol Edition considerations and quirks</h1>
+<!-- Copyright 2025 Yubico AB
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License. -->
+
+<p>YubiKey Bio Multi-protocol Edition (MPE) keys possess some unique attributes that require special consideration when using the .NET YubiKey SDK compared to other YubiKeys with FIDO and PIV capabilities. This page details these differences and how to manage them.</p>
+<h2 id="shared-pin-no-puk">Shared PIN, no PUK</h2>
+<p>Typically, YubiKeys that have both the PIV and FIDO applications (like the 5 Series) have separate PIV and FIDO PINs. However, the YubiKey Bio MPE, which integrates fingerprint biometrics from the FIDO application with PIV functionality, uses a shared PIN for the FIDO and PIV applications. Use of the shared PIN results in two major changes:</p>
+<ul>
+<li>The addition of a special <a href="#resetting-a-yubikey-bio-mpe">device-wide reset</a>, which resets both the FIDO and PIV applications simultaneously</li>
+<li>The omission of the PIV <a class="xref" href="../application-piv/pin-puk-mgmt-key.html">PUK</a> (PIN Unblocking Key)</li>
+</ul>
+<p>No PUK means that once a YubiKey Bio MPE's PIN has been blocked, there is no way to unblock/change the PIN — the key must be reset. This also means that the SDK's <a class="xref" href="../application-piv/commands.html#reset-retry-recover-the-pin">ResetRetryCommand</a> (used to reset the PIN using the PUK) will fail along with any attempt to change the nonexistent PUK with the <a class="xref" href="../application-piv/commands.html#change-reference-data">ChangeReferenceDataCommand</a>.</p>
+<h2 id="resetting-a-yubikey-bio-mpe">Resetting a YubiKey Bio MPE</h2>
+<p>For all YubiKeys except for the YubiKey Bio MPE, factory resets are done strictly <em>by application</em>. For example, if you wanted to reset the PIV and FIDO applications on a YubiKey 5 Series key, you would need to perform both a <a class="xref" href="../../yubikey-api/Yubico.YubiKey.Piv.PivSession.html#Yubico_YubiKey_Piv_PivSession_ResetApplication">PIV reset</a> and a <a class="xref" href="../application-fido2/fido2-reset.html">FIDO reset</a>.</p>
+<p>Under most circumstances, it is not possible to perform factory resets for the PIV and FIDO applications individually with the YubiKey Bio MPE. Instead, a special device-wide reset must be used, which resets both PIV and FIDO applications at the same time. This device-wide reset can be performed via the <code>DeviceReset()</code> method, the <code>DeviceResetCommand()</code>, or by sending a command APDU with the device reset instruction.</p>
+<div class="NOTE">
+<h5>Note</h5>
+<p>The individual FIDO reset can technically be used with YubiKey Bio MPE keys, but <em>only</em> if the FIDO application is not &quot;blocked&quot; (check the key's <a class="xref" href="../../yubikey-api/Yubico.YubiKey.YubiKeyDevice.html#Yubico_YubiKey_YubiKeyDevice_ResetBlocked">ResetBlocked</a> property to confirm). The individual PIV reset cannot be used with YubiKey Bio MPE keys regardless of the PIV application's <code>ResetBlocked</code> status.</p>
+</div>
+<h3 id="devicereset-method">DeviceReset() method</h3>
+<p>Using the <a class="xref" href="../../yubikey-api/Yubico.YubiKey.YubiKeyDevice.html#Yubico_YubiKey_YubiKeyDevice_DeviceReset">DeviceReset()</a> method is simple: <a class="xref" href="making-a-connection.html">connect</a> to a YubiKey with the <a class="xref" href="../../yubikey-api/Yubico.YubiKey.YubiKeyDevice.html">YubiKeyDevice</a> class, then call the method on that key.</p>
+<p>To select the first available YubiKey connected to your host, use:</p>
+<pre><code class="lang-C#">IEnumerable&lt;IYubiKeyDevice&gt; yubiKeyList = YubiKeyDevice.FindAll();
+
+var yubiKey = yubiKeyList.First();
+</code></pre>
+<p>Then perform the reset:</p>
+<pre><code class="lang-C#">yubiKey.DeviceReset();
+</code></pre>
+<h3 id="deviceresetcommand">DeviceResetCommand()</h3>
+<p>The device-wide reset can also be performed using the lower-level <a class="xref" href="../../yubikey-api/Yubico.YubiKey.Management.Commands.DeviceResetCommand.html">DeviceResetCommand</a> and <a class="xref" href="../../yubikey-api/Yubico.YubiKey.Management.Commands.DeviceResetResponse.html">DeviceResetResponse</a> classes (which is what the <code>DeviceReset()</code> method implements under the hood).</p>
+<p>After connecting to a particular YubiKey with the <code>YubiKeyDevice</code> class as shown in the previous example, we need to set up an additional connection to the key's management application using the <a class="xref" href="../../yubikey-api/Yubico.YubiKey.IYubiKeyConnection.html">IYubiKeyConnection</a> class:</p>
+<pre><code class="lang-C#">IYubiKeyConnection connection = yubiKey.Connect(YubiKeyApplication.Management);
+</code></pre>
+<p>Then send the <code>DeviceResetCommand</code> to the key:</p>
+<pre><code class="lang-C#">DeviceResetCommand resetCommand = new DeviceResetCommand();
+DeviceResetResponse resetResponse = connection.SendCommand(resetCommand);
+</code></pre>
+<p>For error handling, check the <code>DeviceResetResponse</code> instance's <a class="xref" href="../../yubikey-api/Yubico.YubiKey.IYubiKeyResponse.html#Yubico_YubiKey_IYubiKeyResponse_Status">Status</a> and <a class="xref" href="../../yubikey-api/Yubico.YubiKey.IYubiKeyResponse.html#Yubico_YubiKey_IYubiKeyResponse_StatusMessage">StatusMessage</a> properties. For general information on using the SDK's command classes, see <a class="xref" href="commands.html">Commands</a>.</p>
+<h3 id="devicereset-apdus">DeviceReset APDUs</h3>
+<p>At the lowest level, the device-wide reset can be performed by sending a command <a class="xref" href="../yubikey-reference/apdu.html">APDU</a> to a YubiKey and handling its response APDU (which is what the <code>DeviceResetCommand</code> and <code>DeviceResetResponse</code> implement under the hood).</p>
+<p>The command APDU is simple, requiring the instruction <code>1F</code> with no additional data. The response APDU returned from the key will only contain the status word.</p>
+<p><strong>Command APDU</strong>:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">CLA</th>
+<th style="text-align: center;">INS</th>
+<th style="text-align: center;">P1</th>
+<th style="text-align: center;">P2</th>
+<th style="text-align: center;">Lc</th>
+<th style="text-align: center;">Data</th>
+<th style="text-align: center;">Le</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">00</td>
+<td style="text-align: center;">1F</td>
+<td style="text-align: center;">00</td>
+<td style="text-align: center;">00</td>
+<td style="text-align: center;">(absent)</td>
+<td style="text-align: center;">(absent)</td>
+<td style="text-align: center;">(absent)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Response APDU (success)</strong>:</p>
+<p>Total Length: 2 bytes</p>
+<p>Data Length: 0</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">Data</th>
+<th style="text-align: center;">SW1</th>
+<th style="text-align: center;">SW2</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">(no data)</td>
+<td style="text-align: center;">90</td>
+<td style="text-align: center;">00</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Response APDU (failure)</strong>:</p>
+<p>Total Length: 2 bytes</p>
+<p>Data Length: 0</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">Data</th>
+<th style="text-align: center;">SW1</th>
+<th style="text-align: center;">SW2</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">(no data)</td>
+<td style="text-align: center;">6f</td>
+<td style="text-align: center;">00</td>
+</tr>
+</tbody>
+</table>
+<h4 id="opensc-example">OpenSC example</h4>
+<p>To perform the device reset on a YubiKey Bio MPE with a tool like <a href="https://github.com/OpenSC/OpenSC">OpenSC</a>, you must first send a command APDU to connect to the key's management application (<code>00a4040008a000000527471117</code>) followed by the device reset command APDU (<code>001F0000</code>):</p>
+<pre><code class="lang-text">opensc-tool -c default -s 00a4040008a000000527471117 -s 001F0000
+Using reader with a card: Yubico YubiKey FIDO+CCID
+Sending: 00 A4 04 00 08 A0 00 00 05 27 47 11 17 
+Received (SW1=0x90, SW2=0x00):
+56 69 72 74 75 61 6C 20 6D 67 72 20 2D 20 46 57 Virtual mgr - FW
+20 76 65 72 73 69 6F 6E 20 35 2E 37 2E 32        version 5.7.2
+Sending: 00 1F 00 00 
+Received (SW1=0x90, SW2=0x00)
+</code></pre>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/Yubico/Yubico.NET.SDK/blob/develop/docs/users-manual/sdk-programming-guide/bio-mpe.md/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

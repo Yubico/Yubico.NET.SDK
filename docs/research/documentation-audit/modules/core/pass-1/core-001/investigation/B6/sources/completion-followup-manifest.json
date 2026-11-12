@@ -1,0 +1,20 @@
+[
+  {
+    "name": "nist-ansx963_2001.zip",
+    "url": "https://csrc.nist.gov/CSRC/media/Projects/Cryptographic-Algorithm-Validation-Program/documents/components/800-135testvectors/ansx963_2001.zip",
+    "requested_utc": "2026-11-11T23:48:16.026546+00:00",
+    "error": "HTTP Error 403: Forbidden"
+  },
+  {
+    "name": "nist-askdfvs.pdf",
+    "url": "https://csrc.nist.gov/CSRC/media/Projects/Cryptographic-Algorithm-Validation-Program/documents/components/askdfvs.pdf",
+    "requested_utc": "2026-11-11T23:48:16.377491+00:00",
+    "error": "HTTP Error 403: Forbidden"
+  },
+  {
+    "name": "iso-obp.html",
+    "url": "https://www.iso.org/obp/ui/en/#iso:std:iso-iec:7816:-4:ed-4:v1:en",
+    "requested_utc": "2026-11-11T23:48:16.712541+00:00",
+    "error": "HTTP Error 403: Forbidden"
+  }
+]

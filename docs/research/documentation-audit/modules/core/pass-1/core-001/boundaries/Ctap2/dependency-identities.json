@@ -1,0 +1,236 @@
+[
+  {
+    "path": "src/Core/src/Sessions/ApplicationSession.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "9a3e226e7845b9143fd3b576a40a40d7f35272beffa8f74cc35aab254f497ced",
+    "pinned_git_bytes_sha256": "9a3e226e7845b9143fd3b576a40a40d7f35272beffa8f74cc35aab254f497ced",
+    "read_scope": "complete factory/prepare/configure/prompt/disposal implementation",
+    "primary_unit_disposition_authority": false,
+    "bom_crlf_normalized_matches_pin": true
+  },
+  {
+    "path": "src/Core/src/Devices/YubiKeyConnectionExtensions.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "c5de6f57fc55f0286ab654ee8b8080bac69697eaf2f1f3b7a756e49cc6da366f",
+    "pinned_git_bytes_sha256": "c5de6f57fc55f0286ab654ee8b8080bac69697eaf2f1f3b7a756e49cc6da366f",
+    "read_scope": "180–305 resolution/open/failure helper and typed routing",
+    "primary_unit_disposition_authority": false,
+    "bom_crlf_normalized_matches_pin": true
+  },
+  {
+    "path": "src/Core/src/Protocols/Fido/Hid/FidoHidProtocol.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "fc50686f051f5fb6f3ee01aca09f3b9f2175f9fc60cc6c97bbc7f2ed308c62a2",
+    "pinned_git_bytes_sha256": "fc50686f051f5fb6f3ee01aca09f3b9f2175f9fc60cc6c97bbc7f2ed308c62a2",
+    "read_scope": "complete protocol implementation for actual CTAP call path",
+    "primary_unit_disposition_authority": false,
+    "bom_crlf_normalized_matches_pin": true
+  },
+  {
+    "path": "src/Core/src/Protocols/Fido/Hid/FidoHidConnection.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "960807ea73d08a7c9e4e211b63faea08a14329c0dc0b851336ee54824d556f44",
+    "pinned_git_bytes_sha256": "960807ea73d08a7c9e4e211b63faea08a14329c0dc0b851336ee54824d556f44",
+    "read_scope": "complete retained synchronous compatibility adapter",
+    "primary_unit_disposition_authority": false,
+    "bom_crlf_normalized_matches_pin": true
+  },
+  {
+    "path": "src/Core/src/Protocols/Fido/Hid/IFidoHidConnection.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "3c9c6f60cdaf08585dfe0ffa35eba0e3cb62328f0905c8a2a0c71db55845c344",
+    "pinned_git_bytes_sha256": "3c9c6f60cdaf08585dfe0ffa35eba0e3cb62328f0905c8a2a0c71db55845c344",
+    "read_scope": "complete public raw connection contract",
+    "primary_unit_disposition_authority": false,
+    "bom_crlf_normalized_matches_pin": true
+  },
+  {
+    "path": "src/Core/src/Utilities/ExchangeGuard.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "3d578cd583c6a489e48b9e2759660c81618485e9dad8073f80cac104b112bdd9",
+    "pinned_git_bytes_sha256": "3d578cd583c6a489e48b9e2759660c81618485e9dad8073f80cac104b112bdd9",
+    "read_scope": "complete admission/drain implementation; no whole-workflow lease",
+    "primary_unit_disposition_authority": false,
+    "bom_crlf_normalized_matches_pin": true
+  },
+  {
+    "path": "src/Core/src/Credentials/UserPresenceNotification.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "4940e70c5f1ef5c2892a444b6e8bae77dabdc50253e25bc10ee8556e8f3985f1",
+    "pinned_git_bytes_sha256": "4940e70c5f1ef5c2892a444b6e8bae77dabdc50253e25bc10ee8556e8f3985f1",
+    "read_scope": "complete handle state/capture/request/resolution/error logging implementation",
+    "primary_unit_disposition_authority": false,
+    "bom_crlf_normalized_matches_pin": true
+  },
+  {
+    "path": "src/Core/src/Credentials/UserPresenceIntent.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "06e90a09cdd8f6ac45a9dbc0d9072f48f9d2ebcc9c9736bccc48864a4d9b63ed",
+    "pinned_git_bytes_sha256": "06e90a09cdd8f6ac45a9dbc0d9072f48f9d2ebcc9c9736bccc48864a4d9b63ed",
+    "read_scope": "complete scope/capture implementation",
+    "primary_unit_disposition_authority": false,
+    "bom_crlf_normalized_matches_pin": true
+  },
+  {
+    "path": "src/Core/src/Credentials/ConsoleCredentialReader.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "a837875cb4bd8a105bf92e2b7fb51e789cca7603bf1cd4cc9d1221830bb59b2b",
+    "pinned_git_bytes_sha256": "a837875cb4bd8a105bf92e2b7fb51e789cca7603bf1cd4cc9d1221830bb59b2b",
+    "read_scope": "complete interactive/redirected/confirmation/encoding implementation",
+    "primary_unit_disposition_authority": false,
+    "bom_crlf_normalized_matches_pin": true
+  },
+  {
+    "path": "src/Core/src/Credentials/CredentialReaderOptions.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "8a16e538bbefb8ceb39c2e5f20d1106edece172f4e1eea740dfcb06cc3f8a3f5",
+    "pinned_git_bytes_sha256": "8a16e538bbefb8ceb39c2e5f20d1106edece172f4e1eea740dfcb06cc3f8a3f5",
+    "read_scope": "complete generic units/preset contract",
+    "primary_unit_disposition_authority": false,
+    "bom_crlf_normalized_matches_pin": true
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Apdu/ApduResponse.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "3991f32ffd2ec3e98f2873ed729fc99f95a9b50175a7e7159457d68ee2395e56",
+    "pinned_git_bytes_sha256": "3991f32ffd2ec3e98f2873ed729fc99f95a9b50175a7e7159457d68ee2395e56",
+    "read_scope": "complete copy/Data/Raw/status/Clear owner",
+    "primary_unit_disposition_authority": false,
+    "bom_crlf_normalized_matches_pin": true
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Apdu/PcscProtocol.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "e1bd7f6dc139821f4ba1c211d185d362a6bb271c2f651ae38b17c4efaf3a1091",
+    "pinned_git_bytes_sha256": "e1bd7f6dc139821f4ba1c211d185d362a6bb271c2f651ae38b17c4efaf3a1091",
+    "read_scope": "complete local prepare/configure/guard/SW boundary; full processor behavior remains B6",
+    "primary_unit_disposition_authority": false,
+    "bom_crlf_normalized_matches_pin": true
+  },
+  {
+    "path": "src/Core/src/Protocols/SmartCard/Apdu/PcscProtocol.Scp.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "e4c32cbe7c3883a6f942ed40e27d6d4faccb5f2add662e054030f70978a5d614",
+    "pinned_git_bytes_sha256": "e4c32cbe7c3883a6f942ed40e27d6d4faccb5f2add662e054030f70978a5d614",
+    "read_scope": "complete handshake call and wrapper transfer; internals remain B6",
+    "primary_unit_disposition_authority": false,
+    "bom_crlf_normalized_matches_pin": true
+  },
+  {
+    "path": "src/Core/src/Devices/Feature.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "8c4ef85c661ae25f742d685ead4e0b74555e2f52492ceaa20f818950aa612ad7",
+    "pinned_git_bytes_sha256": "8c4ef85c661ae25f742d685ead4e0b74555e2f52492ceaa20f818950aa612ad7",
+    "read_scope": "complete firmware compatibility policy",
+    "primary_unit_disposition_authority": false,
+    "bom_crlf_normalized_matches_pin": true
+  },
+  {
+    "path": "src/Core/src/Devices/FirmwareVersion.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "94bc32ab2191c735ce27dae51738b300ad1f7b91bb657eb8b4cd01827699f9be",
+    "pinned_git_bytes_sha256": "94bc32ab2191c735ce27dae51738b300ad1f7b91bb657eb8b4cd01827699f9be",
+    "read_scope": "1–120 development/default and comparison contract; A/B5 completed policy evidence reused",
+    "primary_unit_disposition_authority": false,
+    "bom_crlf_normalized_matches_pin": true
+  },
+  {
+    "path": "src/Core/src/Cryptography/AlgorithmInfo.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "829a5a818364199c93baab4071fd3d3ad6765cbf8f4ea51d0f9cde54eace6d9f",
+    "pinned_git_bytes_sha256": "829a5a818364199c93baab4071fd3d3ad6765cbf8f4ea51d0f9cde54eace6d9f",
+    "read_scope": "complete applicability/identifier metadata contract",
+    "primary_unit_disposition_authority": false,
+    "bom_crlf_normalized_matches_pin": true
+  },
+  {
+    "path": "src/Core/src/Cryptography/Cose/CoseKeyInfo.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "c84aa56f757fda2e5f7597962cf6df740f36cff2275dc9585373b2e0c9f3c22d",
+    "pinned_git_bytes_sha256": "c84aa56f757fda2e5f7597962cf6df740f36cff2275dc9585373b2e0c9f3c22d",
+    "read_scope": "complete kty/crv metadata contract",
+    "primary_unit_disposition_authority": false,
+    "bom_crlf_normalized_matches_pin": true
+  },
+  {
+    "path": "src/Core/src/Cryptography/CryptographyProviders.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "25d08bea3f633da73e2d8502fbefe5a054709e5a5efae83bc1f7f6433c88a4d2",
+    "pinned_git_bytes_sha256": "25d08bea3f633da73e2d8502fbefe5a054709e5a5efae83bc1f7f6433c88a4d2",
+    "read_scope": "complete provider declaration/reach contract, current CTAP BCL bypass traced",
+    "primary_unit_disposition_authority": false,
+    "bom_crlf_normalized_matches_pin": true
+  },
+  {
+    "path": "src/Core/src/Cryptography/ArkgPrimitives.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "acbc1cb55ca788936b0dd821fbcfcff0236c24df95359a86f2aedf2559526013",
+    "pinned_git_bytes_sha256": "acbc1cb55ca788936b0dd821fbcfcff0236c24df95359a86f2aedf2559526013",
+    "read_scope": "complete factory reference boundary",
+    "primary_unit_disposition_authority": false,
+    "bom_crlf_normalized_matches_pin": true
+  },
+  {
+    "path": "src/Core/src/Cryptography/ArkgPrimitivesOpenSsl.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "41806d866579406ab208d89401e7a8d800a164fe1366b1d3e2b9701f5d61a633",
+    "pinned_git_bytes_sha256": "41806d866579406ab208d89401e7a8d800a164fe1366b1d3e2b9701f5d61a633",
+    "read_scope": "1–400 inspected native point/Z/delegated derivation scopes; C retains full mathematical/native helper audit",
+    "primary_unit_disposition_authority": false,
+    "bom_crlf_normalized_matches_pin": true
+  },
+  {
+    "path": "src/WebAuthn/src/Client/Authentication/AuthenticationResponse.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "4bc9c446bd42044d462240499856fd5e5bc3425c21a89f57c15dc46adbf6e5ad",
+    "pinned_git_bytes_sha256": "4bc9c446bd42044d462240499856fd5e5bc3425c21a89f57c15dc46adbf6e5ad",
+    "read_scope": "complete User/CredentialId result contract; native actor and recovery remain BOUNDARY-WebAuthn",
+    "primary_unit_disposition_authority": false,
+    "bom_crlf_normalized_matches_pin": true
+  },
+  {
+    "path": "src/WebAuthn/src/Attestation/WebAuthnAttestationObject.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "caf73438332e52d2baaa92a25344d0ffe10e157b3359c4b856650e0a4a60699d",
+    "pinned_git_bytes_sha256": "caf73438332e52d2baaa92a25344d0ffe10e157b3359c4b856650e0a4a60699d",
+    "read_scope": "complete borrowed CBOR/parsed copy decoder and encoder context",
+    "primary_unit_disposition_authority": false,
+    "bom_crlf_normalized_matches_pin": true
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/Outputs/PrfOutput.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "661ae947267d952dd40604d34d332af7ea4c7dd587e7ac564a90fe11ae2f11cd",
+    "pinned_git_bytes_sha256": "661ae947267d952dd40604d34d332af7ea4c7dd587e7ac564a90fe11ae2f11cd",
+    "read_scope": "complete result ownership contract",
+    "primary_unit_disposition_authority": false,
+    "bom_crlf_normalized_matches_pin": true
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/Codec/PrfCodec.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "19c79865f60ff7e49f057bc94c5a2e92f1a884ce1f15f37e6666aa779c8fa872",
+    "pinned_git_bytes_sha256": "19c79865f60ff7e49f057bc94c5a2e92f1a884ce1f15f37e6666aa779c8fa872",
+    "read_scope": "complete aggregate/range/result-copy cleanup context",
+    "primary_unit_disposition_authority": false,
+    "bom_crlf_normalized_matches_pin": true
+  },
+  {
+    "path": "src/WebAuthn/src/Cose/Aaguid.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "1b2b42e6ebb8c0f7f8043540b14fc614851d4c548d92012e011c8328456c0a72",
+    "pinned_git_bytes_sha256": "1b2b42e6ebb8c0f7f8043540b14fc614851d4c548d92012e011c8328456c0a72",
+    "read_scope": "complete default/equality/converter dependency",
+    "primary_unit_disposition_authority": false,
+    "bom_crlf_normalized_matches_pin": true
+  },
+  {
+    "path": "src/WebAuthn/src/Extensions/PreviewSign/PreviewSignSigningParams.cs",
+    "source_baseline": "fe342fb0b6fdc4087ed4cbe4ee292e5039f5a7ef",
+    "source_sha256": "89b3d3a6f49cc7fd5d13b8d5eb681a97f5d95bdf8d360d10068334a55ed63d1e",
+    "pinned_git_bytes_sha256": "89b3d3a6f49cc7fd5d13b8d5eb681a97f5d95bdf8d360d10068334a55ed63d1e",
+    "read_scope": "complete empty-handle and borrowed input policy; broader caller remains WA owner",
+    "primary_unit_disposition_authority": false,
+    "bom_crlf_normalized_matches_pin": true
+  }
+]

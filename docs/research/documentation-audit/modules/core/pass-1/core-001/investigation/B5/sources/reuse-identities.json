@@ -1,0 +1,36 @@
+[
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/investigation/B1/sources/Task-v10.0.0.cs",
+    "raw_sha256": "5b0d6892267269233dcf5c6191f357b0ba6c4257d1e757ca4d2fe93272b29d9b",
+    "role": "existing immutable/reference source; read-only reuse, no duplicate capture"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sources/python/manifest.json",
+    "raw_sha256": "c0359b1a331c66b5e0aa594b0e11fa1342a92fc362e3b3600e069c5a6c0f76b3",
+    "role": "existing immutable/reference source; read-only reuse, no duplicate capture"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sources/python/context.md",
+    "raw_sha256": "68694ce44329e1d16d56f048cfe4f1c1ad6c7d12152f92f703e1c8b3671d9ba7",
+    "role": "existing immutable/reference source; read-only reuse, no duplicate capture"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/inherited-findings/registry.json",
+    "raw_sha256": "da49c371613b2ddc2c9ec59e1aa87b0e68b5b4611f2b795d935aaaf23922a481",
+    "role": "existing immutable/reference source; read-only reuse, no duplicate capture"
+  },
+  {
+    "path": "docs/research/documentation-audit/modules/core/pass-1/core-001/sources/ownership.md",
+    "raw_sha256": "ec4c3734f4ea90a14e1a38e49561fc3c16bb3841c8b17557d2ca0bdd894fd73c",
+    "role": "existing immutable/reference source; read-only reuse, no duplicate capture"
+  },
+  {
+    "repository": "/home/rupicola/Code/y/yubikey-manager",
+    "pin": "4ca60f706af930459138d8dc0f0f953480e1c7a4",
+    "path": "yubikit/core/otp.py",
+    "read_scope": "COMPLETE-FILE via git show; no package import",
+    "raw_sha256": "da093d3fd225df32de247c3f88aed0467115458de9073c2d18abdcd17f2379a2",
+    "git_blob": "ab3af40eb3325991b14f1ea909239efcb932c487",
+    "immutable_url": "https://raw.githubusercontent.com/Yubico/yubikey-manager/4ca60f706af930459138d8dc0f0f953480e1c7a4/yubikit/core/otp.py"
+  }
+]

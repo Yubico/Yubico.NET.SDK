@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Secure Channel Protocol (SCP03 and SCP11) Specifics &mdash; YubiKey Technical Manual  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/dist.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+        <script src="_static/gtm.js"></script>
+        <script src="https://kit.fontawesome.com/ea7c27f2b7.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="copyright" title="Copyright" href="copyright.html" />
+    <link rel="next" title="YubiHSM Auth Specifics" href="yk5-apps-yubihsm-auth.html" />
+    <link rel="prev" title="OTP Specifics" href="yk5-apps-otp.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            YubiKey Technical Manual
+              <img src="https://resources.yubico.com/XEG5TAAH/at/8kq7984j7ffgq82qvfgqvbnh/logo.svg?auto=webp&format=svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="yk5-intro.html">Introduction to the YubiKey Series</a></li>
+<li class="toctree-l1"><a class="reference internal" href="yk5-physical-attributes.html">Physical Attributes</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="yk5-apps-index.html">Protocols and Applications</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="yk5-apps-fido.html">FIDO Specifics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="yk5-apps-piv.html">Smart Card - PIV Compatible Specifics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="yk5-apps-oath.html">OATH Specifics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="yk5-apps-openpgp.html">OpenPGP Specifics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="yk5-apps-otp.html">OTP Specifics</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Secure Channel Protocol (SCP03 and SCP11) Specifics</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#yubico-secure-channel-technical-description">Yubico Secure Channel Technical Description</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#yubikey-secure-channel-support">YubiKey Secure Channel Support</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#transport-keys-and-session-keys">Transport Keys and Session Keys</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#transport-keys">Transport Keys</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#session-keys">Session Keys</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#establishing-a-secure-channel">Establishing a Secure Channel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#communicating-over-secure-channel">Communicating Over Secure Channel</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#yubico-secure-channel-key-diversification-and-programming">Yubico Secure Channel Key Diversification and Programming</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#introduction">Introduction</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#secure-channel-and-security-domains">Secure Channel and Security Domains</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#key-diversification-option">Key Diversification Option</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#global-platform-cplc-data">Global Platform: CPLC Data</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#yubico-scp03-developer-guidance">Yubico SCP03 Developer Guidance</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id1">Introduction</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#key-sets">Key Sets</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sessions">Sessions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cplc">CPLC</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#software">Software</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#globalplatformpro">GlobalPlatformPro</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gpshell">gpshell</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#references">References</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="yk5-apps-yubihsm-auth.html">YubiHSM Auth Specifics</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="yk5-firmware-index.html">YubiKey Firmware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="yk5-fips-index.html">YubiKey 5 FIPS Series Specifics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="yk5-bio-specifics.html">YubiKey Bio Series Specifics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="yk5-nfc-id-tech-desc.html">NFC ID Calculation Technical Description</a></li>
+<li class="toctree-l1"><a class="reference internal" href="yk5-tools.html">Tools and Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="yk5-cspn-specifics.html">YubiKey 5 CSPN Series Specifics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="acronyms.html">Acronyms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="copyright.html">Copyright</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">YubiKey Technical Manual</a>
+      </nav>
+
+      <div class="wy-nav-content">
+
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="yk5-apps-index.html">Protocols and Applications</a></li>
+      <li class="breadcrumb-item active">Secure Channel Protocol (SCP03 and SCP11) Specifics</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/yk5-apps-scp.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="secure-channel-protocol-scp03-and-scp11-specifics">
+<span id="apps-scp-label"></span><h1>Secure Channel Protocol (SCP03 and SCP11) Specifics<a class="headerlink" href="#secure-channel-protocol-scp03-and-scp11-specifics" title="Permalink to this heading"></a></h1>
+<p>Secure Channel Protocol support was added to YubiKeys as of firmware version 5.3.0. Later versions of YubiKey firmware, as listed in this document, include and add to features and/or functional support.</p>
+<p>Yubico has implemented a subset of the (<a class="reference external" href="https://globalplatform.org/wp-content/uploads/2014/07/GPC_2.3_D_SCP03_v1.1.2_PublicRelease.pdf" target="_blank">GlobalPlatform Secure Channel Protocol 03</a>) specification,  specifically, the most secure implementation including command and response message authentication code (MAC) and encryption. This is available in YubKey firmware 5.3.0 and later.</p>
+<p>Yubico has implemented a subset of the (<a class="reference external" href="https://globalplatform.org/wp-content/uploads/2017/09/GPC_2_3_F_SCP11_v1.2_PublicRelease.pdf" target="_blank">GlobalPlatform Secure Channel Protocol 11</a>) specification,  specifically, the most secure implementation including command and response message authentication code (MAC) and encryption. This is available in YubKey firmware 5.7.2 and later.</p>
+<div class="section" id="yubico-secure-channel-technical-description">
+<span id="yk5-secure-channel-tech-desc-label"></span><h2>Yubico Secure Channel Technical Description<a class="headerlink" href="#yubico-secure-channel-technical-description" title="Permalink to this heading"></a></h2>
+<p>At the highest level, implementing a secure channel consists of providing overhearing and tampering resistance to information sent between an external service, like a Credential Management Solution (CMS) and a smart card. Overhearing resistance is provided by using a unique, private symmetric AES key to apply AES encryption on all commands sent and received. Tamper resistance is provided by using an AES key, unique to each session, to send a securely encrypted MAC of both the commands and associated responses. Since these protections are applied to the data at the endpoints of the communication channel, a standard CCID interface can be used without modification, supporting native flows in Windows, Linux, and other systems.</p>
+<p>On the YubiKey, all of the secure channel operations occur within the secure cryptographic processor. The plain text of the communication is never exposed to outside observers.</p>
+<div class="figure align-default">
+<img alt="_images/flow-when-initializing-a-secure-channel-on-a-yubikey.png" src="_images/flow-when-initializing-a-secure-channel-on-a-yubikey.png" />
+</div>
+<p><em>Flow when Initializing a Secure Channel on a YubiKey</em></p>
+<div class="section" id="yubikey-secure-channel-support">
+<h3>YubiKey Secure Channel Support<a class="headerlink" href="#yubikey-secure-channel-support" title="Permalink to this heading"></a></h3>
+<p>The YubiKey Secure Channel implementation is separate from the rest of the functionality on the YubiKey. It is only active when a secure channel is established. It sits between the input of APDU commands sent into the secure element and the applications on the YubiKey. As such, any command that can be sent as an APDU over CCID can use secure channel, regardless if it is for PIV, OTP or other supported functions. The only exceptions are the FIDO protocols (U2F/WebAuthn), because they do not support communication over the CCID channel.</p>
+<p>The SCP11 addition is compatible with existing SCP03 setups, however the long lived encryption keys
+are symmetric when using SCP03 (AES-128) and asymmetric when using SCP11 (ECC P-256).</p>
+</div>
+<div class="section" id="transport-keys-and-session-keys">
+<h3>Transport Keys and Session Keys<a class="headerlink" href="#transport-keys-and-session-keys" title="Permalink to this heading"></a></h3>
+<table border="1" class="longtable docutils align-default" id="id5">
+<caption><span class="caption-text"><strong>Transport and Session Keys</strong></span><a class="headerlink" href="#id5" title="Permalink to this table"></a></caption>
+<colgroup>
+<col width="36%" />
+<col width="40%" />
+<col width="24%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Key</th>
+<th class="head">Usage</th>
+<th class="head">Creation</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><div class="first last line-block">
+<div class="line">Static Secure Channel</div>
+<div class="line">Encryption Key</div>
+<div class="line">(Key-ENC)</div>
+<div class="line"><br /></div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line">Generate session key</div>
+<div class="line">for Decryption/</div>
+<div class="line">Encryption</div>
+<div class="line">(AES-128)</div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line">Imported from</div>
+<div class="line">Trusted source</div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+</div>
+</td>
+</tr>
+<tr class="row-odd"><td><div class="first last line-block">
+<div class="line">Static Secure Channel</div>
+<div class="line">Message Authentication</div>
+<div class="line">Code Key (Key-MAC)</div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line">Generate session key for</div>
+<div class="line">Secure Channel</div>
+<div class="line">authentication and Secure</div>
+<div class="line">Channel MAC Verification</div>
+<div class="line">and Generation (AES-128)</div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line">Imported from</div>
+<div class="line">Trusted source</div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+</div>
+</td>
+</tr>
+<tr class="row-even"><td><div class="first last line-block">
+<div class="line">Data Encryption Key</div>
+<div class="line">(Key-DEK)</div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line">Sensitive Data Decryption</div>
+<div class="line">(AES-128) used to</div>
+<div class="line">encrypt other Transport</div>
+<div class="line">key sets on import</div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line">Imported from</div>
+<div class="line">Trusted source</div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+</div>
+</td>
+</tr>
+<tr class="row-odd"><td><div class="first last line-block">
+<div class="line">Session Secure Channel</div>
+<div class="line">Encryption Key (S-ENC)</div>
+<div class="line"><br /></div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line">Used for data</div>
+<div class="line">confidentiality</div>
+<div class="line"><br /></div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line">Dynamically</div>
+<div class="line">Created Per</div>
+<div class="line">Session</div>
+</div>
+</td>
+</tr>
+<tr class="row-even"><td><div class="first last line-block">
+<div class="line">Secure Channel Message</div>
+<div class="line">Authentication Code</div>
+<div class="line">Key for Command (S-MAC)</div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line">Used for data and</div>
+<div class="line">protocol integrity</div>
+<div class="line"><br /></div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line">Dynamically</div>
+<div class="line">Created Per</div>
+<div class="line">Session</div>
+</div>
+</td>
+</tr>
+<tr class="row-odd"><td><div class="first last line-block">
+<div class="line">Secure Channel Message</div>
+<div class="line">Authentication Code</div>
+<div class="line">Key for Response</div>
+<div class="line">(S-RMAC)</div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line">User for data and</div>
+<div class="line">protocol integrity</div>
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+</div>
+</td>
+<td><div class="first last line-block">
+<div class="line">Dynamically</div>
+<div class="line">Created Per</div>
+<div class="line">Session</div>
+<div class="line"><br /></div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+<p>The Yubico Secure Channel uses two types of AES-128 or ECC P-256 keys as defined in the SCP03 or SCP11 specifications, respectively; these are organized in the static, externally sourced and imported transport keys, and the dynamic, internally generated session keys. The YubiKey can hold up to 3 transport key sets, and generates unique session keys for each session.</p>
+</div>
+<div class="section" id="transport-keys">
+<h3>Transport Keys<a class="headerlink" href="#transport-keys" title="Permalink to this heading"></a></h3>
+<p>A Transport Key set is made of 3 AES-128 or ECC P-256 keys:</p>
+<blockquote>
+<div><ul class="simple">
+<li>Secure Channel Encryption Key <strong>(KEY-ENC)</strong></li>
+<li>Secure Channel Message Authentication Code Key <strong>(Key-MAC)</strong></li>
+<li>Data Encryption Key <strong>(Key-DEK)</strong></li>
+</ul>
+</div></blockquote>
+<p>Transport key sets are used for establishing the secure channels and are protected in the SCP03 security domain in the secure element. A transport key set contains three long-lived keys, imported from an external source. When a session is established, the session keys are derived from the long-lived transport key set.</p>
+<p>The YubiKey security domain can store three concurrent long-lived transport key sets. To import new transport key sets, establish a secure channel with the security domain. Do this with either a previously loaded transport key set or the default transport key set.</p>
+<p>When initializing a session, the Secure Channel Encryption Key is used to generate the Session Secure Channel Encryption Key for use during that session.
+Similarly, the Secure Channel MAC Key is used to generate the Session Secure Channel MAC key for the Command and Session Secure Channel MAC Key for Response.
+The Data Encryption Key is only used when importing new transport key sets; the imported keys must be encrypted with a known Data Encryption key.</p>
+<p>The Transport keys are imported from a CMS or HSM over an established secure channel. YubiKeys are shipped with either default values for the transport keys, or values derived from a Batch Master Key set at programming. Transport keys can and should be rotated on a regular basis depending on the threat model for the organization. Once overwritten on a YubiKey, Transport keys cannot be restored, so they should be archived, on the CMS if necessary.</p>
+</div>
+<div class="section" id="session-keys">
+<h3>Session Keys<a class="headerlink" href="#session-keys" title="Permalink to this heading"></a></h3>
+<p>The Session Key set is made of 3 AES-128 or ECC P-256 keys:</p>
+<blockquote>
+<div><ul class="simple">
+<li>Session Secure Channel Encryption Key <strong>(S-ENC)</strong></li>
+<li>Secure Channel Message Authentication Code Key for Command <strong>(S-MAC)</strong></li>
+<li>Secure Channel Message Authentication Code Key for Response <strong>(S-RMAC)</strong></li>
+</ul>
+</div></blockquote>
+<p>Session keys are all dynamically generated at the start of each session, using the Secure Channel Encryption and MAC Transport Keys, as well as the challenge sent from the client at the session start. For more details, refer to the <a class="reference external" href="https://globalplatform.org/wp-content/uploads/2014/07/GPC_2.3_D_SCP03_v1.1.2_PublicRelease.pdf" target="_blank">GlobalPlaftorm Secure Channel Protocol (SCP) 03</a> specification, section 4.1.5.</p>
+<p>Every command sent over a secure channel between a client or CMS and a YubiKey is encrypted with the Session Secure Channel Encryption Key. Further, each command from the client has a MAC generated from the contents of the encrypted command APDU and the Session MAC key for Command. This MAC value is used to verify the authenticity of the command sent. Each command MAC value is based off the previous command MAC, enabling a chain that can be verified to ensure the data was not tampered with in transit, nor is a command being replayed.</p>
+<p>The Response MAC is generated using the encrypted response APDU from the YubiKey and the Session MAC key for Response. Each Response MAC also includes a value derived from the original command MAC sent from the client, providing a verification that the data included in the response corresponds to the last command sent.</p>
+</div>
+<div class="section" id="establishing-a-secure-channel">
+<h3>Establishing a Secure Channel<a class="headerlink" href="#establishing-a-secure-channel" title="Permalink to this heading"></a></h3>
+<p>A client connecting to any CCID function on the YubiKey can establish a secure channel at the start of a session. Once a session is started with a secure channel, all communication to and from the YubiKey over that session must be encrypted. Sending a command in plain text will not be accepted and immediately ends the session and removes any previously granted authorizations.</p>
+<p>The AID to access the Secure Channel functionality on the YubiKey is A000000308. The EXTERNAL_AUTHENTICATE command with security level C-DECRYPTION, R-ENCRYPTION, CMAC and R-MAC is the only supported option.</p>
+<p>To begin, the client identifies the function they wish to communicate with and sends the <strong>Initialize Update</strong> command.</p>
+<div class="figure align-default">
+<img alt="_images/yubikey-secure-channel-initialize-update-flow.png" src="_images/yubikey-secure-channel-initialize-update-flow.png" />
+</div>
+<p><em>YubiKey Secure Channel Initialize Update Flow</em></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Step 1:</th><td class="field-body"><p class="first">When a client starts the process of establishing a secure channel with the YubiKey, it selects the Transport key set on the YubiKey to be used, and generates a unique challenge. This challenge is used by the client to derive the session keys that are used going forward.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">Initialize</span> <span class="pre">Update</span></code> command, including the challenge and Transport Key set identifier, is sent from the client to the YubiKey CCID function; specifically, the YubiKey CCID function for which the secure channel is being established.</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Step 2:</th><td class="field-body"><p class="first">When the YubiKey receives an <code class="docutils literal notranslate"><span class="pre">Initialize</span> <span class="pre">Update</span></code> command as a client is starting a session with any CCID facing function, the YubiKey directs communication between the client and the YubiKey to the Secure Channel function for the remainder of the session.</p>
+<p>The Secure Channel Function uses the Transport Key Identifier to select the Transport Key set in memory to use.</p>
+<p>The YubiKey derives the Session keys for Encryption and MAC by generating a card challenge, then using that plus the challenge provided from the client and the selected Transport Key set.</p>
+<p>The YubiKey then generates a command MAC from the previously internally generated card challenge using the Session Command MAC key (S-MAC). The card challenge from the YubiKey and associated MAC are sent back to the client.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Step 3:</th><td class="field-body"><p class="first last">When the client receives the response from the YubiKey, it derives the session keys using the transport key set, the original challenge, and the card challenge from the YubiKey. The client then verifies the MAC using the session keys it had generated. Upon a successful verification, the client can be confident that the YubiKey has generated matching session keys. However, at this point, the YubiKey does not know if the client has the correct key set.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>To authorize the YubiKey to accept commands from the client, run the <strong>External Authenticate</strong> command. Security level C-DECRYPTION, R-ENCRYPTION, CMAC and R-MAC is the only supported option.</p>
+<div class="figure align-default">
+<img alt="_images/yubikey-secure-channel-external-authenticate-flow.png" src="_images/yubikey-secure-channel-external-authenticate-flow.png" />
+</div>
+<p><em>YubiKey Secure Channel External Authenticate flow</em></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Step 1:</th><td class="field-body">The External Authenticate flow starts with the client receiving the card challenge from the YubiKey created during the <code class="docutils literal notranslate"><span class="pre">Initialize</span> <span class="pre">Update</span></code> command. From that point, the client defines the session security settings - the YubiKey only supports the strictest option, with both commands and responses encrypted and associated MACs generated. As with the Initialize Update flow, the client creates a challenge and encrypts it with the session encryption key. However, a MAC value from the previous challenge is also created and appended to the challenge, creating a chain of commands to be tracked. The Challenge and MAC chain value are then used to create a command MAC using the S-MAC key, and both are sent to the YubiKey.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Step 2:</th><td class="field-body">The YubiKey receives the <code class="docutils literal notranslate"><span class="pre">External</span> <span class="pre">Authenticate</span></code> command, and verifies the Challenge using the MAC value and S-MAC key. The MAC Chain is then verified, confirms that the client has the same session keys and that a secure channel has been created. Then the challenge is decrypted using the S-ENC key and a response is created. In addition, the challenge from the client is used to create a new MAC chain value, which is appended to the response.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Step 3:</th><td class="field-body">The response and MAC Chain value are used to generate a response MAC using the S-RMAC key. Then the response and associated MAC are sent from the YubiKey back to the client. Then the response MAC is verified using the S-RMAC key, the MAC Chain value is verified against the command sent previously, and the response is decrypted.</td>
+</tr>
+</tbody>
+</table>
+<p>At this point, a secure channel has been established between the client and the YubiKey.</p>
+</div>
+<div class="section" id="communicating-over-secure-channel">
+<h3>Communicating Over Secure Channel<a class="headerlink" href="#communicating-over-secure-channel" title="Permalink to this heading"></a></h3>
+<div class="figure align-default">
+<img alt="_images/communicating-over-secure-channel.png" src="_images/communicating-over-secure-channel.png" />
+</div>
+<p><em>Communicating Over Secure Channel Flow</em></p>
+<p>When Command APDU is sent over an established secure channel, the Yubico Secure Channel follows an encrypt then MAC approach.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Step 1:</th><td class="field-body"><p class="first">The command APDU is first encrypted using the Session Encryption Key (S-ENC). Sending an unencrypted command ends the current session and removes any authorizations.</p>
+<div class="admonition important">
+<p class="first admonition-title">Important</p>
+<p class="last">Any APDU delivering instructions or data, such as a key or certificate, to a YubiKey is considered a Command APDU.</p>
+</div>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Step 2:</th><td class="field-body"><p class="first">A command MAC is created using the Session MAC key (S-MAC), the encrypted APDU, with a MAC chain value created from the previous Command MAC. This is sent to the YubiKey.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Step 3:</th><td class="field-body"><p class="first">The YubiKey verifies the command MAC, then verifies the MAC Chain links to the previous command sent.</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Step 4:</th><td class="field-body"><p class="first">With the MAC values verified, the command is decrypted and passed to the YubiKey functionality. A response from the function called in the communication is returned.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Step 5:</th><td class="field-body"><p class="first">The response is encrypted with the S-ENC key, then a MAC chain value is derived from the command appended to it. The response and chain MAC value are used with the Session Response MAC key to generate a response MAC. The Response and Response MAC are sent back to the client.</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Step 6:</th><td class="field-body"><p class="first last">The client performs the same operations, verifying the response MAC, verifying the MAC chain, then decrypting the response. The Response APDU are passed to the client.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="yubico-secure-channel-key-diversification-and-programming">
+<span id="yk5-secure-channel-diverse-key-programming-label"></span><h2>Yubico Secure Channel Key Diversification and Programming<a class="headerlink" href="#yubico-secure-channel-key-diversification-and-programming" title="Permalink to this heading"></a></h2>
+<div class="section" id="introduction">
+<h3>Introduction<a class="headerlink" href="#introduction" title="Permalink to this heading"></a></h3>
+<p>The term <em>key diversification</em> refers to the process of deriving a secure channel static transport key set from a Batch Master Key (BMK), the YubiKey identifier (part of serial number), and additional metadata.</p>
+<div class="section" id="benefits-and-usage">
+<h4>Benefits and Usage<a class="headerlink" href="#benefits-and-usage" title="Permalink to this heading"></a></h4>
+<p>Key diversification enables simplified and secured distribution of secure channel transport key sets because only the Batch Master Key must be shared with the CMS system to derive the YubiKey transport key sets.</p>
+<p>Hence, the secure channel transport key sets can be pre-programmed by Yubico, assuming that Yubico has access to the BMK of the CMS vendor.</p>
+<p>Another option is for the CMS system to generate the secure channel transport key sets based on the YubiKey serial number, the BMK, and additional metadata. The CMS can then use the initial secure channel transport key set for writing additional secure channel transport key sets to the YubiKeys.</p>
+<div class="figure align-default">
+<img alt="_images/SCP03-key-diversification.png" src="_images/SCP03-key-diversification.png" />
+</div>
+<p><em>SCP03 Key Diversification</em></p>
+</div>
+</div>
+<div class="section" id="secure-channel-and-security-domains">
+<h3>Secure Channel and Security Domains<a class="headerlink" href="#secure-channel-and-security-domains" title="Permalink to this heading"></a></h3>
+<p>The authenticated and encrypted communication channel takes place over the CCID interface between a host and the secure element on the YubiKey. This includes configuration of, or communication from, CCID applications. The secure channel feature can therefore be used to load application keys onto the YubiKey to be used with the CCID applications OATH, OpenPGP, or PIV.</p>
+<div class="figure align-default">
+<img alt="_images/writing-CCID-application-keys-over-SCP03.png" src="_images/writing-CCID-application-keys-over-SCP03.png" />
+</div>
+<p><em>Writing CCID Application Keys over SCP03</em></p>
+<p>The YubiKey security domain can store three concurrent transport key sets. A transport key set contains three long-lived AES keys. When a session is established, the session AES keys are derived from the long-lived transport key set.</p>
+<p>The YubiKey supports up to three secure channel transport key sets. This is to enable more granular control over the establishment of a secure channel to a specific device. The keys in each of these key sets can be overwritten when connected to the YubiKey. This allows for YubiKeys to be shipped with a default key set, then have the key set be changed to a random set of keys at initialization. This in turn, ensures that only the CMS server has the actual keys.</p>
+</div>
+<div class="section" id="key-diversification-option">
+<h3>Key Diversification Option<a class="headerlink" href="#key-diversification-option" title="Permalink to this heading"></a></h3>
+<p>Key diversification is the process of deriving a secure channel static transport key set from a Batch Master Key (BMK), the YubiKey identifier (part of the device serial number), and additional metadata. Key diversification therefore facilitates secure distribution of key sets over a secure channel. To derive the YubiKey transport key sets, the Batch Master Key (BMK) is shared with the CMS system. If the CMS vendor gives Yubico access to its BMK, Yubico can preprogram the secure channel transport key sets for the YubiKey 5 batches. The BMK could be protected by the YubiHSM2.</p>
+<p>When purchasing YubiKeys from Yubico, there is an option to custom-configure the transport keys from the default values to values derived from details specific to the hardware and a BMK. This means these keys can be distributed with locked down key sets, and that ensures they cannot be connected to remotely by third parties. The BMK is generated and owned by the customer, who in turn can provide it to Yubico and their CMS deployment. The CMS can then use the BMK to establish a secure channel to a customer’s YubiKeys, and set new transport keys during initialization. This limits access to just that CMS. As with other custom configuration options, these keys can be overwritten or deleted by the customer; the keys are not “baked into” the YubiKey firmware.</p>
+<p>In order to import new transport key sets, establish a secure channel with the security domain. Do this with a previously loaded transport key set or the default transport key set. Each secure channel transport key set is protected by being written to the YubiKey security domain in the secure element and stored in a server, typically a CMS system. The host that is accessing the YubiKey has an agent that connects to the CMS system to retrieve the secure channel key set. Based on the secure channel key set, both on the host and the YubiKey, a secure session is established.</p>
+<div class="figure align-default">
+<img alt="_images/establish-SCP03-secure-channel.png" src="_images/establish-SCP03-secure-channel.png" />
+</div>
+<p><em>Establish SCP03 Secure Channel</em></p>
+<div class="section" id="batch-master-key-bmk-generation">
+<h4>Batch Master Key (BMK) Generation<a class="headerlink" href="#batch-master-key-bmk-generation" title="Permalink to this heading"></a></h4>
+<p>Each custom order with diversified keys has a unique BMK. This is used when Yubico programs the keys. A BMK is a 32-bit AES key that Yubico recommends the customer generate in a secure manner approved by their own internal security department. The YubiHSM 2 can be used to generate a random AES key with the <code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">PSEUDO</span> <span class="pre">RANDOM</span></code> command, for example: <code class="docutils literal notranslate"><span class="pre">get</span> <span class="pre">random</span> <span class="pre">0</span> <span class="pre">32</span></code>.</p>
+<p>For more information, see the <em>YubiHSM 2 User Guide, Command Reference</em> for the <a class="reference external" href="https://docs.yubico.com/hardware/yubihsm-2/hsm-2-user-guide/hsm2-cmd-reference.html#get-pseudo-random-command" target="_blank">GET PSEUDO RANDOM command</a>.</p>
+<p>Before every order with key diversification, the customer must generate and provide the BMK to Yubico by a secure means. After the YubiKeys are programmed using the BMK provided, the BMK on the Yubico programming station is destroyed. This ensures the customer has the only extant BMK. The customer must maintain and securely archive their BMK for use with future orders.</p>
+</div>
+<div class="section" id="key-diversification-function-kdf">
+<h4>Key Diversification Function (KDF)<a class="headerlink" href="#key-diversification-function-kdf" title="Permalink to this heading"></a></h4>
+<p>The diversification function used is the AES-CMAC-KDF Counter Mode derivation algorithm specified in <a class="reference external" href="https://csrc.nist.gov/pubs/sp/800/108/upd1/final" target="_blank">NIST SP800-108</a>.</p>
+<p>Scroll horizontally to see the diversified key in this code sample:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>AES<span class="w"> </span>CMAC<span class="w"> </span>of<span class="w"> </span><span class="o">[</span><span class="w"> </span>Counter<span class="w"> </span><span class="o">(</span><span class="m">1</span><span class="w"> </span>byte<span class="o">)</span><span class="w"> </span><span class="o">||</span><span class="w"> </span>Label<span class="w"> </span><span class="o">(</span><span class="m">4</span><span class="w"> </span>bytes<span class="o">)</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="m">00</span><span class="w"> </span><span class="o">||</span>
+<span class="w">    </span>Context<span class="w"> </span><span class="o">(</span><span class="m">10</span><span class="w"> </span>bytes<span class="o">)</span><span class="w"> </span><span class="o">||</span><span class="w"> </span>Key<span class="w"> </span>Length<span class="w"> </span><span class="k">in</span><span class="w"> </span>bits<span class="w"> </span><span class="o">(</span><span class="m">2</span><span class="w"> </span>Bytes<span class="o">)</span><span class="w"> </span><span class="o">]</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">AES256 and 3DES keys require two rounds of KDF. They are used to generate a 32-byte key value and 24-byte key value respectively. The first KDF has a counter value set to <code class="docutils literal notranslate"><span class="pre">01</span></code> and the second SDK has a counter value set to <code class="docutils literal notranslate"><span class="pre">02</span></code>.</p>
+</div>
+<p>The Key Length in the KDF input field is expressed in hexadecimal value. It is:</p>
+<blockquote>
+<div><ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">0100</span></code> for a 256-bit key</li>
+<li><code class="docutils literal notranslate"><span class="pre">00C0</span></code> for a 192-bit Key (PIV Admin Key)</li>
+<li><code class="docutils literal notranslate"><span class="pre">0080</span></code> for a 128-bit key (ISD Keys &amp; Interfaces Management Key)</li>
+<li><code class="docutils literal notranslate"><span class="pre">0040</span></code> for a 64-bit code (the PUK)</li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="labels-for-key-diversification">
+<h4>Labels for Key Diversification<a class="headerlink" href="#labels-for-key-diversification" title="Permalink to this heading"></a></h4>
+<p>The KDF function of separating keys uses the following labels as input. Note that these are example values, using: Yubikey 5 Series implementation with ISD Keys as 16-byte values, YubiKey Interfaces Management Key as a 16-byte value, the PIV Admin Key as a 24-byte value, and the PUK as an 8-byte value.</p>
+<table border="1" class="docutils align-default">
+<colgroup>
+<col width="36%" />
+<col width="36%" />
+<col width="27%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Factory Key Codes</th>
+<th class="head">Key Length in bits</th>
+<th class="head">KDF Label</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>Issuer Security Domain DAK (Authentication Key)</td>
+<td>‘0080’</td>
+<td>‘00000001’</td>
+</tr>
+<tr class="row-odd"><td>Issuer Security Domain DMK (MAC Key )</td>
+<td>‘0080’</td>
+<td>‘00000002’</td>
+</tr>
+<tr class="row-even"><td>Issuer Security Domain DEK (Encryption Key)</td>
+<td>‘0080’</td>
+<td>‘00000003’</td>
+</tr>
+<tr class="row-odd"><td>PIV Application Administrative Key</td>
+<td>‘00C0’</td>
+<td>‘00000004’</td>
+</tr>
+<tr class="row-even"><td>PIV Application PUK</td>
+<td>‘0040’</td>
+<td>‘00000007’</td>
+</tr>
+<tr class="row-odd"><td>Capabilities Lock Code (YubiKey Interfaces Management Key)</td>
+<td>‘0080’</td>
+<td>‘00000010’</td>
+</tr>
+</tbody>
+</table>
+<p>In general the Key Length should be derived from the listed values:</p>
+<table border="1" class="docutils align-default">
+<colgroup>
+<col width="50%" />
+<col width="50%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Key Size</th>
+<th class="head">Key Length in Bits</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>32 Bytes</td>
+<td>‘0100’</td>
+</tr>
+<tr class="row-odd"><td>24 Bytes</td>
+<td>‘00C0’</td>
+</tr>
+<tr class="row-even"><td>20 Bytes</td>
+<td>‘00A0’</td>
+</tr>
+<tr class="row-odd"><td>16 Bytes</td>
+<td>‘0080’</td>
+</tr>
+<tr class="row-even"><td>8 Bytes</td>
+<td>‘0040’</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="context-for-key-diversification">
+<h4>Context for Key Diversification<a class="headerlink" href="#context-for-key-diversification" title="Permalink to this heading"></a></h4>
+<p>The value of the <strong>Context</strong> field in the KDF input data is the <strong>Issuer Context</strong> and is equal to the first 10 bytes of the value returned from the Global Platform <code class="docutils literal notranslate"><span class="pre">INITIALIZE</span> <span class="pre">UPDATE</span></code> command.</p>
+</div>
+<div class="section" id="puk-generation-from-diversified-value">
+<h4>PUK Generation from Diversified Value<a class="headerlink" href="#puk-generation-from-diversified-value" title="Permalink to this heading"></a></h4>
+<p>We use the trailing 8 bytes of the diversified value and generate the PUK using the pseudocode below. Scroll horizontally to see the full line, if needed.</p>
+<div class="highlight-Bash notranslate"><div class="highlight"><pre><span></span><span class="k">for</span><span class="w"> </span><span class="o">(</span>int<span class="w"> </span><span class="nv">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">0</span><span class="p">;</span><span class="w"> </span>i<span class="w"> </span>&lt;<span class="w"> </span><span class="m">8</span><span class="p">;</span><span class="w"> </span>i++<span class="o">)</span><span class="w"> </span><span class="o">{</span><span class="w"> </span>diversifiedVal<span class="o">[</span>i<span class="o">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">(</span>byte<span class="o">)</span>
+<span class="w">    </span><span class="o">(</span>0x30<span class="w"> </span>+<span class="w"> </span><span class="o">((</span>diversifiedVal<span class="o">[</span>i<span class="o">]</span><span class="w"> </span><span class="p">&amp;</span><span class="w"> </span>0x7F<span class="o">)</span><span class="w"> </span>%<span class="w"> </span><span class="m">10</span><span class="o">))</span><span class="p">;</span><span class="o">}</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="global-platform-cplc-data">
+<span id="sec-channel-cplc-label"></span><h3>Global Platform: CPLC Data<a class="headerlink" href="#global-platform-cplc-data" title="Permalink to this heading"></a></h3>
+<p>The Card Production Life Cycle (CPLC) data object is a random dataset that is stored on each YubiKey to assure unique identification of the YubiKeys in CMS. Although it is officially deprecated from the SCP03 standard, it is still widely used to hold card data specific to CMS services or to uniquely identify smart cards. Therefore Yubico has implemented the CPLC data object to provide unique identification of YubiKeys for CMS vendors.</p>
+<div class="section" id="description">
+<h4>Description<a class="headerlink" href="#description" title="Permalink to this heading"></a></h4>
+<p>Although this format is officially deprecated and not part of the Global Platform specification, some organizations need support for the information stored in the so-called CPLC (Card Production Life Cycle).</p>
+<p>This consists of a static set of bytes that can be retrieved with a <code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">DATA</span></code> command (INS 0xca) and TAG 0x9f7f after selecting the SD application.</p>
+<p>The response is 42 bytes that can be parsed into different fields with different meanings. However, Yubico does not attribute any specific meaning to 40 of those bytes. Only the first two bytes are meaningful.</p>
+<div class="section" id="example-command">
+<h5>Example Command<a class="headerlink" href="#example-command" title="Permalink to this heading"></a></h5>
+<p>To retrieve the value use the command: Scroll horizontally, if needed.</p>
+<div class="highlight-Bash notranslate"><div class="highlight"><pre><span></span>opensc-tool<span class="w"> </span>-c<span class="w"> </span>default<span class="w"> </span>-s<span class="w"> </span><span class="s1">&#39;00a4040008a000000151000000&#39;</span><span class="w"> </span>-s<span class="w"> </span><span class="s1">&#39;00ca9f7f&#39;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="relevant-output">
+<h5>Relevant Output<a class="headerlink" href="#relevant-output" title="Permalink to this heading"></a></h5>
+<div class="highlight-Bash notranslate"><div class="highlight"><pre><span></span><span class="m">40</span><span class="w"> </span><span class="m">90</span><span class="w"> </span><span class="m">73</span><span class="w"> </span>F9<span class="w"> </span><span class="m">53</span><span class="w"> </span><span class="m">94</span><span class="w"> </span>C0<span class="w"> </span><span class="m">01</span><span class="w"> </span><span class="m">23</span><span class="w"> </span>D8<span class="w"> </span>E9<span class="w"> </span>F0<span class="w"> </span><span class="m">68</span><span class="w"> </span>3A<span class="w"> </span><span class="m">48</span><span class="w"> </span>9A<span class="w"> </span>@.s.S...#...h:H.
+<span class="m">76</span><span class="w"> </span><span class="m">30</span><span class="w"> </span>4C<span class="w"> </span>D8<span class="w"> </span>F6<span class="w"> </span>CC<span class="w"> </span><span class="m">41</span><span class="w"> </span><span class="m">66</span><span class="w"> </span><span class="m">61</span><span class="w"> </span>0F<span class="w"> </span>C4<span class="w"> </span>F5<span class="w"> </span>8C<span class="w"> </span>DE<span class="w"> </span>D6<span class="w"> </span><span class="m">93</span><span class="w"> </span>v0L...Afa.......
+<span class="m">77</span><span class="w"> </span><span class="m">32</span><span class="w"> </span><span class="m">09</span><span class="w"> </span><span class="m">82</span><span class="w"> </span>1B<span class="w"> </span>EA<span class="w"> </span>0C<span class="w"> </span><span class="m">78</span><span class="w"> </span>3D<span class="w"> </span>8B<span class="w">                   </span>w2.....x<span class="o">=</span>.
+</pre></div>
+</div>
+<p>Of those 42 bytes, only the first two (<code class="docutils literal notranslate"><span class="pre">40</span> <span class="pre">90</span></code>) are meant to signify an Infineon SLE 78 chipset, the rest are random bytes generated when the SD application is (re)initialized.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="yubico-scp03-developer-guidance">
+<span id="yk5-scp03-developer-label"></span><h2>Yubico SCP03 Developer Guidance<a class="headerlink" href="#yubico-scp03-developer-guidance" title="Permalink to this heading"></a></h2>
+<p>This section describes how Secure Channel Protocol 3 (SCP03) works in the YubiKey. It is intended for developers integrating support for it.</p>
+<div class="section" id="id1">
+<h3>Introduction<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h3>
+<p>SCP03 is a protocol from Global Platform for mutual authentication and encrypted transport using smart cards. The protocol allows for the following modes of encryption and authentication of data:</p>
+<ul class="simple">
+<li>C-MAC</li>
+<li>C-ENC</li>
+<li>R-MAC</li>
+<li>R-ENC</li>
+</ul>
+<p>The YubiKey implements this with all of them turned on. Turning anything off is not an option.</p>
+<p>Authenticating with SCP03 does not assign any specific permissions in the YubiKey. It does set up a mutually authenticated and encrypted channel between the YubiKey and the host. Unencrypted commands sent over the secure channel end the session and revokes any previously issued authorizations.</p>
+<p>For more details on SCP03, refer to the <a class="reference external" href="https://globalplatform.org/specs-library/secure-channel-protocol-03-amendment-d-v1-2/" target="_blank">Global Platform SCP03 specifications</a>.</p>
+</div>
+<div class="section" id="key-sets">
+<h3>Key Sets<a class="headerlink" href="#key-sets" title="Permalink to this heading"></a></h3>
+<p>A key set contains three long-lived keys, the encryption key (<strong>Key-ENC</strong>), the MAC key (<strong>Key-MAC</strong>), and the data encryption key (<strong>Key-DEK</strong>). When a session is established, the session encryption key is derived from the ENC key, while the session MAC keys are derived from the MAC key. Any new key sets transported over the session are encrypted with the DEK.</p>
+<p>The YubiKey only allows putting or deleting a whole key set at a time. Manipulating the individual keys within the set, is not allowed.</p>
+<p>Each key set is identified by the key version defined when the set is imported into the YubiKey. Each individual key also has an id, but that serves solely to identify the specific key within the set - ENC, MAC, or DEK. The key version number is required for addressing the correct set. 255 is the factory default version and therefore that version number is reserved. When importing a key set, the version is set to a value in the range 1-254.</p>
+<p>The YubiKey can store up to three key sets at a time. By default there is one key set installed with key version 255 and the value <code class="docutils literal notranslate"><span class="pre">404142434445464748494a4b4c4d4e4f</span></code> for all three keys. These keys are known as the test keys. When a new key set is installed, it replaces the default key set. The YubiKey supports only AES-128 for all three keys.</p>
+<p>When authentication with a key set fails repeatedly (for example, 32 times in a row) that key set is deleted. When the last key set is deleted, the security domain is automatically reset with the default key set installed. To delete the last key set on purpose and force a reset, send the delete instruction with <code class="docutils literal notranslate"><span class="pre">p2=1</span></code>.</p>
+</div>
+<div class="section" id="sessions">
+<h3>Sessions<a class="headerlink" href="#sessions" title="Permalink to this heading"></a></h3>
+<p>The session is established only within the scope of the currently selected applet. When a new applet is selected, the session is terminated. To manage SCP03 keys, a session needs to be established with the AID <code class="docutils literal notranslate"><span class="pre">a000000151000000</span></code> - the Issuer Security Domain.</p>
+<p>When a large amount of data is to be transported over the session, it is encrypted and MAC’d in its entirety. If the data exceeds the capacity of a single message, it is chunked for transport.</p>
+</div>
+<div class="section" id="cplc">
+<h3>CPLC<a class="headerlink" href="#cplc" title="Permalink to this heading"></a></h3>
+<p>The security domain contains an entry called CPLC which identifies a specific device. On a YubiKey, this entry is filled with random data on first boot. No significance is ascribed to any of the fields.</p>
+</div>
+<div class="section" id="software">
+<h3>Software<a class="headerlink" href="#software" title="Permalink to this heading"></a></h3>
+<p>Yubico has conformed to the Global Platform Open Standard, and as such, has developed the SCP03 support on the YubiKey to be compatible with open source offerings.</p>
+</div>
+<div class="section" id="globalplatformpro">
+<h3>GlobalPlatformPro<a class="headerlink" href="#globalplatformpro" title="Permalink to this heading"></a></h3>
+<p><a class="reference external" href="https://github.com/martinpaljak/GlobalPlatformPro" target="_blank">GlobalPlatformPro</a> is a Java library and tool for interacting with smart cards supporting the Global Platform secure channel protocols.</p>
+<div class="section" id="examples">
+<h4>Examples<a class="headerlink" href="#examples" title="Permalink to this heading"></a></h4>
+<p>Some of the following examples are long lines of code. Scroll horizontally, as needed.</p>
+<div class="section" id="open-a-channel-with-the-security-domain-and-print-information">
+<h5>Open a channel with the security domain and print information<a class="headerlink" href="#open-a-channel-with-the-security-domain-and-print-information" title="Permalink to this heading"></a></h5>
+<div class="highlight-Bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>java<span class="w"> </span>-jar<span class="w"> </span>tool/target/gp.jar<span class="w"> </span>--mode<span class="w"> </span>mac<span class="w"> </span>--mode<span class="w"> </span>enc
+<span class="w">    </span>--mode<span class="w"> </span>rmac<span class="w"> </span>--mode<span class="w"> </span>renc<span class="w"> </span>--debug<span class="w"> </span>--info
+</pre></div>
+</div>
+</div>
+<div class="section" id="open-a-channel-with-the-security-domain-and-install-a-new-key-set">
+<h5>Open a channel with the security domain and install a new key set<a class="headerlink" href="#open-a-channel-with-the-security-domain-and-install-a-new-key-set" title="Permalink to this heading"></a></h5>
+<div class="highlight-Bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>java<span class="w"> </span>-jar<span class="w"> </span>tool/target/gp.jar<span class="w"> </span>--mode<span class="w"> </span>mac<span class="w"> </span>--mode<span class="w"> </span>enc
+<span class="w">    </span>--mode<span class="w"> </span>rmac<span class="w"> </span>--mode<span class="w"> </span>renc<span class="w"> </span>--debug<span class="w"> </span>--lock<span class="w"> </span>000102030405060708090a0b0c0d0e0f
+</pre></div>
+</div>
+</div>
+<div class="section" id="open-a-channel-with-the-piv-applet-and-verify-the-pin-over-the-channel">
+<h5>Open a channel with the PIV applet and verify the PIN over the channel<a class="headerlink" href="#open-a-channel-with-the-piv-applet-and-verify-the-pin-over-the-channel" title="Permalink to this heading"></a></h5>
+<div class="highlight-Bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>java<span class="w"> </span>-jar<span class="w"> </span>tool/target/gp.jar<span class="w"> </span>--mode<span class="w"> </span>mac<span class="w"> </span>--mode<span class="w"> </span>enc
+<span class="w">    </span>--mode<span class="w"> </span>rmac<span class="w"> </span>--mode<span class="w"> </span>renc<span class="w"> </span>--debug<span class="w"> </span>--sdaid
+<span class="w">    </span>a000000308000010000100<span class="w"> </span>-s<span class="w"> </span>0020008008313233343536ffff
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="gpshell">
+<h3>gpshell<a class="headerlink" href="#gpshell" title="Permalink to this heading"></a></h3>
+<p><a class="reference external" href="https://sourceforge.net/p/globalplatform/wiki/GPShell/" target="_blank">Gpshell</a> is a C library and tool for interacting with the secure channel protocols.</p>
+<div class="section" id="id4">
+<h4>Examples<a class="headerlink" href="#id4" title="Permalink to this heading"></a></h4>
+<p>Gpshell works with scripts. The following code is an example of opening a channel with the YubiKey. Scroll horizontally to see the last line of code in its entirety, as needed.</p>
+<div class="highlight-Bash notranslate"><div class="highlight"><pre><span></span>enable_trace
+mode_211
+establish_context
+card_connect
+<span class="k">select</span><span class="w"> </span>-AID<span class="w"> </span>a000000151
+open_sc<span class="w"> </span>-enc_key<span class="w"> </span>404142434445464748494a4b4c4d4e4f<span class="w"> </span>-mac_key
+<span class="w">   </span>404142434445464748494a4b4c4d4e4f<span class="w"> </span>-kek_key
+<span class="w">   </span>404142434445464748494a4b4c4d4e4f<span class="w"> </span>-security<span class="w"> </span><span class="m">51</span><span class="w"> </span>-scp<span class="w"> </span><span class="m">3</span>
+<span class="w">   </span>-scpimpl<span class="w"> </span><span class="m">96</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="references">
+<h3>References<a class="headerlink" href="#references" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><a class="reference external" href="https://globalplatform.org/specs-library/card-specification/" target="_blank">Global Platform Card Specification v2.3.1 | GPC_SPE_034</a></li>
+<li><a class="reference external" href="https://globalplatform.org/specs-library/secure-channel-protocol-03-amendment-d-v1-2/" target="_blank">Global Platform Secure Channel Protocol ‘03’ - Amendment D v1.2 | GPC_SPE_014</a></li>
+<li><a class="reference external" href="https://github.com/martinpaljak/GlobalPlatformPro/" target="_blank">GitHub: GlobalPlatformPro (Martin Paljak)</a></li>
+<li><a class="reference external" href="https://sourceforge.net/projects/globalplatform/" target="_blank">SourceForge: GlobalPlatform</a></li>
+<li><a class="reference external" href="https://sourceforge.net/p/globalplatform/wiki/GPShell/" target="_blank">SourceForge: GlobalPlatform Wiki</a></li>
+</ul>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="yk5-apps-otp.html" class="btn btn-neutral float-left" title="OTP Specifics" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="yk5-apps-yubihsm-auth.html" class="btn btn-neutral float-right" title="YubiHSM Auth Specifics" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; <a href="copyright.html">Copyright</a> 2026, Yubico AB.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+<noscript>
+  <iframe
+    title="Blank"
+    aria-hidden="true"
+    src="https://sgtm.yubico.com/ns.html?id=GTM-TCVFSSSJ"
+    height="0"
+    width="0"
+    style="display: none; visibility: hidden"
+  ></iframe>
+</noscript>
+<div>
+  <a
+    href="https://www.yubico.com/support/terms-conditions/cookie-notice/"
+    target="_blank"
+    >Cookies</a
+  >
+  |
+  <a
+    href="https://www.yubico.com/support/terms-conditions/privacy-notice/"
+    target="_blank"
+    >Privacy Policy</a
+  >
+</div>
+
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

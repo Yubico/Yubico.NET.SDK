@@ -1,0 +1,1116 @@
+[
+  {
+    "path": "src/Management/CLAUDE.md",
+    "source_sha256": "551365b8af3253fbfb5490bd8c9f38b19a1cdcabc31904743c825b6ea5850326",
+    "pinned_git_blob": "2fe5acf844f95d04025dcb354959033c7b67c4e3",
+    "pinned_bytes_sha256": "551365b8af3253fbfb5490bd8c9f38b19a1cdcabc31904743c825b6ea5850326",
+    "normalized_pin_equal": true,
+    "read_scope": "complete file for assigned boundary units and enclosing helpers; no whole-module redisposition",
+    "unit_ids": [
+      "core-001:unit:9ca466f645d00472",
+      "core-001:unit:a70a909607a3ed2c",
+      "core-001:unit:cac73c7001fe3fd7",
+      "core-001:unit:3ed214b2588f79a9",
+      "core-001:unit:ecad2fadc4a9f3cc",
+      "core-001:unit:5e8d51ce33a824a2",
+      "core-001:unit:8dac79f46f83b447",
+      "core-001:unit:267b572523c4e845",
+      "core-001:unit:e7d80cde51189e19",
+      "core-001:unit:496655a7f5ecdecf",
+      "core-001:unit:ed30a41493f74921",
+      "core-001:unit:882741619baa4f76",
+      "core-001:unit:6d3e27c3e01c0008",
+      "core-001:unit:9502e2f7d8a857ee",
+      "core-001:unit:e8f6b36e112f7d70",
+      "core-001:unit:55f43e6198afe78b",
+      "core-001:unit:03ed44963a1d230d",
+      "core-001:unit:91a9dcd0c605ee7e",
+      "core-001:unit:dbfb4d9ebdf2aa99",
+      "core-001:unit:66b805f4428154be",
+      "core-001:unit:fdceefc524dd0c0c",
+      "core-001:unit:e8e391b06ff3d784",
+      "core-001:unit:30ed503b67fc96f5",
+      "core-001:unit:ad50c5d17d9b37ee",
+      "core-001:unit:7654df3aa7be8b1f",
+      "core-001:unit:7ca448402ba9c1ab",
+      "core-001:unit:fcabfb60f79d147d",
+      "core-001:unit:972d007a0966bb7e",
+      "core-001:unit:c12128dd54ddd510",
+      "core-001:unit:c018e6f459af81fa",
+      "core-001:unit:5704a1fde86a0707",
+      "core-001:unit:491a1938347b1e6c",
+      "core-001:unit:e0ccdd8348bd93ac",
+      "core-001:unit:a7ba0e863f0dd28d",
+      "core-001:unit:4f20fdb19ed6290e",
+      "core-001:unit:1ecad30e48d4af2c",
+      "core-001:unit:00024682f58fd15e",
+      "core-001:unit:c67ff5686ba88b23",
+      "core-001:unit:02d33cb8880b55ba",
+      "core-001:unit:84190eb81d090879"
+    ],
+    "status": "READ-CANDIDATE-CONTEXT",
+    "candidates": [
+      "CORE-MGMT-X002"
+    ],
+    "observation": "Guide distinguishes session/fixture/discovery snapshots, selected transports, unused prompt and borrowed SCP/codes. Complete examples retain cleanup scopes. Reopen returned firmware/timeout ownership with X002; current row/pin qualifications remain useful.",
+    "unchanged_path_action": "Retain product bytes; fresh editor/reviewer dispositions required for candidate/dependency passages."
+  },
+  {
+    "path": "src/Management/PACKAGE_README.md",
+    "source_sha256": "73bc1e69e8b940fd7e0618edf4473d3d1e294979861a9a67939198cddb2538f4",
+    "pinned_git_blob": "393c4c41a6b45c8173a3391520279e376c3eecee",
+    "pinned_bytes_sha256": "73bc1e69e8b940fd7e0618edf4473d3d1e294979861a9a67939198cddb2538f4",
+    "normalized_pin_equal": true,
+    "read_scope": "complete file for assigned boundary units and enclosing helpers; no whole-module redisposition",
+    "unit_ids": [
+      "core-001:unit:4f7606ed1a3acf74",
+      "core-001:unit:2755b3eecb810d74"
+    ],
+    "status": "READ-CLEAN",
+    "candidates": [],
+    "observation": "Package purpose, alpha qualification and transitive Core dependency match shipping project. Installation text read only.",
+    "unchanged_path_action": "Retain current text for this boundary; unrelated applet findings keep original scope."
+  },
+  {
+    "path": "src/Management/README.md",
+    "source_sha256": "0c40ec645647c3aecabaf1df6829790b2da5ce5b7b35791d25ade2f41784de16",
+    "pinned_git_blob": "b16a6dc3a24c20d519595ba37d6ab02d5e6268ee",
+    "pinned_bytes_sha256": "0c40ec645647c3aecabaf1df6829790b2da5ce5b7b35791d25ade2f41784de16",
+    "normalized_pin_equal": true,
+    "read_scope": "complete file for assigned boundary units and enclosing helpers; no whole-module redisposition",
+    "unit_ids": [
+      "core-001:unit:4424464f3bdd9f75",
+      "core-001:unit:9f7ca492278e8724",
+      "core-001:unit:fa2cecf8233a971c",
+      "core-001:unit:8d1924ccc00dbc3a",
+      "core-001:unit:35e21f4009df8265",
+      "core-001:unit:9dd38171ca81214c",
+      "core-001:unit:9ffede66bd4268c3",
+      "core-001:unit:342683ef24b65e06",
+      "core-001:unit:7feea4a99ce231f1",
+      "core-001:unit:983d80eb3a029d94",
+      "core-001:unit:62be98ba31967355",
+      "core-001:unit:d429d67c5a31ef08",
+      "core-001:unit:281efd280cff9872",
+      "core-001:unit:0bbf89a0137dea4a"
+    ],
+    "status": "READ-CANDIDATE-CONTEXT",
+    "candidates": [
+      "CORE-MGMT-X002"
+    ],
+    "observation": "Independent examples acquire one owned session at a time; reboot scope ends before fresh Find and delay/order are qualified. Reset family, per-command lock, effective firmware, validation limits and unused prompt match source. X002 adds precise returned-firmware/storage provenance.",
+    "unchanged_path_action": "Retain product bytes; fresh editor/reviewer dispositions required for candidate/dependency passages."
+  },
+  {
+    "path": "src/Management/examples/ManagementTool/Cli/Menus/CapabilitiesMenu.cs",
+    "source_sha256": "1ff2f0c77ba94600625c02360243712534b6e99071e2649ac07ef44a01d988b3",
+    "pinned_git_blob": "eaa6cd58bf5a9e71e5c3bcf7c5575f09caac20ba",
+    "pinned_bytes_sha256": "1ff2f0c77ba94600625c02360243712534b6e99071e2649ac07ef44a01d988b3",
+    "normalized_pin_equal": true,
+    "read_scope": "complete file for assigned boundary units and enclosing helpers; no whole-module redisposition",
+    "unit_ids": [
+      "core-001:unit:7403f642825ab1c7",
+      "core-001:unit:fbe275a32149d99d",
+      "core-001:unit:49dee8dcc2bf0e83",
+      "core-001:unit:e506fc42a938bfa5"
+    ],
+    "status": "READ-CLEAN",
+    "candidates": [],
+    "observation": "Owned session/live read precede complete modeled supported-mask choice, USB None guard and borrowed code under finally. Reboot is requested and no later old-session read occurs. Unknown-bit representation remains A dependency.",
+    "unchanged_path_action": "Retain current text for this boundary; unrelated applet findings keep original scope."
+  },
+  {
+    "path": "src/Management/examples/ManagementTool/Cli/Menus/DeviceFlagsMenu.cs",
+    "source_sha256": "c313695ea06726fc4163a1236d194836facb43c8399578c81dcd59f88794dfcb",
+    "pinned_git_blob": "5de5c68c80f4a9d36559b7e7eefb8455fae651eb",
+    "pinned_bytes_sha256": "c313695ea06726fc4163a1236d194836facb43c8399578c81dcd59f88794dfcb",
+    "normalized_pin_equal": true,
+    "read_scope": "complete file for assigned boundary units and enclosing helpers; no whole-module redisposition",
+    "unit_ids": [
+      "core-001:unit:79faf157193b9abe"
+    ],
+    "status": "READ-CLEAN",
+    "candidates": [],
+    "observation": "Live flags drive two modeled choices/full replacement; code finally encloses awaited write. Existing TouchEject output omits CCID-only condition; adjacent comment/README already qualify it.",
+    "unchanged_path_action": "Retain current text for this boundary; unrelated applet findings keep original scope."
+  },
+  {
+    "path": "src/Management/examples/ManagementTool/Cli/Menus/DeviceInfoMenu.cs",
+    "source_sha256": "574e075c5a56d8123a9af20a8d3897a8da7e88b608440baf8ae1f1338e9d75b6",
+    "pinned_git_blob": "7bedec8bf03c8028fd9af7d641ea8518c3f1b76e",
+    "pinned_bytes_sha256": "574e075c5a56d8123a9af20a8d3897a8da7e88b608440baf8ae1f1338e9d75b6",
+    "normalized_pin_equal": true,
+    "read_scope": "complete file for assigned boundary units and enclosing helpers; no whole-module redisposition",
+    "unit_ids": [
+      "core-001:unit:e2f2c2d5b5029223",
+      "core-001:unit:66ccf14e1af0d947"
+    ],
+    "status": "READ-CLEAN",
+    "candidates": [],
+    "observation": "Awaited status callback owns session/live read. Existing FIPS Mode/reset-availability output exceeds manufacturing/firmware evidence; nearby prose preserves limitations. A-C004/C005 retain interpretation ownership.",
+    "unchanged_path_action": "Retain current text for this boundary; unrelated applet findings keep original scope."
+  },
+  {
+    "path": "src/Management/examples/ManagementTool/Cli/Menus/LockCodeMenu.cs",
+    "source_sha256": "fbc8b21291c824cfc63daf90f638d6f1b1eadd7a9ec21c2f016a6beab1d3977d",
+    "pinned_git_blob": "40fc84a8a57dbefa52f7171cf2207e392a576e69",
+    "pinned_bytes_sha256": "fbc8b21291c824cfc63daf90f638d6f1b1eadd7a9ec21c2f016a6beab1d3977d",
+    "normalized_pin_equal": true,
+    "read_scope": "complete file for assigned boundary units and enclosing helpers; no whole-module redisposition",
+    "unit_ids": [
+      "core-001:unit:23047c96d7f0fcb0"
+    ],
+    "status": "READ-CLEAN",
+    "candidates": [],
+    "observation": "Live IsLocked chooses operations; Set/Change/Remove await wrappers inside independently cleared caller-array scopes. Unsupported reset-recovery warning is already qualified by comment/README; retain old finding.",
+    "unchanged_path_action": "Retain current text for this boundary; unrelated applet findings keep original scope."
+  },
+  {
+    "path": "src/Management/examples/ManagementTool/Cli/Menus/ResetMenu.cs",
+    "source_sha256": "08397e675bbffb5f9a1fe4ae60989ce355ce0ec56047a0446740320974b56ea2",
+    "pinned_git_blob": "90bbedfdba4c95bc132cd65726d0f972ee942c19",
+    "pinned_bytes_sha256": "08397e675bbffb5f9a1fe4ae60989ce355ce0ec56047a0446740320974b56ea2",
+    "normalized_pin_equal": true,
+    "read_scope": "complete file for assigned boundary units and enclosing helpers; no whole-module redisposition",
+    "unit_ids": [
+      "core-001:unit:803bfd5d338c5c7d"
+    ],
+    "status": "READ-CLEAN",
+    "candidates": [],
+    "observation": "Live read then firmware-only helper and double confirmation; SmartCard eligibility comes from selector. Broad erase/default-PIN output is already documented as unreliable. Success adds no cache invalidation; MGMT-IMP-010 remains.",
+    "unchanged_path_action": "Retain current text for this boundary; unrelated applet findings keep original scope."
+  },
+  {
+    "path": "src/Management/examples/ManagementTool/Cli/Menus/TimeoutsMenu.cs",
+    "source_sha256": "761d64d0438307f365e51824270a45ec3156c46fc9ca226da6bca8ebf1485e36",
+    "pinned_git_blob": "c582db32966f4980dab22a7791111d4d84d0a981",
+    "pinned_bytes_sha256": "761d64d0438307f365e51824270a45ec3156c46fc9ca226da6bca8ebf1485e36",
+    "normalized_pin_equal": true,
+    "read_scope": "complete file for assigned boundary units and enclosing helpers; no whole-module redisposition",
+    "unit_ids": [
+      "core-001:unit:34ac078328bc45ae"
+    ],
+    "status": "READ-CANDIDATE-CONTEXT",
+    "candidates": [
+      "CORE-MGMT-X002"
+    ],
+    "observation": "Live auto-eject/first optional timeout byte drive defaults. Assignment ceilings are SDK policy. Code finally encloses awaited write; reboot ends usable old scope. A-C003 affects timeout storage separately from UI default15.",
+    "unchanged_path_action": "Retain product bytes; fresh editor/reviewer dispositions required for candidate/dependency passages."
+  },
+  {
+    "path": "src/Management/examples/ManagementTool/Cli/Output/OutputHelpers.cs",
+    "source_sha256": "c0e5feb28de4b2746ebfff2e51150a3160cf8ed88417aae9b3fc35892eac618e",
+    "pinned_git_blob": "7206d76866e4540e2ef9b88d9aa8ad07077ae876",
+    "pinned_bytes_sha256": "c0e5feb28de4b2746ebfff2e51150a3160cf8ed88417aae9b3fc35892eac618e",
+    "normalized_pin_equal": true,
+    "read_scope": "complete file for assigned boundary units and enclosing helpers; no whole-module redisposition",
+    "unit_ids": [
+      "core-001:unit:bae06acf3023927d",
+      "core-001:unit:3ffa48b03a70b3dc"
+    ],
+    "status": "READ-CLEAN",
+    "candidates": [],
+    "observation": "Renderers enumerate known modeled capability/flag bits only and can print empty text for unknown-only values. Presentation is neither raw preservation nor support proof; reopen with A-C002/C006.",
+    "unchanged_path_action": "Retain current text for this boundary; unrelated applet findings keep original scope."
+  },
+  {
+    "path": "src/Management/examples/ManagementTool/Cli/Prompts/DeviceSelector.cs",
+    "source_sha256": "8f26bd204c7878816faf7da90d84091a7e2a3f0681e6e3be081f14d6588f1030",
+    "pinned_git_blob": "06335f269068f4db746ff162c50a257452d42aa6",
+    "pinned_bytes_sha256": "8f26bd204c7878816faf7da90d84091a7e2a3f0681e6e3be081f14d6588f1030",
+    "normalized_pin_equal": true,
+    "read_scope": "complete file for assigned boundary units and enclosing helpers; no whole-module redisposition",
+    "unit_ids": [
+      "core-001:unit:ef5a2787c5b519e3",
+      "core-001:unit:a2cf98dcc1805fbf"
+    ],
+    "status": "READ-CLEAN",
+    "candidates": [],
+    "observation": "Shared selector requires SmartCard and RequireChoice after All discovery, preserving composites/reset menu eligibility. FormFactor formatting is shared exact-value policy. Exposed SmartCard wins normal Management order.",
+    "unchanged_path_action": "Retain current text for this boundary; unrelated applet findings keep original scope."
+  },
+  {
+    "path": "src/Management/examples/ManagementTool/Cli/Prompts/LockCodePrompt.cs",
+    "source_sha256": "a7013821bad3d4ab28f28db5c2c42ca2e4fdc1e1c8f39f25e965fe3717e1e31b",
+    "pinned_git_blob": "16eae8f289b388ea3617609311ff202a8741a339",
+    "pinned_bytes_sha256": "a7013821bad3d4ab28f28db5c2c42ca2e4fdc1e1c8f39f25e965fe3717e1e31b",
+    "normalized_pin_equal": true,
+    "read_scope": "complete file for assigned boundary units and enclosing helpers; no whole-module redisposition",
+    "unit_ids": [],
+    "status": "READ-CONTEXT-EXCLUDED-FROM-PRIMARY",
+    "candidates": [],
+    "observation": "Context-only: full helper read; immutable strings and confirmation throw before cleanup remain documented limitations. Returned arrays are cleared by menu callers. No primary IDs or new whole-prompt audit.",
+    "unchanged_path_action": "Retain current text for this boundary; unrelated applet findings keep original scope."
+  },
+  {
+    "path": "src/Management/examples/ManagementTool/Commands/ConfigCommand.cs",
+    "source_sha256": "b8b4675ef8c2a727dfb98815efae62f6a8c2a4da2a68ece2c7e02982c2c35203",
+    "pinned_git_blob": "1206bec6ff259718b0fcf8d4bc93416695c12f20",
+    "pinned_bytes_sha256": "b8b4675ef8c2a727dfb98815efae62f6a8c2a4da2a68ece2c7e02982c2c35203",
+    "normalized_pin_equal": true,
+    "read_scope": "complete file for assigned boundary units and enclosing helpers; no whole-module redisposition",
+    "unit_ids": [
+      "core-001:unit:4e806194dd61097d"
+    ],
+    "status": "READ-CLEAN",
+    "candidates": [],
+    "observation": "Selector then owned session/explicit DeviceInfoQuery. Failure returns1 without substituting selection snapshot; displayed configuration inherits Core interpretation.",
+    "unchanged_path_action": "Retain current text for this boundary; unrelated applet findings keep original scope."
+  },
+  {
+    "path": "src/Management/examples/ManagementTool/Commands/InfoCommand.cs",
+    "source_sha256": "86de267e336219c15117e9be6d6792b3093e019f5460139de4a503fad39b6ee8",
+    "pinned_git_blob": "a5a4b665dfaf44b8aa6697d7551f20c89517ca4b",
+    "pinned_bytes_sha256": "86de267e336219c15117e9be6d6792b3093e019f5460139de4a503fad39b6ee8",
+    "normalized_pin_equal": true,
+    "read_scope": "complete file for assigned boundary units and enclosing helpers; no whole-module redisposition",
+    "unit_ids": [
+      "core-001:unit:3d13099f522c8132"
+    ],
+    "status": "READ-CLEAN",
+    "candidates": [],
+    "observation": "Selector then owned session/explicit live read; FIPS Mode/masks retain documented limits, flagged form factors can miss exact formatter. No stale fallback after live failure.",
+    "unchanged_path_action": "Retain current text for this boundary; unrelated applet findings keep original scope."
+  },
+  {
+    "path": "src/Management/examples/ManagementTool/Features/DeviceConfiguration.cs",
+    "source_sha256": "03004d4f3f006ca73a3b7ad9333cd3296f025c6d3c40af528b3e14ad99ce9a4c",
+    "pinned_git_blob": "a48eb80af1c72f35d80aeeeb59f69cd382569d38",
+    "pinned_bytes_sha256": "03004d4f3f006ca73a3b7ad9333cd3296f025c6d3c40af528b3e14ad99ce9a4c",
+    "normalized_pin_equal": true,
+    "read_scope": "complete file for assigned boundary units and enclosing helpers; no whole-module redisposition",
+    "unit_ids": [
+      "core-001:unit:a815cc370e465f4c",
+      "core-001:unit:692c84390c4dbff0"
+    ],
+    "status": "READ-CLEAN",
+    "candidates": [],
+    "observation": "Wrappers borrow session/codes and create per-command options; RebootRequired echoes request. Broad catch includes cancellation. Encoder/session own transient copies; caller owns source arrays. Full helper cleanup/examples read.",
+    "unchanged_path_action": "Retain current text for this boundary; unrelated applet findings keep original scope."
+  },
+  {
+    "path": "src/Management/examples/ManagementTool/Features/DeviceInfoQuery.cs",
+    "source_sha256": "5a63f2bd0faaf1cd6911019e29edc483943414919170f98e209cb8fb412fabf2",
+    "pinned_git_blob": "be6dadf302ae1b247823b5ab4444ce026797a16b",
+    "pinned_bytes_sha256": "5a63f2bd0faaf1cd6911019e29edc483943414919170f98e209cb8fb412fabf2",
+    "normalized_pin_equal": true,
+    "read_scope": "complete file for assigned boundary units and enclosing helpers; no whole-module redisposition",
+    "unit_ids": [],
+    "status": "READ-CONTEXT-EXCLUDED-FROM-PRIMARY",
+    "candidates": [],
+    "observation": "Context-only: live-read wrapper converts operation exceptions including cancellation to failure; no cached fallback. Typed example disposes session before connection. No primary IDs.",
+    "unchanged_path_action": "Retain current text for this boundary; unrelated applet findings keep original scope."
+  },
+  {
+    "path": "src/Management/examples/ManagementTool/Features/DeviceReset.cs",
+    "source_sha256": "356acb744426b2bbd4fca76c78d04b305e325c2185b061869ab36c205fce6321",
+    "pinned_git_blob": "aabd235dbc0db277346def562eb407849af621d4",
+    "pinned_bytes_sha256": "356acb744426b2bbd4fca76c78d04b305e325c2185b061869ab36c205fce6321",
+    "normalized_pin_equal": true,
+    "read_scope": "complete file for assigned boundary units and enclosing helpers; no whole-module redisposition",
+    "unit_ids": [
+      "core-001:unit:05b21601d48c3a05",
+      "core-001:unit:b8402d2807f5eed9",
+      "core-001:unit:1c5fa2bee9f15a6f"
+    ],
+    "status": "READ-CLEAN",
+    "candidates": [],
+    "observation": "Numeric firmware helper inherits major-zero policy. Supplied metadata preflight can differ from overridden session firmware; family stays caller prerequisite. Broad catch converts operation/cancellation exceptions to result.",
+    "unchanged_path_action": "Retain current text for this boundary; unrelated applet findings keep original scope."
+  },
+  {
+    "path": "src/Management/examples/ManagementTool/Features/Results/ConfigResult.cs",
+    "source_sha256": "45deee7d7b6944577e1c616031f299eb1765d6d5830bd4aedc04ab57b2584eb1",
+    "pinned_git_blob": "e0c2d6cef122e9dc711696b49fcc2b7fe84233dc",
+    "pinned_bytes_sha256": "45deee7d7b6944577e1c616031f299eb1765d6d5830bd4aedc04ab57b2584eb1",
+    "normalized_pin_equal": true,
+    "read_scope": "complete file for assigned boundary units and enclosing helpers; no whole-module redisposition",
+    "unit_ids": [],
+    "status": "READ-CONTEXT-EXCLUDED-FROM-PRIMARY",
+    "candidates": [],
+    "observation": "Context-only: RebootRequired explicitly records requested flag, with no pending/completed reboot observation. No primary IDs.",
+    "unchanged_path_action": "Retain current text for this boundary; unrelated applet findings keep original scope."
+  },
+  {
+    "path": "src/Management/examples/ManagementTool/Features/Results/DeviceInfoResult.cs",
+    "source_sha256": "b9ebe30968ee4c81f43c9eb05c3158cb9309a1411c3eefa407d260dda5076fca",
+    "pinned_git_blob": "e5eb39451ddda0a17e91491d992e451e95575068",
+    "pinned_bytes_sha256": "b9ebe30968ee4c81f43c9eb05c3158cb9309a1411c3eefa407d260dda5076fca",
+    "normalized_pin_equal": true,
+    "read_scope": "complete file for assigned boundary units and enclosing helpers; no whole-module redisposition",
+    "unit_ids": [
+      "core-001:unit:6d23bc38a309d324",
+      "core-001:unit:a30a1ce877d40d74"
+    ],
+    "status": "READ-CANDIDATE-CONTEXT",
+    "candidates": [
+      "CORE-MGMT-X002"
+    ],
+    "observation": "Record copies DeviceInfo value while retaining A-C003's underlying timeout alias. Success constructor adds no deep snapshot; X002 reopening dependency.",
+    "unchanged_path_action": "Retain product bytes; fresh editor/reviewer dispositions required for candidate/dependency passages."
+  },
+  {
+    "path": "src/Management/examples/ManagementTool/Features/Results/ResetResult.cs",
+    "source_sha256": "3388eedc2430623e5ace783487135e12e310dd0d24291b092c2658dccb63f1fe",
+    "pinned_git_blob": "9ba7b4d2dce0dabc1b154c51784803e1240db547",
+    "pinned_bytes_sha256": "3388eedc2430623e5ace783487135e12e310dd0d24291b092c2658dccb63f1fe",
+    "normalized_pin_equal": true,
+    "read_scope": "complete file for assigned boundary units and enclosing helpers; no whole-module redisposition",
+    "unit_ids": [],
+    "status": "READ-CONTEXT-EXCLUDED-FROM-PRIMARY",
+    "candidates": [],
+    "observation": "Context-only: helper outcome carrier adds no device metadata or physical reset evidence. No primary IDs.",
+    "unchanged_path_action": "Retain current text for this boundary; unrelated applet findings keep original scope."
+  },
+  {
+    "path": "src/Management/examples/ManagementTool/ManagementTool.csproj",
+    "source_sha256": "78deac71175dad6ba59d735474387a1610a711bf53066471cc83d78240fd1373",
+    "pinned_git_blob": "ee0dcfe9cd73c4f42e6c261d965d5388a728b5a6",
+    "pinned_bytes_sha256": "c626ed23567cc748c694a9d092f781d6a6a1f2f724748a60307febd1bf125d47",
+    "normalized_pin_equal": true,
+    "read_scope": "complete file for assigned boundary units and enclosing helpers; no whole-module redisposition",
+    "unit_ids": [
+      "core-001:unit:71595eb5336ba181"
+    ],
+    "status": "READ-CLEAN",
+    "candidates": [],
+    "observation": "Actual Management/Core/Cli.Shared/Cli.Commands references plus Spectre PackageReference and explicit HintPath. Reference resolution/analyzer participation requires later coordinator compilation.",
+    "unchanged_path_action": "Retain current text for this boundary; unrelated applet findings keep original scope."
+  },
+  {
+    "path": "src/Management/examples/ManagementTool/Program.cs",
+    "source_sha256": "b5136626522033d891265971f2e4da7af4f677cfe3726f4cc397593cc0f0c9ef",
+    "pinned_git_blob": "0e90a1ccb31536d7f3708c8b3c44002fb2d28c01",
+    "pinned_bytes_sha256": "b5136626522033d891265971f2e4da7af4f677cfe3726f4cc397593cc0f0c9ef",
+    "normalized_pin_equal": true,
+    "read_scope": "complete file for assigned boundary units and enclosing helpers; no whole-module redisposition",
+    "unit_ids": [
+      "core-001:unit:d592a41a63a6d554"
+    ],
+    "status": "READ-CLEAN",
+    "candidates": [],
+    "observation": "Menu callbacks discard ct; first-token command dispatch ignores remaining args. README already qualifies cancellation/help limitations. Each menu owns fresh selection/session lifetime; runtime strings preserved.",
+    "unchanged_path_action": "Retain current text for this boundary; unrelated applet findings keep original scope."
+  },
+  {
+    "path": "src/Management/examples/ManagementTool/README.md",
+    "source_sha256": "ff782044735d4f63037044e2d44f159d356cef4ed1ba4fde2972cc8b368fde6e",
+    "pinned_git_blob": "3ddf1b0caaf77b60bc6c4cb56fe8fa8a31f5fbaa",
+    "pinned_bytes_sha256": "ff782044735d4f63037044e2d44f159d356cef4ed1ba4fde2972cc8b368fde6e",
+    "normalized_pin_equal": true,
+    "read_scope": "complete file for assigned boundary units and enclosing helpers; no whole-module redisposition",
+    "unit_ids": [
+      "core-001:unit:9f4a2faae922c95c",
+      "core-001:unit:483c8ba4d8a36454",
+      "core-001:unit:68e0a1cd355159f9",
+      "core-001:unit:b85cc0c1c01e7572",
+      "core-001:unit:31d79bce8daf96b9",
+      "core-001:unit:555e3712647dbc07",
+      "core-001:unit:ecca79e0e5ec1d27",
+      "core-001:unit:42b148d2b77ffe78",
+      "core-001:unit:5f33e90910d94c96",
+      "core-001:unit:677a3a75f41b0d24"
+    ],
+    "status": "READ-CLEAN",
+    "candidates": [],
+    "observation": "Guide accurately scopes SmartCard eligibility, commands versus menus, requested reboot flag, recovery, cancellation gaps and existing misleading FIPS/reset output. No new output or prompt-policy changes.",
+    "unchanged_path_action": "Retain current text for this boundary; unrelated applet findings keep original scope."
+  },
+  {
+    "path": "src/Management/src/Backend/FidoHidBackend.cs",
+    "source_sha256": "583bebdfacb63ce8c096fff6f2eda1c8e2638e1c68b2c2545804704f50edcbc4",
+    "pinned_git_blob": "2f32e88fed3f2b75b56339e3ff2ad02ef9c0e13f",
+    "pinned_bytes_sha256": "583bebdfacb63ce8c096fff6f2eda1c8e2638e1c68b2c2545804704f50edcbc4",
+    "normalized_pin_equal": true,
+    "read_scope": "complete file for assigned boundary units and enclosing helpers; no whole-module redisposition",
+    "unit_ids": [
+      "core-001:unit:ec79474089651a1a",
+      "core-001:unit:f9559528897c0b04",
+      "core-001:unit:965b06d1de2b569f",
+      "core-001:unit:7e93fdc26904d844"
+    ],
+    "status": "READ-CLEAN",
+    "candidates": [],
+    "observation": "C3 write and C0 internal mode use prepared IFidoHidProtocol with None notification. Backend neither initializes channel nor owns it; Core C2 reader and session HID-reset refusal are separate.",
+    "unchanged_path_action": "Retain current text for this boundary; unrelated applet findings keep original scope."
+  },
+  {
+    "path": "src/Management/src/Backend/IManagementBackend.cs",
+    "source_sha256": "292f92e53d42445e929a776b1a5adf8094723933de224ebb5422c757933cdf0f",
+    "pinned_git_blob": "f0a09c68bc6d1d47e8d9bfa6b123501d58b90706",
+    "pinned_bytes_sha256": "292f92e53d42445e929a776b1a5adf8094723933de224ebb5422c757933cdf0f",
+    "normalized_pin_equal": true,
+    "read_scope": "complete file for assigned boundary units and enclosing helpers; no whole-module redisposition",
+    "unit_ids": [],
+    "status": "READ-CONTEXT-EXCLUDED-FROM-PRIMARY",
+    "candidates": [],
+    "observation": "Context-only: backend owns no resource/protocol/connection; write borrows payload; internal SetMode is outside public surface. No primary IDs.",
+    "unchanged_path_action": "Retain current text for this boundary; unrelated applet findings keep original scope."
+  },
+  {
+    "path": "src/Management/src/Backend/OtpBackend.cs",
+    "source_sha256": "591e25bd39fe1e673681a5652e6343d90088b020c5239f719b18fba28b4724af",
+    "pinned_git_blob": "572c33165a15b19d9591aaa06e56bb797608665e",
+    "pinned_bytes_sha256": "591e25bd39fe1e673681a5652e6343d90088b020c5239f719b18fba28b4724af",
+    "normalized_pin_equal": true,
+    "read_scope": "complete file for assigned boundary units and enclosing helpers; no whole-module redisposition",
+    "unit_ids": [
+      "core-001:unit:1adf219a85f82c90",
+      "core-001:unit:3b9e4c479a383a8d",
+      "core-001:unit:6dea5c78a8314291",
+      "core-001:unit:17c93bf7511f516e",
+      "core-001:unit:fee656531930cbba"
+    ],
+    "status": "READ-CLEAN",
+    "candidates": [],
+    "observation": "ReadStatus initializes and reads status; fallback prefers protocol firmware. Writes delegate slot constants; Core owns framing/outbound CRC and DeviceInfoReader checks inbound info CRC. Backend owns nothing.",
+    "unchanged_path_action": "Retain current text for this boundary; unrelated applet findings keep original scope."
+  },
+  {
+    "path": "src/Management/src/Backend/SmartCardBackend.cs",
+    "source_sha256": "f3a5b54ee4e66bef1ae9e3259b3a571d9ebf3e109fd65c094772e089def6a08d",
+    "pinned_git_blob": "b0a07ecee6f23f83f66c73d1223bc895c9af94ee",
+    "pinned_bytes_sha256": "f3a5b54ee4e66bef1ae9e3259b3a571d9ebf3e109fd65c094772e089def6a08d",
+    "normalized_pin_equal": true,
+    "read_scope": "complete file for assigned boundary units and enclosing helpers; no whole-module redisposition",
+    "unit_ids": [
+      "core-001:unit:e51375ec7878913d",
+      "core-001:unit:a1794a63d52ad79b",
+      "core-001:unit:269d4840c559cff1",
+      "core-001:unit:8b2bc20d9765dcd2",
+      "core-001:unit:417fbf395249474a",
+      "core-001:unit:256e5964ee6edcbb"
+    ],
+    "status": "READ-CLEAN",
+    "candidates": [],
+    "observation": "SELECT fallback firmware; write INS1C, internal mode INS16, reset INS1F use borrowed effective protocol/default error handling. Reset zero CLA/P1/P2/no data; final wire/status/SCP review remains B6.",
+    "unchanged_path_action": "Retain current text for this boundary; unrelated applet findings keep original scope."
+  },
+  {
+    "path": "src/Management/src/DeviceConfig.cs",
+    "source_sha256": "f0eb2e575ec32fe4ed175a546c137e04aaae954ce081d6f9fc2ab409d923a4b4",
+    "pinned_git_blob": "8a569e359d9279f360e000da93d5cb65a9e5f3d9",
+    "pinned_bytes_sha256": "f0eb2e575ec32fe4ed175a546c137e04aaae954ce081d6f9fc2ab409d923a4b4",
+    "normalized_pin_equal": true,
+    "read_scope": "complete file for assigned boundary units and enclosing helpers; no whole-module redisposition",
+    "unit_ids": [
+      "core-001:unit:c753f5d272700cb6",
+      "core-001:unit:cb584054a2492fed",
+      "core-001:unit:ec2c35f8260bc056",
+      "core-001:unit:f4c0f014a5714c10",
+      "core-001:unit:ebc3cd03ad1bb0cf"
+    ],
+    "status": "READ-CLEAN",
+    "candidates": [],
+    "observation": "Null omission/full-field replacement; exact USB None guard; ushort/byte narrowing without supported-mask checks. Encoder clears owned TLVs/intermediate bytes; returned length-prefixed buffer belongs to session cleanup. Existing encoder findings retain applet ownership.",
+    "unchanged_path_action": "Retain current text for this boundary; unrelated applet findings keep original scope."
+  },
+  {
+    "path": "src/Management/src/IManagementSession.cs",
+    "source_sha256": "b35858944a645276e2e023bcb971be503ef250e211c85553d4bf77588f11df9f",
+    "pinned_git_blob": "7dcd36b4597191e92a01e50e7c6b080763538148",
+    "pinned_bytes_sha256": "b35858944a645276e2e023bcb971be503ef250e211c85553d4bf77588f11df9f",
+    "normalized_pin_equal": true,
+    "read_scope": "complete file for assigned boundary units and enclosing helpers; no whole-module redisposition",
+    "unit_ids": [
+      "core-001:unit:d2d826434f7c5b86",
+      "core-001:unit:a11c1d5720b99106"
+    ],
+    "status": "READ-CANDIDATE-CONTEXT",
+    "candidates": [
+      "CORE-MGMT-X002"
+    ],
+    "observation": "XML separates full workflows from individual exchanges, caller-code memory and reset family/gates. X002 supplies returned-firmware/timeout qualification. Interface declares no Management IsLocked property.",
+    "unchanged_path_action": "Retain product bytes; fresh editor/reviewer dispositions required for candidate/dependency passages."
+  },
+  {
+    "path": "src/Management/src/IYubiKeyExtensions.cs",
+    "source_sha256": "0b04c36d103473a9b976087fae45831d79c2dad70bd1c9207f2b30953a6c72b6",
+    "pinned_git_blob": "53519d682442dce855a46b0be0d4522dbc8e47f0",
+    "pinned_bytes_sha256": "0b04c36d103473a9b976087fae45831d79c2dad70bd1c9207f2b30953a6c72b6",
+    "normalized_pin_equal": true,
+    "read_scope": "complete file for assigned boundary units and enclosing helpers; no whole-module redisposition",
+    "unit_ids": [
+      "core-001:unit:006fe3e885ef4d2d",
+      "core-001:unit:a13faad5fc95c4b4"
+    ],
+    "status": "READ-CLEAN",
+    "candidates": [],
+    "observation": "One-shot methods await owned scopes. Factory selects one transport, copies options with resolved preference, opens typed connection, transfers ownership after direct success. Failures propagate without sibling retry.",
+    "unchanged_path_action": "Retain current text for this boundary; unrelated applet findings keep original scope."
+  },
+  {
+    "path": "src/Management/src/ManagementSession.cs",
+    "source_sha256": "36f879ea7d703e78c69d0f02b97a24c752301eab4dce02b0164fa1d9f5aadfe9",
+    "pinned_git_blob": "d57fb7e74a7072f3e25b6b1fac4eecf1ed7c3340",
+    "pinned_bytes_sha256": "36f879ea7d703e78c69d0f02b97a24c752301eab4dce02b0164fa1d9f5aadfe9",
+    "normalized_pin_equal": true,
+    "read_scope": "complete file for assigned boundary units and enclosing helpers; no whole-module redisposition",
+    "unit_ids": [
+      "core-001:unit:d1501d0225ef8fcd",
+      "core-001:unit:03a5d63600fc9f94",
+      "core-001:unit:668bdaa4020468f6",
+      "core-001:unit:0a0a2dcc2d7302c9",
+      "core-001:unit:19e43ee4b3559849",
+      "core-001:unit:de63256ab9a102cc",
+      "core-001:unit:075169f476208f52",
+      "core-001:unit:1bc53b27699944ff",
+      "core-001:unit:42c7a7065ceda79d",
+      "core-001:unit:af68f499f1271c18",
+      "core-001:unit:942782ab2ec2d473",
+      "core-001:unit:1ad0884b53f6ab23"
+    ],
+    "status": "READ-CANDIDATE-CONTEXT",
+    "candidates": [
+      "CORE-MGMT-X002"
+    ],
+    "observation": "Direct factory binds before Prepare, transport probe and DeviceInfo; Configure/SCP precede backend/readiness. _version retains initial discovery. Later reads use that fallback. Write clears encoded bytes in finally. Reset has no family gate/success invalidation; inherited decisions and B6 remain.",
+    "unchanged_path_action": "Retain product bytes; fresh editor/reviewer dispositions required for candidate/dependency passages."
+  },
+  {
+    "path": "src/Management/src/PublicAPI.Shipped.txt",
+    "source_sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd",
+    "pinned_git_blob": "7dc5c58110bfa8486c4ddb75c89a99655c1adcf8",
+    "pinned_bytes_sha256": "3c3b422dddb1efeb0fc5b228608fd8682452b2a9507d4031894bce3c4dedadbd",
+    "normalized_pin_equal": true,
+    "read_scope": "complete file for assigned boundary units and enclosing helpers; no whole-module redisposition",
+    "unit_ids": [],
+    "status": "READ-CONTEXT-EXCLUDED-FROM-PRIMARY",
+    "candidates": [],
+    "observation": "Context exclusion: nullable directive only, no active shipped declarations or assigned primary IDs.",
+    "unchanged_path_action": "Retain current text for this boundary; unrelated applet findings keep original scope."
+  },
+  {
+    "path": "src/Management/src/PublicAPI.Unshipped.txt",
+    "source_sha256": "d60da145a04c93eb007cdd4abfa058c4da76a3541eea9d24674fa046c43f05ca",
+    "pinned_git_blob": "e9fec056741b5f28013fc42521cd87ab861de428",
+    "pinned_bytes_sha256": "d60da145a04c93eb007cdd4abfa058c4da76a3541eea9d24674fa046c43f05ca",
+    "normalized_pin_equal": true,
+    "read_scope": "complete file for assigned boundary units and enclosing helpers; no whole-module redisposition",
+    "unit_ids": [
+      "core-001:unit:10bb0a92e252320f"
+    ],
+    "status": "READ-CLEAN",
+    "candidates": [],
+    "observation": "Snapshot matches inspected factories/operations, separate config/session options and Core-owned metadata. Compiler binding remains VALID-NOT-CHECKED.",
+    "unchanged_path_action": "Retain current text for this boundary; unrelated applet findings keep original scope."
+  },
+  {
+    "path": "src/Management/src/SetDeviceConfigOptions.cs",
+    "source_sha256": "d28bb6dbbed4a4fd5d373d4323bb509f834899339f65023b00ba7b015b36061c",
+    "pinned_git_blob": "aceec2e88203676f72d7844fe0ebfc4b1e034dca",
+    "pinned_bytes_sha256": "d28bb6dbbed4a4fd5d373d4323bb509f834899339f65023b00ba7b015b36061c",
+    "normalized_pin_equal": true,
+    "read_scope": "complete file for assigned boundary units and enclosing helpers; no whole-module redisposition",
+    "unit_ids": [],
+    "status": "READ-CONTEXT-EXCLUDED-FROM-PRIMARY",
+    "candidates": [],
+    "observation": "Context-only: borrowed code lifetime includes one-shot creation; false reboot default; null/empty/sixteen-zero replacement differ. Accurate existing text; no primary IDs.",
+    "unchanged_path_action": "Retain current text for this boundary; unrelated applet findings keep original scope."
+  },
+  {
+    "path": "src/Management/src/Yubico.YubiKit.Management.csproj",
+    "source_sha256": "9d1a6290c56e046e611855eb1e57767331e92f1c1a561146ab5f879429c1e0ad",
+    "pinned_git_blob": "c48991d3674c0b9e66e56def45d12d3841d912ec",
+    "pinned_bytes_sha256": "17087622b08053928597ba8b6a7b256ec3a49e2edf2ae83941542ff4bcdd8b3d",
+    "normalized_pin_equal": true,
+    "read_scope": "complete file for assigned boundary units and enclosing helpers; no whole-module redisposition",
+    "unit_ids": [
+      "core-001:unit:6cb194bebfaebec7"
+    ],
+    "status": "READ-CLEAN",
+    "candidates": [],
+    "observation": "Shipping Management references Core only and opts into shared AOT policy; IVT enables backend fakes. Static configuration supplies no compile/publish result.",
+    "unchanged_path_action": "Retain current text for this boundary; unrelated applet findings keep original scope."
+  },
+  {
+    "path": "src/Management/tests/CLAUDE.md",
+    "source_sha256": "b8f00044fae55e057cecaf4c7cb3e9d52dbaf692f8499dc7b4bcfd4a84c60887",
+    "pinned_git_blob": "faec23d62bc7c17fe29d114b6a3ce348baf2680f",
+    "pinned_bytes_sha256": "b8f00044fae55e057cecaf4c7cb3e9d52dbaf692f8499dc7b4bcfd4a84c60887",
+    "normalized_pin_equal": true,
+    "read_scope": "complete file for assigned boundary units and enclosing helpers; no whole-module redisposition",
+    "unit_ids": [
+      "core-001:unit:9a2b9d708aed8e5a",
+      "core-001:unit:9fa575e4eb4c6432",
+      "core-001:unit:6319ed66c2ec651d",
+      "core-001:unit:17c198f45dca0109",
+      "core-001:unit:263043f73decaa1c"
+    ],
+    "status": "READ-CLEAN",
+    "candidates": [],
+    "observation": "Fake readiness cases in integration project, explicit read-only hardware filter, two-key monitor prerequisites, cached callback and device-filter/transport-pin distinctions are current. X001/X002 reopen linked explanations.",
+    "unchanged_path_action": "Retain current text for this boundary; unrelated applet findings keep original scope."
+  },
+  {
+    "path": "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/IntegrationTestBase.cs",
+    "source_sha256": "27c3c6503ec92d2a32c1b15eb3b16a88aa18166adb03df8fb1732bed408be793",
+    "pinned_git_blob": "ff8db3c19566a910d077470c79d4afa2e20db993",
+    "pinned_bytes_sha256": "27c3c6503ec92d2a32c1b15eb3b16a88aa18166adb03df8fb1732bed408be793",
+    "normalized_pin_equal": true,
+    "read_scope": "complete file for assigned boundary units and enclosing helpers; no whole-module redisposition",
+    "unit_ids": [],
+    "status": "READ-CONTEXT-EXCLUDED-FROM-PRIMARY",
+    "candidates": [],
+    "observation": "Context-only no-op async lifetime has no monitor or reset setup, confirming one-shot applet model. No primary IDs.",
+    "unchanged_path_action": "Retain current text for this boundary; unrelated applet findings keep original scope."
+  },
+  {
+    "path": "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ManagementHidConcurrencyTests.cs",
+    "source_sha256": "0e51baf74601f88c3c10c24a0d2619eda3395027e2c526d939eff7c36ee5ed5d",
+    "pinned_git_blob": "19d8ab423de29e9a5f97b2067fe20c1f2d47a264",
+    "pinned_bytes_sha256": "0e51baf74601f88c3c10c24a0d2619eda3395027e2c526d939eff7c36ee5ed5d",
+    "normalized_pin_equal": true,
+    "read_scope": "complete file for assigned boundary units and enclosing helpers; no whole-module redisposition",
+    "unit_ids": [
+      "core-001:unit:31911bab5d75fe59",
+      "core-001:unit:99139d9333474bdc",
+      "core-001:unit:391a0e0cf4a2365d",
+      "core-001:unit:d349265b86edae24",
+      "core-001:unit:8fecb0a08c28986d"
+    ],
+    "status": "READ-CLEAN",
+    "candidates": [],
+    "observation": "Concrete rows pin/assert transport; five rounds accept success or specifically matched guard refusal, require success and subsequent read. Serial/firmware/form equality leaves other fields outside oracle. Actual refusal timing remains hardware-unexecuted.",
+    "unchanged_path_action": "Retain current text for this boundary; unrelated applet findings keep original scope."
+  },
+  {
+    "path": "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ManagementLockCodeTests.cs",
+    "source_sha256": "43daec031a94b21ab218aefba479a95ce1be3b4df44023df9153fbefac2da59f",
+    "pinned_git_blob": "1c7e7baed48c0c2cfa973453b98a48128537fde0",
+    "pinned_bytes_sha256": "43daec031a94b21ab218aefba479a95ce1be3b4df44023df9153fbefac2da59f",
+    "normalized_pin_equal": true,
+    "read_scope": "complete file for assigned boundary units and enclosing helpers; no whole-module redisposition",
+    "unit_ids": [
+      "core-001:unit:51ae5ccce9520e79",
+      "core-001:unit:5f22db5d10a2fe7a"
+    ],
+    "status": "READ-CLEAN",
+    "candidates": [],
+    "observation": "Cached starting metadata/default transport; missing-code assertion accepts any exception. Fallible finally restoration/readback precedes code zeroing; second restoration lacks readback. Preserve MGMT-IMP-004/old weak-oracle qualification.",
+    "unchanged_path_action": "Retain current text for this boundary; unrelated applet findings keep original scope."
+  },
+  {
+    "path": "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ManagementSessionAdvancedTests.cs",
+    "source_sha256": "b4a1d7fbc4fa4c4af62bd350668ef74f83cc37840e95bee1b96259ff847bc9fe",
+    "pinned_git_blob": "4d2851c310cc613f8ee604c5c44fd31b1bad9f6e",
+    "pinned_bytes_sha256": "b4a1d7fbc4fa4c4af62bd350668ef74f83cc37840e95bee1b96259ff847bc9fe",
+    "normalized_pin_equal": true,
+    "read_scope": "complete file for assigned boundary units and enclosing helpers; no whole-module redisposition",
+    "unit_ids": [
+      "core-001:unit:1d51177a8fd7ab01",
+      "core-001:unit:d388ab9ed6c54880",
+      "core-001:unit:d15900104e133434",
+      "core-001:unit:03c05d9130dfda13",
+      "core-001:unit:71cf545bc087dfa9",
+      "core-001:unit:b72a9b74e7e968a2",
+      "core-001:unit:5e3e28d077401e1f",
+      "core-001:unit:1000979ddc49af8e",
+      "core-001:unit:e0d4e8f160c1ac73",
+      "core-001:unit:e3224e9ebaef8efc",
+      "core-001:unit:0ce11af856152404",
+      "core-001:unit:43a3f7839cb18988",
+      "core-001:unit:582caea13bdf7ab3",
+      "core-001:unit:9eaacf097dd0debc",
+      "core-001:unit:767b2752dccb2257",
+      "core-001:unit:2315912e510ba56c"
+    ],
+    "status": "READ-CANDIDATE-CONTEXT",
+    "candidates": [
+      "CORE-MGMT-X001"
+    ],
+    "observation": "Complete rows read: repeated decode FIPS/form comparisons, independent AllTransports pins, inline undisposed default SCP (MGMT-IMP-004), cached-discovery wording X001. AdvancedPiv USB assertion is stronger than either-transport capability filter.",
+    "unchanged_path_action": "Retain product bytes; fresh editor/reviewer dispositions required for candidate/dependency passages."
+  },
+  {
+    "path": "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ManagementSessionCapabilityTests.cs",
+    "source_sha256": "f145c3e1171fb982dbfac0291bf755d8b93f2dd8f79bbfb7d065f26a6c98d20e",
+    "pinned_git_blob": "4c8ec5dca9f0dd741c17a55b4ac15f8785f2faeb",
+    "pinned_bytes_sha256": "f145c3e1171fb982dbfac0291bf755d8b93f2dd8f79bbfb7d065f26a6c98d20e",
+    "normalized_pin_equal": true,
+    "read_scope": "complete file for assigned boundary units and enclosing helpers; no whole-module redisposition",
+    "unit_ids": [
+      "core-001:unit:1dd329786aeabb6c",
+      "core-001:unit:ceb627b906f334ff"
+    ],
+    "status": "READ-CLEAN",
+    "candidates": [],
+    "observation": "OATH persisted USB mask toggle/finally readback differs from active-interface proof. NFC true write/readback and cached-value restoration supply no NFC-access/false-recovery evidence. Preserve original applet findings.",
+    "unchanged_path_action": "Retain current text for this boundary; unrelated applet findings keep original scope."
+  },
+  {
+    "path": "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ManagementSessionSimpleTests.cs",
+    "source_sha256": "acad7cb1830a60f9bfadd845779ad366491faeebbdd615c588aa9a249cc944cd",
+    "pinned_git_blob": "62e69e39725da277ceddac421094d31d74fb7647",
+    "pinned_bytes_sha256": "acad7cb1830a60f9bfadd845779ad366491faeebbdd615c588aa9a249cc944cd",
+    "normalized_pin_equal": true,
+    "read_scope": "complete file for assigned boundary units and enclosing helpers; no whole-module redisposition",
+    "unit_ids": [
+      "core-001:unit:8ff2478459d5da69",
+      "core-001:unit:f6d265c59f0169bf",
+      "core-001:unit:3ed83c9fe764006b",
+      "core-001:unit:1ba989b15f2fd08d",
+      "core-001:unit:0e2b7ac56d1b6120",
+      "core-001:unit:55bd011d34ebcf2f",
+      "core-001:unit:0ef7b0ff9c5e908c",
+      "core-001:unit:e2e9a9543eb540d2",
+      "core-001:unit:a9f342345707b596",
+      "core-001:unit:e8eb3aaa7f953508",
+      "core-001:unit:ed8acec3068bd629",
+      "core-001:unit:94cf1d1225852eb6",
+      "core-001:unit:02ae797f211c1fb1"
+    ],
+    "status": "READ-CLEAN",
+    "candidates": [],
+    "observation": "Typed direct scopes choose SmartCard/FIDO; unpinned one-shot HID rows only select eligible devices. Serial NotEqual0 permits null. Success SCP parameters correctly scoped; wrong-key broad assertion cannot isolate auth. Simple restoration skips failed assertions/lacks readback (MGMT-IMP-004).",
+    "unchanged_path_action": "Retain current text for this boundary; unrelated applet findings keep original scope."
+  },
+  {
+    "path": "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ManagementSessionTests.cs",
+    "source_sha256": "9e14a6f17b090ae88374454ca22ae92d0321ef021ee303d64cac1f7c5ad135a1",
+    "pinned_git_blob": "1dcbd9aa31c575e44895aba105180277b321c351",
+    "pinned_bytes_sha256": "9e14a6f17b090ae88374454ca22ae92d0321ef021ee303d64cac1f7c5ad135a1",
+    "normalized_pin_equal": true,
+    "read_scope": "complete file for assigned boundary units and enclosing helpers; no whole-module redisposition",
+    "unit_ids": [
+      "core-001:unit:c2126db982bbfcb5",
+      "core-001:unit:4a124b9572afe329",
+      "core-001:unit:c5c41a16f0ac5681",
+      "core-001:unit:857c4c22865384eb",
+      "core-001:unit:644cb368ccf328fc",
+      "core-001:unit:ede4c02a7e4edf72"
+    ],
+    "status": "READ-CLEAN",
+    "candidates": [],
+    "observation": "One placeholder per attribute/first matching fixture; exact form and FIPS interpretations repeat Core. MinFirmware5.0 remains ignored with existing truthful comment (MGMT-IMP-009). Default helper selection is separate from row metadata.",
+    "unchanged_path_action": "Retain current text for this boundary; unrelated applet findings keep original scope."
+  },
+  {
+    "path": "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/OwnedMonitorReadOnlyTests.cs",
+    "source_sha256": "863502e0a2960903529306e8013d6308dbfe937aac3f54d73f32cfe55ec33e2a",
+    "pinned_git_blob": "9f5099dc0cf0394ddebbd7a453ebb88ba7dc515d",
+    "pinned_bytes_sha256": "863502e0a2960903529306e8013d6308dbfe937aac3f54d73f32cfe55ec33e2a",
+    "normalized_pin_equal": true,
+    "read_scope": "complete file for assigned boundary units and enclosing helpers; no whole-module redisposition",
+    "unit_ids": [
+      "core-001:unit:57a99dee62a9db51",
+      "core-001:unit:a093a12a6c2d7ab9",
+      "core-001:unit:657cd68bf09a1351",
+      "core-001:unit:c4bb2bbdb811cf02",
+      "core-001:unit:e21e5ac30c86d034",
+      "core-001:unit:7c55c1d153a147f4",
+      "core-001:unit:c486d9f36101dbbf",
+      "core-001:unit:c320d2d637928f05"
+    ],
+    "status": "READ-CLEAN",
+    "candidates": [],
+    "observation": "Two authorized serial-bearing fixtures required; immediate snapshot/replay, repeated reference retention, subscriber-local cancellation, factory token independence, completion/recreate and convenience no-match asserted. Every explicit live comparison occurs after monitor disposal; no attended hotplug proof.",
+    "unchanged_path_action": "Retain current text for this boundary; unrelated applet findings keep original scope."
+  },
+  {
+    "path": "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ReconfigurationDiscoveryInvariantTests.cs",
+    "source_sha256": "b6e738070c7d1fb7f0dbd662166b5284d28b2b6da91b055d68610df114330c52",
+    "pinned_git_blob": "294b3cd978557d85dd5cc67f27af70ca0f9460e1",
+    "pinned_bytes_sha256": "b6e738070c7d1fb7f0dbd662166b5284d28b2b6da91b055d68610df114330c52",
+    "normalized_pin_equal": true,
+    "read_scope": "complete file for assigned boundary units and enclosing helpers; no whole-module redisposition",
+    "unit_ids": [
+      "core-001:unit:eac91c75317cc051",
+      "core-001:unit:b9993485c05ad53c",
+      "core-001:unit:f4a882826be6e212",
+      "core-001:unit:1e3693aa400d7608",
+      "core-001:unit:3adf9de3795751b3"
+    ],
+    "status": "READ-CANDIDATE-CONTEXT",
+    "candidates": [
+      "CORE-MGMT-X001"
+    ],
+    "observation": "Fresh live original USB mask; disable OTP/reboot then repeated fresh scans assert distinct IDs/at most one serial-form holder. Finally fresh lookup/write/reboot/readback attempts restoration. Deadlines checked between awaits; stale single-key-never-reads-serial comment X001.",
+    "unchanged_path_action": "Retain product bytes; fresh editor/reviewer dispositions required for candidate/dependency passages."
+  },
+  {
+    "path": "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ScopedDiscoveryReadOnlyTests.cs",
+    "source_sha256": "c51262fe9d26cefc128f693a69da38e74376428d39950b1e21d6d5f4430d624d",
+    "pinned_git_blob": "52b8b4a911b20cf74dc7d866a03074bed5dfd3e8",
+    "pinned_bytes_sha256": "c51262fe9d26cefc128f693a69da38e74376428d39950b1e21d6d5f4430d624d",
+    "normalized_pin_equal": true,
+    "read_scope": "complete file for assigned boundary units and enclosing helpers; no whole-module redisposition",
+    "unit_ids": [
+      "core-001:unit:7a8902465cf66ecc",
+      "core-001:unit:6c246a806d859fbc",
+      "core-001:unit:27e1f4e566467c3a",
+      "core-001:unit:b8f489515a9c2928",
+      "core-001:unit:b9636de986d704fc",
+      "core-001:unit:346df83a656cb3e7",
+      "core-001:unit:c7e8700d4ee8e554",
+      "core-001:unit:6508a83195fe1afe",
+      "core-001:unit:3130fc515960f43b",
+      "core-001:unit:254dd8d62094f7f3"
+    ],
+    "status": "READ-CANDIDATE-CONTEXT",
+    "candidates": [
+      "CORE-MGMT-X001",
+      "CORE-MGMT-X002"
+    ],
+    "observation": "Seven scopes aggregate authorized connections by serial and compare eight named semantic fields through sequential typed connections/live reads. All scans precede live scopes; readiness validates metadata before allow-list filter. Snapshot list aliases timeout storage; X001 equality rationale stale, A-C003/X002 limit deep stability.",
+    "unchanged_path_action": "Retain product bytes; fresh editor/reviewer dispositions required for candidate/dependency passages."
+  },
+  {
+    "path": "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/ScopedDiscoveryReadinessTests.cs",
+    "source_sha256": "18f4c3c56b24e6d565b24b95dc6cd221772813eef8b00085314690172b057e6a",
+    "pinned_git_blob": "2ce62e267997f47ea4a24728fd35f3785981ba4b",
+    "pinned_bytes_sha256": "18f4c3c56b24e6d565b24b95dc6cd221772813eef8b00085314690172b057e6a",
+    "normalized_pin_equal": true,
+    "read_scope": "complete file for assigned boundary units and enclosing helpers; no whole-module redisposition",
+    "unit_ids": [
+      "core-001:unit:c6865f63afed1dc9",
+      "core-001:unit:0020bcadd875fffe",
+      "core-001:unit:61eb51979d55e830",
+      "core-001:unit:b0cbe2fa99b90361",
+      "core-001:unit:7d7b9afd6e086704",
+      "core-001:unit:d7f101a278d4148c",
+      "core-001:unit:6dac00682a873522",
+      "core-001:unit:0de7a4d3232ea8b6",
+      "core-001:unit:429d59ac199af1c6"
+    ],
+    "status": "READ-CLEAN",
+    "candidates": [],
+    "observation": "Hardware-free injected complete bystanders/serial-less views return authorized fixtures only; missing metadata on any view exhausts three attempts. ScanView.Connect throws; this tests readiness/authorization projection, not real discovery/protocols.",
+    "unchanged_path_action": "Retain current text for this boundary; unrelated applet findings keep original scope."
+  },
+  {
+    "path": "src/Management/tests/Yubico.YubiKit.Management.IntegrationTests/Yubico.YubiKit.Management.IntegrationTests.csproj",
+    "source_sha256": "625b84748e3f82754db5567822d71e7a313dd6ab0403b8439d30412ddfd177cb",
+    "pinned_git_blob": "2ce03d2d9bb9adfa98bcf617e1f7e3e1ffe484c0",
+    "pinned_bytes_sha256": "6e089bc92a64ffd7524cd2e2573f814e895ee89f3a5e29b4a84e3549540954e2",
+    "normalized_pin_equal": true,
+    "read_scope": "complete file for assigned boundary units and enclosing helpers; no whole-module redisposition",
+    "unit_ids": [
+      "core-001:unit:e789b93d00ad745f"
+    ],
+    "status": "READ-CLEAN",
+    "candidates": [],
+    "observation": "xUnit2/VSTest references Management/Core/Tests.Shared; no blanket project-run safety inferred from fake readiness cases. Build/runner/native lanes remain separate.",
+    "unchanged_path_action": "Retain current text for this boundary; unrelated applet findings keep original scope."
+  },
+  {
+    "path": "src/Management/tests/Yubico.YubiKit.Management.UnitTests/AuditV2/ManagementAuditReproTests.cs",
+    "source_sha256": "37bb1351fa289ecc549d925335d4d02502fcac62c6c5eb84b13d42f7b0dfcf4f",
+    "pinned_git_blob": "8fcdc78f67ea13950565753b2d20a9da99272a06",
+    "pinned_bytes_sha256": "37bb1351fa289ecc549d925335d4d02502fcac62c6c5eb84b13d42f7b0dfcf4f",
+    "normalized_pin_equal": true,
+    "read_scope": "complete file for assigned boundary units and enclosing helpers; no whole-module redisposition",
+    "unit_ids": [
+      "core-001:unit:9ff8d8b2b2bce16f",
+      "core-001:unit:4bb379de0d85c0a9",
+      "core-001:unit:08f406b060540181",
+      "core-001:unit:bd93d0a766ce2322"
+    ],
+    "status": "READ-CLEAN",
+    "candidates": [],
+    "observation": "Record derivation, exact USB None/null omission, timeout guards and representative length/TLV bytes use explicit fixture. Python order is comparator, not mandatory protocol order; synthetic A5 copies are not production cleanup evidence.",
+    "unchanged_path_action": "Retain current text for this boundary; unrelated applet findings keep original scope."
+  },
+  {
+    "path": "src/Management/tests/Yubico.YubiKit.Management.UnitTests/FirmwareVersionTests.cs",
+    "source_sha256": "28da53a4418690503d10c798aa3e375c7276502708e6bc319170113318d513a8",
+    "pinned_git_blob": "ec476c9ebfb6bc04f1e5ed38fee17f7c62e35f5f",
+    "pinned_bytes_sha256": "28da53a4418690503d10c798aa3e375c7276502708e6bc319170113318d513a8",
+    "normalized_pin_equal": true,
+    "read_scope": "complete file for assigned boundary units and enclosing helpers; no whole-module redisposition",
+    "unit_ids": [
+      "core-001:unit:265cb8eb5d4695f5",
+      "core-001:unit:a7a505eaa26e0b39",
+      "core-001:unit:c72c2645fc208462",
+      "core-001:unit:d17e253d32973f90",
+      "core-001:unit:11fd331338fb63d1",
+      "core-001:unit:662fe174e1825fbe",
+      "core-001:unit:9d83ee8ee99dfa33",
+      "core-001:unit:43f40a36cce7b6ec",
+      "core-001:unit:9ab6f1ff85873ab9",
+      "core-001:unit:ebe7b9bc05a61c1c",
+      "core-001:unit:0323e8f33ff88b28",
+      "core-001:unit:b4200d8fb4075b97",
+      "core-001:unit:920aed6dbc2c5cd8",
+      "core-001:unit:a5014717998c877c",
+      "core-001:unit:bdbe3eca93b2ffff",
+      "core-001:unit:f7def4e67f2ee1c6",
+      "core-001:unit:08d1dffc8fcfefd5",
+      "core-001:unit:aab1837c53b774bb",
+      "core-001:unit:daafd261d8a23ae0",
+      "core-001:unit:3fc9b928c432b962",
+      "core-001:unit:7062888aa3eb0cb6",
+      "core-001:unit:4fca5d79c26e2062",
+      "core-001:unit:4261b5953e871e17",
+      "core-001:unit:343610db5823a4b7",
+      "core-001:unit:d9af20f75a18caf5",
+      "core-001:unit:1a1f5c5ae383c206",
+      "core-001:unit:409d46be3df37198",
+      "core-001:unit:697a7a5a617b7c97",
+      "core-001:unit:9447dd104d61f40f",
+      "core-001:unit:e8251c0f1e00f417",
+      "core-001:unit:6daa2f4eb5e2c7f9",
+      "core-001:unit:3bfbd8b95f154530",
+      "core-001:unit:79083d754d5248de",
+      "core-001:unit:539dc01721357642",
+      "core-001:unit:8877f23541c9b425",
+      "core-001:unit:559d4de5cc7d2d60",
+      "core-001:unit:a0c4f5d14da2b8ed",
+      "core-001:unit:5da270debc3d3ecb",
+      "core-001:unit:a469b3cef18fecb5",
+      "core-001:unit:826486b76bd5c6f1",
+      "core-001:unit:4f3df259a3d79821",
+      "core-001:unit:0738b79d34950612",
+      "core-001:unit:41a5987bee94c554",
+      "core-001:unit:16a91c20bd6c0758",
+      "core-001:unit:e95f31c6d035e3a4",
+      "core-001:unit:0b4f29f77323564f",
+      "core-001:unit:357a141ebbac0f39",
+      "core-001:unit:61064638714367f9",
+      "core-001:unit:08ce7822d8b4b3c2",
+      "core-001:unit:ecb7890edfc22276",
+      "core-001:unit:ce23cc0fe2a9da73",
+      "core-001:unit:30cfbefbd21e34c1",
+      "core-001:unit:51c7e311c9044c3e",
+      "core-001:unit:31727c2ccafa550e",
+      "core-001:unit:1192a90431849d01",
+      "core-001:unit:8d6268a15d04f5c6",
+      "core-001:unit:ab1ac215210a05f3"
+    ],
+    "status": "READ-CLEAN",
+    "candidates": [],
+    "observation": "Complete comparison/null/parse/bytes/string/default/operator vectors read. Major-zero optimistic ordering is SDK policy; AlphaOrBeta names supply no hardware/qualifier proof. Hash inequality is one vector, not collision-free guarantee.",
+    "unchanged_path_action": "Retain current text for this boundary; unrelated applet findings keep original scope."
+  },
+  {
+    "path": "src/Management/tests/Yubico.YubiKit.Management.UnitTests/IYubiKeyExtensionsTransportTests.cs",
+    "source_sha256": "906daac2d262529d5104083f6804869df2c008bb2968045b485e14af060ef661",
+    "pinned_git_blob": "9db083be71a1c6da835d641a607bce893400d4ef",
+    "pinned_bytes_sha256": "906daac2d262529d5104083f6804869df2c008bb2968045b485e14af060ef661",
+    "normalized_pin_equal": true,
+    "read_scope": "complete file for assigned boundary units and enclosing helpers; no whole-module redisposition",
+    "unit_ids": [
+      "core-001:unit:073ec481bfae2119",
+      "core-001:unit:fcb13d937fc127ef",
+      "core-001:unit:62fddc5f24d221dd",
+      "core-001:unit:9d763f0866f46e98",
+      "core-001:unit:e82a33d8f35b3eb8",
+      "core-001:unit:d3ae9d6f907de968",
+      "core-001:unit:16a50b0a7c01152a",
+      "core-001:unit:b962e78340ce77a7",
+      "core-001:unit:f694922dad0dc3dd",
+      "core-001:unit:f78eeec8e786cccb",
+      "core-001:unit:6347963f6b1aae2d",
+      "core-001:unit:bf723d5ea1fa7251",
+      "core-001:unit:459b626453bc31f8",
+      "core-001:unit:0a4bf24a663dd6e8",
+      "core-001:unit:98f86d3d046fd573",
+      "core-001:unit:28633efa2cfe067e",
+      "core-001:unit:bfc9b7fa61197878",
+      "core-001:unit:e7788116706b4107",
+      "core-001:unit:5113d832a3fed3be",
+      "core-001:unit:c9ee8a00dcb4f231",
+      "core-001:unit:20ceeaf0b20fc65f",
+      "core-001:unit:faae8709b85f2c92",
+      "core-001:unit:b56680596b7d8777",
+      "core-001:unit:6f1556ea8e1e718c",
+      "core-001:unit:1b7b6bf83657d19a"
+    ],
+    "status": "READ-CLEAN",
+    "candidates": [],
+    "observation": "SelectionProbe records requested generic type then throws; FallbackProbe records exact attempts. Synthetic held/SCP failures prove no HID attempt, without native/initialization proof. Inline owned default SCP remains undisposed: MGMT-IMP-004.",
+    "unchanged_path_action": "Retain current text for this boundary; unrelated applet findings keep original scope."
+  },
+  {
+    "path": "src/Management/tests/Yubico.YubiKit.Management.UnitTests/ManagementBackendLifecycleTests.cs",
+    "source_sha256": "ce0f8245201cde725b60fb5a10992a94f94faebad857cc7b026769a39c475de5",
+    "pinned_git_blob": "665d0f67a415543c8f75bea94579b07251115c90",
+    "pinned_bytes_sha256": "ce0f8245201cde725b60fb5a10992a94f94faebad857cc7b026769a39c475de5",
+    "normalized_pin_equal": true,
+    "read_scope": "complete file for assigned boundary units and enclosing helpers; no whole-module redisposition",
+    "unit_ids": [
+      "core-001:unit:7fe8591f930e4bc2",
+      "core-001:unit:b503c9b3d18f6efa",
+      "core-001:unit:08ff17179045b457",
+      "core-001:unit:20ce16d2fb7eff11"
+    ],
+    "status": "READ-CLEAN",
+    "candidates": [],
+    "observation": "Reflection asserts IDisposable assignability only; prepared fake throws if Initialize called and records C3. Resource-free implementation follows source, beyond reflection's limited oracle.",
+    "unchanged_path_action": "Retain current text for this boundary; unrelated applet findings keep original scope."
+  },
+  {
+    "path": "src/Management/tests/Yubico.YubiKit.Management.UnitTests/ManagementSessionExchangeOverlapTests.cs",
+    "source_sha256": "fba3474e0de7c6a4c28dff5c4f48836590df2cb16c01e4fee13dfd69e68fefda",
+    "pinned_git_blob": "4472b6d0878dd10b1855c6fa124b1ad2b6684ac3",
+    "pinned_bytes_sha256": "fba3474e0de7c6a4c28dff5c4f48836590df2cb16c01e4fee13dfd69e68fefda",
+    "normalized_pin_equal": true,
+    "read_scope": "complete file for assigned boundary units and enclosing helpers; no whole-module redisposition",
+    "unit_ids": [
+      "core-001:unit:5f325fffba150cdc",
+      "core-001:unit:5b94fe28199b88e6",
+      "core-001:unit:52c951863eeeb083",
+      "core-001:unit:bff1f8151e831a7f"
+    ],
+    "status": "READ-CLEAN",
+    "candidates": [],
+    "observation": "Production factory over scripted two-page SmartCard fake holds page0, asserts refusal/no extra wire then pages0/1 and sequential reuse. Finally releases gate; per-exchange drain can precede whole-reader task (B5-C006/C008). Zero FIPS fixtures prove no mapping correctness.",
+    "unchanged_path_action": "Retain current text for this boundary; unrelated applet findings keep original scope."
+  },
+  {
+    "path": "src/Management/tests/Yubico.YubiKit.Management.UnitTests/ManagementSessionTests.cs",
+    "source_sha256": "6897ff2e152e0b533455e7f40c76e53b891e8147caa80d8750078de67f6f8406",
+    "pinned_git_blob": "bca7bbcb427db5acfa1bb78c4f13279bb8e019e2",
+    "pinned_bytes_sha256": "6897ff2e152e0b533455e7f40c76e53b891e8147caa80d8750078de67f6f8406",
+    "normalized_pin_equal": true,
+    "read_scope": "complete file for assigned boundary units and enclosing helpers; no whole-module redisposition",
+    "unit_ids": [
+      "core-001:unit:3e27531e7c12aebb",
+      "core-001:unit:ba3b7fffdb307d6f",
+      "core-001:unit:cc7003497e620c01",
+      "core-001:unit:ad4717bfc0d14cd0",
+      "core-001:unit:a0aa6f86fd7015b7",
+      "core-001:unit:25c362986d0591d5",
+      "core-001:unit:cbb1f6c787dc031d",
+      "core-001:unit:31be492233f1bd76",
+      "core-001:unit:433c3437e70bee5e",
+      "core-001:unit:14dafd5ed992a259",
+      "core-001:unit:ab010757c4e7e5e9",
+      "core-001:unit:b391807c49ec4669",
+      "core-001:unit:4f0ca2ae81229c21",
+      "core-001:unit:2fdd067391a86292",
+      "core-001:unit:e043bbf6cc4f6809",
+      "core-001:unit:b4ab1344dae0dac0",
+      "core-001:unit:da8b0c7717d83595",
+      "core-001:unit:f54349868acd7f50",
+      "core-001:unit:147eeb23a9f5dff5",
+      "core-001:unit:bb900fbbae029438",
+      "core-001:unit:209d46566c40dc89",
+      "core-001:unit:b5e3493d6cf9130c",
+      "core-001:unit:4522359191c8d6e9",
+      "core-001:unit:88e28a339ed1752b",
+      "core-001:unit:3f58b083c6e3bde4"
+    ],
+    "status": "READ-CANDIDATE-CONTEXT",
+    "candidates": [
+      "CORE-MGMT-X003"
+    ],
+    "observation": "Factory failure/pre-cancel preserve borrowed connection; constructor-only ProbeSession never attaches (X003). Reset fake checks one INS1F; HID fake throws on I/O. UninitializedObject backend fake checks successful encoded clearing only. Disposal helpers bypass initialization.",
+    "unchanged_path_action": "Retain product bytes; fresh editor/reviewer dispositions required for candidate/dependency passages."
+  },
+  {
+    "path": "src/Management/tests/Yubico.YubiKit.Management.UnitTests/Yubico.YubiKit.Management.UnitTests.csproj",
+    "source_sha256": "93ea2bdb47ff78f9dbfba2840976a708d3cb32e9fda3736f31187a250cd1c156",
+    "pinned_git_blob": "8a5b78f4f190f52d01ecdfbdcf4701a1a4e1fb5b",
+    "pinned_bytes_sha256": "dee3ce7dc31f88a33fa71c6821343cbb5c28b942c695e520b71afbfd99ade59c",
+    "normalized_pin_equal": true,
+    "read_scope": "complete file for assigned boundary units and enclosing helpers; no whole-module redisposition",
+    "unit_ids": [
+      "core-001:unit:b1c4e562962c539a"
+    ],
+    "status": "READ-CLEAN",
+    "candidates": [],
+    "observation": "net10 executable xUnit3/MTP references Management with inherited compiler policy. No restore/evaluation/runner execution.",
+    "unchanged_path_action": "Retain current text for this boundary; unrelated applet findings keep original scope."
+  }
+]

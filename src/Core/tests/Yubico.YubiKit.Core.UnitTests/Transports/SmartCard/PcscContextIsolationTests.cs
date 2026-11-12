@@ -27,7 +27,7 @@ public sealed class PcscContextIsolationTests
         using var monitorApi = new MonitoringApi();
         var connectionApi = new ControlledSCardConnectionApi();
         using var listener = new DesktopSmartCardDeviceListener(monitorApi, _ => { });
-        UsbSmartCardConnection? connection = null;
+        PcscConnection? connection = null;
 
         try
         {
@@ -35,7 +35,7 @@ public sealed class PcscContextIsolationTests
             Assert.Equal(DeviceListenerStatus.Started, listener.Status);
             var monitoredHandle = await monitorApi.MonitorEntered.Task.WaitAsync(TestContext.Current.CancellationToken);
 
-            connection = new UsbSmartCardConnection(new Reader(), connectionApi);
+            connection = new PcscConnection(new Reader(), connectionApi);
             await connection.InitializeAsync(TestContext.Current.CancellationToken);
             var transmit = connection.TransmitAndReceiveAsync(new byte[] { 0x00 }, TestContext.Current.CancellationToken);
             await connectionApi.FirstTransmitEntered.Task.WaitAsync(TestContext.Current.CancellationToken);

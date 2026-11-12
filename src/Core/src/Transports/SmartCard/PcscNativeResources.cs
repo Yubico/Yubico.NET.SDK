@@ -19,13 +19,13 @@ namespace Yubico.YubiKit.Core.Transports.SmartCard;
 
 /// <summary>Owns one connection's synchronous PC/SC resources and native calls.</summary>
 /// <remarks>
-///     This type provides no scheduling or synchronization. <see cref="PcscConnectionNativeState" /> confines every
+///     This type provides no scheduling or synchronization. <see cref="PcscConnectionNativeOwner" /> confines every
 ///     call to its owned worker and does not publish completion until the native borrow has ended.
 /// </remarks>
 internal sealed class PcscNativeResources
 {
     private readonly string _readerName;
-    private readonly ISCardConnectionApi _api;
+    private readonly ISCardConnectionApi _connectionApi;
     private SCardContext? _context;
     private SCardCardHandle? _cardHandle;
     private SCARD_PROTOCOL? _protocol;
@@ -38,10 +38,10 @@ internal sealed class PcscNativeResources
 
     private readonly SmartCardSharing _sharing;
 
-    public PcscNativeResources(string readerName, ISCardConnectionApi api, SmartCardSharing sharing = SmartCardSharing.Exclusive)
+    public PcscNativeResources(string readerName, ISCardConnectionApi connectionApi, SmartCardSharing sharing = SmartCardSharing.Exclusive)
     {
         _readerName = readerName;
-        _api = api;
+        _connectionApi = connectionApi;
         _sharing = sharing;
     }
 
@@ -50,14 +50,14 @@ internal sealed class PcscNativeResources
 
     public void Open()
     {
-        var result = _api.EstablishContext(SCARD_SCOPE.USER, out var context);
+        var result = _connectionApi.EstablishContext(SCARD_SCOPE.USER, out var context);
         _context = context;
         if (result != ErrorCode.SCARD_S_SUCCESS)
             throw new SCardException("ExceptionMessages.SCardCantEstablish", result);
 
         // See SmartCardSharing for why the handle is exclusive by default.
         var shareMode = _sharing == SmartCardSharing.Shared ? SCARD_SHARE.SHARED : SCARD_SHARE.EXCLUSIVE;
-        result = _api.Connect(context, _readerName, shareMode, SCARD_PROTOCOL.Tx, out var cardHandle, out var activeProtocol);
+        result = _connectionApi.Connect(context, _readerName, shareMode, SCARD_PROTOCOL.Tx, out var cardHandle, out var activeProtocol);
         if (result == ErrorCode.SCARD_E_SHARING_VIOLATION && shareMode == SCARD_SHARE.EXCLUSIVE)
         {
             if (_sharing == SmartCardSharing.Exclusive)
@@ -68,7 +68,7 @@ internal sealed class PcscNativeResources
             }
 
             shareMode = SCARD_SHARE.SHARED;
-            result = _api.Connect(context, _readerName, shareMode, SCARD_PROTOCOL.Tx, out cardHandle, out activeProtocol);
+            result = _connectionApi.Connect(context, _readerName, shareMode, SCARD_PROTOCOL.Tx, out cardHandle, out activeProtocol);
         }
 
         _cardHandle = cardHandle;
@@ -88,7 +88,7 @@ internal sealed class PcscNativeResources
 
     public int Transmit(ReadOnlySpan<byte> command, Span<byte> response)
     {
-        var result = _api.Transmit(
+        var result = _connectionApi.Transmit(
             CardHandle,
             new SCARD_IO_REQUEST(Protocol),
             command,
@@ -100,12 +100,12 @@ internal sealed class PcscNativeResources
         return bytesReceived;
     }
 
-    public uint BeginTransaction() => _api.BeginTransaction(CardHandle);
+    public uint BeginTransaction() => _connectionApi.BeginTransaction(CardHandle);
 
     public uint EndTransaction(SCARD_DISPOSITION disposition) =>
         _cardHandle is null || _cardHandle.IsInvalid
             ? ErrorCode.SCARD_S_SUCCESS
-            : _api.EndTransaction(_cardHandle, disposition);
+            : _connectionApi.EndTransaction(_cardHandle, disposition);
 
     public bool TryRelease(out Exception? cleanupError)
     {
@@ -116,7 +116,7 @@ internal sealed class PcscNativeResources
             try
             {
                 // Power the card off so card-wide security state cannot outlive this connection (see SmartCardSharing).
-                result = _api.Disconnect(cardHandle, SCARD_DISPOSITION.UNPOWER_CARD);
+                result = _connectionApi.Disconnect(cardHandle, SCARD_DISPOSITION.UNPOWER_CARD);
             }
             catch (Exception ex)
             {
@@ -139,7 +139,7 @@ internal sealed class PcscNativeResources
             uint result;
             try
             {
-                result = _api.ReleaseContext(context);
+                result = _connectionApi.ReleaseContext(context);
             }
             catch (Exception ex)
             {

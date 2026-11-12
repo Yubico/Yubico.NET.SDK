@@ -17,10 +17,10 @@ using Yubico.YubiKit.Core.Native.Desktop.SCard;
 
 namespace Yubico.YubiKit.Core.Transports.SmartCard;
 
-internal sealed class PcscConnectionNativeState
+internal sealed class PcscConnectionNativeOwner
 {
     private readonly string _readerName;
-    private readonly PcscNativeResources _resources;
+    private readonly PcscNativeResources _nativeResources;
     private readonly Action? _released;
     private readonly Action<Exception>? _unrecovered;
     private readonly Action<Thread> _startWorker;
@@ -42,11 +42,11 @@ internal sealed class PcscConnectionNativeState
     private int _nativeReleaseProven = 1;
 
     /// <summary>True when the native handle was opened with SCARD_SHARE_EXCLUSIVE.</summary>
-    public bool IsExclusive => _resources.IsExclusive;
+    public bool IsExclusive => _nativeResources.IsExclusive;
 
-    public PcscConnectionNativeState(
+    public PcscConnectionNativeOwner(
         string readerName,
-        ISCardConnectionApi api,
+        ISCardConnectionApi connectionApi,
         SmartCardSharing sharing = SmartCardSharing.Exclusive,
         Action? released = null,
         Action<Exception>? unrecovered = null,
@@ -54,7 +54,7 @@ internal sealed class PcscConnectionNativeState
         Action? workerLoopStarting = null)
     {
         _readerName = readerName;
-        _resources = new PcscNativeResources(readerName, api, sharing);
+        _nativeResources = new PcscNativeResources(readerName, connectionApi, sharing);
         _released = released;
         _unrecovered = unrecovered;
         _startWorker = startWorker ?? (static worker => worker.Start());
@@ -72,14 +72,14 @@ internal sealed class PcscConnectionNativeState
             () =>
             {
                 Volatile.Write(ref _nativeReleaseProven, 0);
-                _resources.Open();
+                _nativeResources.Open();
                 return true;
             },
             cancellationToken).ConfigureAwait(false);
     }
 
     public int Transmit(ReadOnlySpan<byte> command, Span<byte> response) =>
-        _resources.Transmit(command, response);
+        _nativeResources.Transmit(command, response);
 
     public Task<T> RunAsync<T>(Func<T> nativeCall, CancellationToken cancellationToken)
         where T : unmanaged
@@ -116,7 +116,7 @@ internal sealed class PcscConnectionNativeState
         cancellationToken.ThrowIfCancellationRequested();
         var transaction = new TransactionState(endDisposition);
         var work = new NativeWorkItem<uint>(
-            _resources.BeginTransaction,
+            _nativeResources.BeginTransaction,
             cancellationToken,
             completed => CompleteTransactionBegin(transaction, completed));
 
@@ -160,7 +160,7 @@ internal sealed class PcscConnectionNativeState
     private void ThrowIfOrdinaryWorkCannotStart()
     {
         if (_closed)
-            throw new ObjectDisposedException(nameof(UsbSmartCardConnection));
+            throw new ObjectDisposedException("UsbSmartCardConnection");
         if (_ordinaryActive)
             throw new InvalidOperationException(
                 "Another raw smart-card operation is already active on this connection. " +
@@ -382,7 +382,7 @@ internal sealed class PcscConnectionNativeState
         Exception? failure = null;
         try
         {
-            result = _resources.EndTransaction(transaction.EndDisposition);
+            result = _nativeResources.EndTransaction(transaction.EndDisposition);
         }
         catch (Exception ex)
         {
@@ -415,7 +415,7 @@ internal sealed class PcscConnectionNativeState
 
     private void CompleteShutdown()
     {
-        var releasedNativeResources = _resources.TryRelease(out var cleanupError);
+        var releasedNativeResources = _nativeResources.TryRelease(out var cleanupError);
         var transactionError = _transaction?.EndFailure;
         if (!releasedNativeResources)
         {
@@ -595,7 +595,7 @@ internal sealed class PcscConnectionNativeState
     }
 
     private sealed class TransactionScope(
-        PcscConnectionNativeState owner,
+        PcscConnectionNativeOwner owner,
         TransactionState transaction,
         Action<uint> reportEndFailure) : IDisposable, IAsyncDisposable
     {

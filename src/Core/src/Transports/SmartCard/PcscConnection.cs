@@ -20,17 +20,17 @@ using Yubico.YubiKit.Core.Native.Desktop.SCard;
 
 namespace Yubico.YubiKit.Core.Transports.SmartCard;
 
-internal class UsbSmartCardConnection : ISmartCardConnection
+internal class PcscConnection : ISmartCardConnection
 {
     private const int MaxExtendedApduResponseSize = 65536 + 2;
     private readonly IPcscDevice _smartCardDevice;
-    private readonly ILogger<UsbSmartCardConnection> _logger;
+    private readonly ILogger<PcscConnection> _logger;
     private readonly SmartCardSharing _sharing;
-    private readonly PcscConnectionNativeState _nativeState;
+    private readonly PcscConnectionNativeOwner _nativeOwner;
 
-    internal UsbSmartCardConnection(
+    internal PcscConnection(
         IPcscDevice smartCardDevice,
-        ISCardConnectionApi? api = null,
+        ISCardConnectionApi? connectionApi = null,
         SmartCardSharing sharing = SmartCardSharing.Exclusive,
         Action? released = null,
         Action<Exception>? unrecovered = null,
@@ -39,10 +39,10 @@ internal class UsbSmartCardConnection : ISmartCardConnection
     {
         _smartCardDevice = smartCardDevice;
         _sharing = sharing;
-        _logger = YubiKitLogging.CreateLogger<UsbSmartCardConnection>();
-        _nativeState = new PcscConnectionNativeState(
+        _logger = YubiKitLogging.CreateLogger<PcscConnection>();
+        _nativeOwner = new PcscConnectionNativeOwner(
             smartCardDevice.ReaderName,
-            api ?? new NativeSCardConnectionApi(),
+            connectionApi ?? new NativeSCardConnectionApi(),
             sharing,
             released,
             unrecovered,
@@ -51,13 +51,13 @@ internal class UsbSmartCardConnection : ISmartCardConnection
     }
 
     /// <inheritdoc />
-    public bool IsExclusive => _nativeState.IsExclusive;
+    public bool IsExclusive => _nativeOwner.IsExclusive;
 
-    ~UsbSmartCardConnection()
+    ~PcscConnection()
     {
         try
         {
-            _ = ObserveFinalizerShutdownAsync(_nativeState.RequestShutdown());
+            _ = ObserveFinalizerShutdownAsync(_nativeOwner.RequestShutdown());
         }
         catch
         {
@@ -82,7 +82,7 @@ internal class UsbSmartCardConnection : ISmartCardConnection
         try
         {
             _logger.LogDebug("Initializing smart card connection to reader {ReaderName}", _smartCardDevice.ReaderName);
-            await _nativeState.OpenAsync(cancellationToken).ConfigureAwait(false);
+            await _nativeOwner.OpenAsync(cancellationToken).ConfigureAwait(false);
             if (_sharing == SmartCardSharing.ExclusiveWithSharedFallback && !IsExclusive)
             {
                 _logger.LogWarning(
@@ -96,11 +96,11 @@ internal class UsbSmartCardConnection : ISmartCardConnection
         {
             try
             {
-                await _nativeState.RequestShutdown().ConfigureAwait(false);
+                await _nativeOwner.RequestShutdown().ConfigureAwait(false);
             }
             catch (Exception cleanupFailure)
             {
-                if (!_nativeState.IsNativeReleaseProven)
+                if (!_nativeOwner.IsNativeReleaseProven)
                 {
                     throw new UnrecoveredConnectionException(
                         $"The smart-card connection to reader '{_smartCardDevice.ReaderName}' failed to initialize " +
@@ -120,13 +120,13 @@ internal class UsbSmartCardConnection : ISmartCardConnection
     internal IDisposable BeginTransaction(
         SCARD_DISPOSITION endDisposition,
         CancellationToken cancellationToken = default) =>
-        _nativeState.BeginTransaction(
+        _nativeOwner.BeginTransaction(
             endDisposition,
             cancellationToken,
             result => _logger.LogDebug("SCardEndTransaction returned {Error}", result));
 
     public Task<IDisposable> BeginTransactionAsync(CancellationToken cancellationToken = default) =>
-        _nativeState.BeginTransactionAsync(
+        _nativeOwner.BeginTransactionAsync(
             SCARD_DISPOSITION.LEAVE_CARD,
             cancellationToken,
             result => _logger.LogDebug("SCardEndTransaction returned {Error}", result));
@@ -138,8 +138,8 @@ internal class UsbSmartCardConnection : ISmartCardConnection
         var outputBuffer = ArrayPool<byte>.Shared.Rent(MaxExtendedApduResponseSize);
         try
         {
-            var responseLength = await _nativeState.RunAsync(
-                () => _nativeState.Transmit(command.Span, outputBuffer),
+            var responseLength = await _nativeOwner.RunAsync(
+                () => _nativeOwner.Transmit(command.Span, outputBuffer),
                 cancellationToken).ConfigureAwait(false);
 
             var response = new byte[responseLength];
@@ -154,18 +154,18 @@ internal class UsbSmartCardConnection : ISmartCardConnection
 
     public void Dispose()
     {
-        if (_nativeState.IsWorkerThread)
+        if (_nativeOwner.IsWorkerThread)
             throw new InvalidOperationException("Synchronous disposal cannot wait on the native worker.");
 
         GC.SuppressFinalize(this);
-        var shutdown = _nativeState.RequestShutdown();
+        var shutdown = _nativeOwner.RequestShutdown();
         shutdown.GetAwaiter().GetResult();
     }
 
     public ValueTask DisposeAsync()
     {
         GC.SuppressFinalize(this);
-        return new ValueTask(_nativeState.RequestShutdown());
+        return new ValueTask(_nativeOwner.RequestShutdown());
     }
 
     private static async Task ObserveFinalizerShutdownAsync(Task shutdown)

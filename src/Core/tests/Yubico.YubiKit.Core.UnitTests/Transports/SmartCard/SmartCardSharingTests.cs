@@ -108,7 +108,7 @@ public class SmartCardSharingTests
     {
         var api = new ControlledSCardConnectionApi { RefuseExclusive = contention };
         var reader = new PcscDevice { ReaderName = "default-connection", Atr = null };
-        await using var connection = new UsbSmartCardConnection(reader, api);
+        await using var connection = new PcscConnection(reader, api);
 
         if (contention)
             await Assert.ThrowsAsync<ConnectionInUseException>(() => connection.InitializeAsync(Ct).AsTask());
@@ -124,10 +124,10 @@ public class SmartCardSharingTests
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
-    public async Task NativeState_DefaultRequiresExclusiveAccess(bool contention)
+    public async Task NativeOwner_DefaultRequiresExclusiveAccess(bool contention)
     {
         var api = new ControlledSCardConnectionApi { RefuseExclusive = contention };
-        var state = new PcscConnectionNativeState("default-state", api);
+        var state = new PcscConnectionNativeOwner("default-state", api);
         try
         {
             if (contention)

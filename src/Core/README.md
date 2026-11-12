@@ -388,6 +388,15 @@ their separate owners described below. See
 [retained synchronous compatibility paths](../../docs/architecture/raw-access-tiers.md#retained-synchronous-compatibility-paths)
 before using direct report access.
 
+For source navigation, the macOS facades forward to `MacOSFidoHidNativeOwner` and
+`MacOSOtpHidNativeOwner`; `MacOSHidInputBridge` supplies native callback delivery and
+`MacOSHidReportApi` supplies the mechanical IOKit report calls. Portable USB/NFC
+smart-card connections use `PcscConnection` and `PcscConnectionNativeOwner`.
+These are internal organization changes. **The macOS extraction still requires native
+and hardware testing on macOS before merge.**
+The PC/SC connection logger category follows the new internal `PcscConnection` name;
+its disposed-object diagnostic retains the legacy `UsbSmartCardConnection` string.
+
 ### Windows HID connections
 
 Built-in Windows `ConnectAsync<IFidoHidConnection>` / `ConnectAsync<IOtpHidConnection>` and raw-session
@@ -410,9 +419,13 @@ feature payload sizes follow the descriptor (excluding the native report-ID byte
 that descriptor exactly; typed FIDO requires 64 bytes and typed OTP eight bytes. Returned data belongs
 to the caller. Public interfaces and raw-access tiers are unchanged.
 
-At the 2026-11-11 checkpoint, owner/routing/facade tests use controlled native seams. They do not certify
-actual Windows completion APIs, HID drivers, JIT/AOT device execution or hardware behavior; those
-acceptance gates remain pending. See [raw access tiers](../../docs/architecture/raw-access-tiers.md).
+The Windows implementation checkpoint at `bdac2f4f4` passed native Windows units,
+59 selected device cases, redirected FIDO-over-CCID GetInfo, and an unsealed JIT
+synthetic-pipe diagnostic. These results retain their original source identity;
+they are not native verification of later consistency edits. AOT/sealed publication
+and physical HID-driver race coverage remain outstanding. See the
+[bounded acceptance record](../../docs/research/windows-async-native-acceptance.md)
+and [raw access tiers](../../docs/architecture/raw-access-tiers.md).
 
 ### Linux HID connections
 

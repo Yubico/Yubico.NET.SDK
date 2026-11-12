@@ -1,6 +1,34 @@
 # Status: YubiKit async boundaries
 
-## Windows execution and cross-platform consistency — 2026-11-11
+## Windows acceptance and approved consistency follow-up — 2026-11-12
+
+The Windows implementation at `bdac2f4f4224fa0ccf92006971af8659736aa2b1` passed
+native Windows Core units (2210 executed, three skipped), 59 selected physical-device
+cases, a source-bound redirected SmartCard GetInfo diagnostic, and an unsealed JIT
+synthetic-pipe run (10 scenarios / 65 checks). All successful runs had native exit
+zero. See [the bounded acceptance record](../../research/windows-async-native-acceptance.md)
+for job identities, source binding, fixture effects and limitations.
+
+The user approved C1/C2 as a stacked follow-up on #771, including macOS mechanical
+renames and owner extraction. **macOS native/hardware testing remains required before
+merge.** The absent Windows C++ linker still blocks AOT/sealed publication; approving
+the cleanup does not satisfy that original acceptance requirement. New source bytes
+need their own applicable validation. The overall ISA count remains **19/72**.
+
+The dated record below preserves the earlier checkpoint and its then-active pause;
+its unexecuted/paused statements are superseded only by the bounded results above.
+
+C1/C2 is implemented in the consistency follow-up: macOS report seams/bridge and
+native owners occupy matching files; PC/SC connection/owner names are aligned;
+Linux supporting seams are split. The scanner retains 245 sites with 229 unchanged
+identities and 16 one-to-one mappings, without acceptance-status promotion. The
+separately reviewed PIV clearing-test correction (#773) is a verification prerequisite;
+it observes cleanup before pool return rather than reading reused storage afterward.
+The [Mac handoff](../../research/adapter-consistency-macos-handoff.md) records exact
+commands and evidence limits for later execution. The user approved Linux delivery
+now, with Mac native/hardware and a separately prepared native-AOT VM to follow.
+
+## Historical Windows execution and consistency checkpoint — 2026-11-11
 
 The user approved phased Windows FIDO/OTP async-boundary implementation, Windows
 PC/SC acceptance and a subsequent cross-platform adapter consistency pass. Astra is

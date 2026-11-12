@@ -2,7 +2,16 @@
 
 # Architecture: one key's asynchronous lifecycle
 
-**Windows implementation checkpoint — 2026-11-11 (`a0b133f97`):** separate FIDO/OTP native
+**Windows acceptance and consistency update — 2026-11-12:** implementation head
+`bdac2f4f4` passed the bounded Windows unit/device, redirected GetInfo and unsealed
+JIT synthetic-pipe checks recorded in [Windows native acceptance](../../research/windows-async-native-acceptance.md).
+AOT/sealed publication remains blocked by the missing linker. The user approved a
+stacked internal naming/owner-extraction follow-up, including macOS changes with
+macOS native/hardware testing explicitly required. These edits preserve distinct
+platform mechanisms and public contracts; earlier native results retain their original
+source identity. Global acceptance remains 19/72.
+
+**Historical Windows implementation checkpoint — 2026-11-11 (`a0b133f97`):** separate FIDO/OTP native
 owners, typed routing, synchronous direct facades and pre-open factory/discovery claim transfer
 are implemented and reviewed. FIDO uses `ThreadPoolBoundHandle` overlapped completion; OTP
 preserves zero-access open and worker-owned feature GET/SET. Unproven checked close or BCL

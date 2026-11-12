@@ -133,7 +133,7 @@ its parameters for reset. Base `Protocol` remains the disposal owner even while 
 ### Built-in macOS FIDO lifetime
 
 The built-in macOS FIDO report connection opens asynchronously through
-`MacOSFidoHidConnection` and its internal `IHidInputBridge`. A persistent native IOKit
+`MacOSFidoHidConnection` and its internal `IMacOSHidInputBridge`. A persistent native IOKit
 input owner copies bounded reports; blocking output and checked shutdown run on the
 connection's worker. Acknowledgment and accepted-report drain precede release; a failed
 close retains the owner and physical claim rather than allowing unsafe reopen. Terminal
@@ -144,6 +144,13 @@ synchronous; the typed macOS OTP path uses a separate worker. Linux has its own 
 owners described below; Windows has separate owners too, while custom HID retains the compatibility adapters. See
 [retained synchronous compatibility paths](../../docs/architecture/raw-access-tiers.md#retained-synchronous-compatibility-paths)
 for public entry points and known limits.
+
+The connection facades delegate lifetime work to `MacOSFidoHidNativeOwner` and
+`MacOSOtpHidNativeOwner`. `MacOSHidInputBridge` owns the mechanism-specific native
+input callback glue; `IMacOSHidReportApi` / `MacOSHidReportApi` name the mechanical
+IOKit report seam. Extracting these types does not change worker, callback, root or
+claim-release ordering. The consistency follow-up requires macOS native/hardware
+verification; portable fake-seam tests are not that evidence.
 
 ### Windows HID native lifetime and routing
 
@@ -183,6 +190,9 @@ length exactly. Typed FIDO remains 64 bytes and typed OTP eight bytes. Public in
 Controlled-seam owner/routing/facade tests are managed evidence; actual Windows completion APIs,
 HID-driver JIT/AOT and hardware acceptance remain pending at the 2026-11-11 checkpoint. Do not infer
 scanner completeness or whole-platform acceptance from these routes.
+The later `bdac2f4f4` device/JIT/RDP results are recorded separately in
+[Windows native acceptance](../../docs/research/windows-async-native-acceptance.md);
+preserve that source identity when assessing this consistency follow-up.
 
 ### Linux native report boundary (L1)
 
@@ -526,8 +536,8 @@ an error in `.editorconfig`. A clean build does not mean you used `LibraryImport
 ### Connection Factory Pattern
 
 Built-in PC/SC creation defaults to strict `SmartCardSharing.Exclusive`: sharing violations throw
-`ConnectionInUseException` without a shared retry. Keep the `UsbSmartCardConnection`,
-`PcscConnectionNativeState`, and `PcscNativeResources` constructor defaults consistent with the initial
+`ConnectionInUseException` without a shared retry. Keep the `PcscConnection`,
+`PcscConnectionNativeOwner`, and `PcscNativeResources` constructor defaults consistent with the initial
 `SmartCardConnectionFactory.DefaultSharing`. Parameterless factories (including `CreateDefault` behind
 `FindYubiKeys.Create` / `YubiKeyManager`) snapshot the process-wide policy at construction; changing it
 does not reconfigure existing factories. Migration/coexistence requires an explicit `Shared` or
@@ -914,7 +924,7 @@ Behavior added by the discovery/session concurrency hardening (see `ExchangeGuar
   scans/publications; `DeviceChangeFeed` owns membership, identity retention, and isolated subscriptions.
   Disposal stops listeners, cancels and awaits the loop without a timeout, retires discovery, then completes
   the feed; bounded native waits do not release native leases before actual teardown.
-- **Registered connections dispose exactly once, and disposal shares one outcome.** `DisposalGate` gives the first `Dispose`/`DisposeAsync` caller the claim via one atomic compare-exchange. Every other caller observes that same completion — async callers await it and sync callers block on it. Built-in PC/SC connections create their lifetime owner before native open, run open/transmit/transaction/end/checked release on one lazy background worker, refuse overlapping ordinary raw calls, and release the registry lease only after successful disconnect plus context release. A release error retains and quarantines the claim; `UnrecoveredConnectionException` distinguishes it from ordinary live contention. External SmartCard implementations that fault disposal likewise retain their claim because Core has no native release proof. Built-in macOS/Linux HID transfer claims to their native owners before open; Windows/custom HID registered-wrapper release behavior is unchanged. Linux EINTR/EIO close diagnostics still release proven-closed descriptors' original claims.
+- **Registered connections dispose exactly once, and disposal shares one outcome.** `DisposalGate` gives the first `Dispose`/`DisposeAsync` caller the claim via one atomic compare-exchange. Every other caller observes that same completion — async callers await it and sync callers block on it. Built-in PC/SC connections create their lifetime owner before native open, run open/transmit/transaction/end/checked release on one lazy background worker, refuse overlapping ordinary raw calls, and release the registry lease only after successful disconnect plus context release. A release error retains and quarantines the claim; `UnrecoveredConnectionException` distinguishes it from ordinary live contention. External SmartCard implementations that fault disposal likewise retain their claim because Core has no native release proof. Built-in Windows/macOS/Linux HID transfer claims to their native owners before open; custom HID retains the registered compatibility wrapper. Linux EINTR/EIO close diagnostics still release proven-closed descriptors' original claims.
 
 ## Known Gotchas
 

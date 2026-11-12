@@ -179,9 +179,15 @@ Use `physicalClaim`, `cancellationToken`, `reportApi`, `inputBridge`, `readReact
 `reportId`, `payload`, `bytesTransferred` and `expectedReportLength` where those meanings apply.
 Keep shutdown request, native completion, input quiescence and proven native release distinct.
 Preserve native ABI spellings, public parameter contracts and existing cross-platform `IO` facade spelling.
-These are conventions for bounded changes, not a claim that all adapters have been renamed:
-macOS bridge/nested-owner extraction and PC/SC renames remain future consistency work, gated on
-functional native/integration acceptance.
+The consistency follow-up names the macOS input bridge `MacOSHidInputBridge`, its mechanical
+report seam `MacOSHidReportApi`, and its extracted lifetime authorities
+`MacOSFidoHidNativeOwner` / `MacOSOtpHidNativeOwner`. Portable USB/NFC PC/SC connections use
+`PcscConnection`, backed by `PcscConnectionNativeOwner` and `PcscNativeResources`.
+These internal names do not change the public `PscsConnectionKind` or
+`DesktopSmartCardDeviceListener` contracts. Mechanical moves and structural extractions retain
+separate review/evidence. macOS native/hardware verification of the extraction and Windows
+AOT/sealed-publication acceptance remain pending; see the
+[Windows checkpoint](research/windows-async-native-acceptance.md).
 
 ## SmartCard And APDU Style
 

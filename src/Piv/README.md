@@ -207,7 +207,17 @@ with SmartCard-only eligibility. The argument-driven CLI never prompts, even on 
 when multiple devices are connected. Picker labels reuse discovery metadata, not authoritative live configuration.
 ## Maintainer verification
 
-For maintainers, run unit tests with `dotnet toolchain.cs -- test --project Piv`. On an explicitly allowlisted
+For maintainers, run unit tests with `dotnet toolchain.cs -- test --project Piv`.
+To run the hardware-free authentication cleanup and pool-reuse cases specifically:
+
+```bash
+dotnet toolchain.cs -- test --project Piv --filter "FullyQualifiedName~AuthenticationProtocolTests"
+```
+
+These cases check clearing before pooled storage is returned, across successful,
+rejected, mismatched and canceled exchanges for Triple-DES and AES management keys.
+
+On an explicitly allowlisted
 dedicated test key, run smoke with `dotnet toolchain.cs -- test --integration --project Piv --smoke`, then full
 unattended coverage with `dotnet toolchain.cs -- test --integration --project Piv --filter "Category!=RequiresUserPresence"`.
 These tests reset and mutate PIV, including a protected-mode enable/reopen/recover/disable round trip. Touch

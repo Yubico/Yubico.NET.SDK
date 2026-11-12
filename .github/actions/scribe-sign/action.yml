@@ -60,6 +60,7 @@ runs:
         rm -rf scribe-download
         # Scribe picks the signature type by file extension and does not know .snupkg. A symbol
         # package is a NuGet package, so submit it as .snupkg.nupkg and rename it back afterwards.
+        # Remove once Yubico/yes-scribe#771 is deployed.
         find "$DIRECTORY" -type f -name '*.snupkg' -exec mv '{}' '{}.nupkg' \;
 
     - name: Submit to Scribe and wait for the signed files

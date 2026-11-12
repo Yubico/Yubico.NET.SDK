@@ -29,8 +29,8 @@ internal sealed class HidConnectionSlot : IYubiKeyConnectionSlot, IDiscoveryConn
     private static readonly ILogger Logger = YubiKitLogging.CreateLogger<HidConnectionSlot>();
 
     private readonly IHidInterface _hidInterface;
-    private readonly IHidInputBridge? _inputBridge;
-    private readonly IIOKitDeviceLifetime? _otpLifetime;
+    private readonly IMacOSHidInputBridge? _inputBridge;
+    private readonly IMacOSHidReportApi? _macOSReportApi;
     private readonly ILinuxHidReportApi? _linuxReportApi;
     private readonly ILinuxHidReadReactor? _linuxReadReactor;
     private readonly Func<IWindowsHidReportApi> _windowsReportApiFactory;
@@ -38,15 +38,15 @@ internal sealed class HidConnectionSlot : IYubiKeyConnectionSlot, IDiscoveryConn
 
     // Windows factories create one fresh, unopened API per acquisition. API instances are stateful and
     // belong exclusively to the receiving owner; neither a second slot nor a reopen may reuse them.
-    internal HidConnectionSlot(IHidInterface hidInterface, IHidInputBridge? inputBridge = null,
-        IIOKitDeviceLifetime? otpLifetime = null, ILinuxHidReportApi? linuxReportApi = null,
+    internal HidConnectionSlot(IHidInterface hidInterface, IMacOSHidInputBridge? inputBridge = null,
+        IMacOSHidReportApi? macOSReportApi = null, ILinuxHidReportApi? linuxReportApi = null,
         ILinuxHidReadReactor? linuxReadReactor = null,
         Func<IWindowsHidReportApi>? windowsReportApiFactory = null,
         Func<IWindowsHidFeatureReportApi>? windowsFeatureReportApiFactory = null)
     {
         _hidInterface = hidInterface;
         _inputBridge = inputBridge;
-        _otpLifetime = otpLifetime;
+        _macOSReportApi = macOSReportApi;
         _linuxReportApi = linuxReportApi;
         _linuxReadReactor = linuxReadReactor;
         _windowsReportApiFactory = windowsReportApiFactory ?? (static () => new WindowsHidReportApi());
@@ -122,9 +122,9 @@ internal sealed class HidConnectionSlot : IYubiKeyConnectionSlot, IDiscoveryConn
         (_hidInterface, ConnectionType) switch
         {
             (MacOSHidInterface device, ConnectionType.HidFido) =>
-                await MacOSFidoHidConnection.OpenAsync(device.EntryId, _inputBridge ?? new NativeHidInputBridge(), cancellationToken, physicalClaim).ConfigureAwait(false),
+                await MacOSFidoHidConnection.OpenAsync(device.EntryId, _inputBridge ?? new MacOSHidInputBridge(), cancellationToken, physicalClaim).ConfigureAwait(false),
             (MacOSHidInterface device, ConnectionType.HidOtp) =>
-                await MacOSOtpHidConnection.OpenAsync(device.EntryId, _otpLifetime ?? IOKitDeviceLifetime.Instance, cancellationToken, physicalClaim).ConfigureAwait(false),
+                await MacOSOtpHidConnection.OpenAsync(device.EntryId, _macOSReportApi ?? MacOSHidReportApi.Instance, cancellationToken, physicalClaim).ConfigureAwait(false),
             (LinuxHidInterface device, ConnectionType.HidFido) =>
                 await LinuxFidoHidConnection.OpenAsync(device.ReaderName, _linuxReportApi ?? LinuxHidReportApi.Instance,
                     _linuxReadReactor ?? LinuxHidReadReactor.Shared, cancellationToken, physicalClaim).ConfigureAwait(false),

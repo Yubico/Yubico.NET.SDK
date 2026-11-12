@@ -51,11 +51,11 @@ internal static class AdapterContractRegistry
         ("macOS OTP", "send", "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSOtpHidConnection", "SendAsync", ["overlap", "cancel during"]),
         ("macOS OTP", "receive", "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSOtpHidConnection", "ReceiveAsync", ["failure", "cancel during"]),
         ("macOS OTP", "dispose", "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSOtpHidConnection", "DisposeAsync", ["failure"]),
-        ("portable PCSC", "open", "Yubico.YubiKit.Core.Transports.SmartCard.UsbSmartCardConnection", "InitializeAsync", ["failure"]),
-        ("portable PCSC", "transmit", "Yubico.YubiKit.Core.Transports.SmartCard.UsbSmartCardConnection", "TransmitAndReceiveAsync", ["overlap", "cancel before", "cancel during"]),
-        ("portable PCSC", "transaction begin", "Yubico.YubiKit.Core.Transports.SmartCard.UsbSmartCardConnection", "BeginTransactionAsync", ["pending", "cancel before", "cancel during"]),
-        ("portable PCSC", "transaction end", "Yubico.YubiKit.Core.Transports.SmartCard.PcscConnectionNativeState+TransactionScope", "DisposeAsync", ["drain", "failure"]),
-        ("portable PCSC", "dispose", "Yubico.YubiKit.Core.Transports.SmartCard.UsbSmartCardConnection", "DisposeAsync", ["drain", "failure", "native worker"]),
+        ("portable PCSC", "open", "Yubico.YubiKit.Core.Transports.SmartCard.PcscConnection", "InitializeAsync", ["failure"]),
+        ("portable PCSC", "transmit", "Yubico.YubiKit.Core.Transports.SmartCard.PcscConnection", "TransmitAndReceiveAsync", ["overlap", "cancel before", "cancel during"]),
+        ("portable PCSC", "transaction begin", "Yubico.YubiKit.Core.Transports.SmartCard.PcscConnection", "BeginTransactionAsync", ["pending", "cancel before", "cancel during"]),
+        ("portable PCSC", "transaction end", "Yubico.YubiKit.Core.Transports.SmartCard.PcscConnectionNativeOwner+TransactionScope", "DisposeAsync", ["drain", "failure"]),
+        ("portable PCSC", "dispose", "Yubico.YubiKit.Core.Transports.SmartCard.PcscConnection", "DisposeAsync", ["drain", "failure", "native worker"]),
         ("macOS direct input (sync)", "open", "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSHidIOReportConnection", ".ctor", ["constructor failure"]),
         ("macOS direct input (sync)", "get", "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSHidIOReportConnection", "GetReport", ["timeout then retry", "buffer ownership"]),
         ("macOS direct input (sync)", "set", "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSHidIOReportConnection", "SetReport", ["native drain", "failure"]),
@@ -68,9 +68,9 @@ internal static class AdapterContractRegistry
         ("macOS listener (sync)", "stop", "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSHidDeviceListener", "Stop", ["callback drain", "shared stop after timeout"]),
         // Built-in PC/SC behavior only. Custom ISmartCardConnection implementations' native
         // lifetime behavior is not verified; the default async fallback only verifies caller blocking.
-        ("portable PCSC (sync)", "transaction begin", "Yubico.YubiKit.Core.Transports.SmartCard.UsbSmartCardConnection", "BeginTransaction", ["native wait"]),
-        ("portable PCSC (sync)", "transaction end", "Yubico.YubiKit.Core.Transports.SmartCard.PcscConnectionNativeState+TransactionScope", "Dispose", ["native drain"]),
-        ("portable PCSC (sync)", "dispose", "Yubico.YubiKit.Core.Transports.SmartCard.UsbSmartCardConnection", "Dispose", ["native drain"]),
+        ("portable PCSC (sync)", "transaction begin", "Yubico.YubiKit.Core.Transports.SmartCard.PcscConnection", "BeginTransaction", ["native wait"]),
+        ("portable PCSC (sync)", "transaction end", "Yubico.YubiKit.Core.Transports.SmartCard.PcscConnectionNativeOwner+TransactionScope", "Dispose", ["native drain"]),
+        ("portable PCSC (sync)", "dispose", "Yubico.YubiKit.Core.Transports.SmartCard.PcscConnection", "Dispose", ["native drain"]),
         ("portable PCSC (sync)", "async default begin", "Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardConnection", "BeginTransactionAsync", ["caller block"])
     ];
 
@@ -80,7 +80,7 @@ internal static class AdapterContractRegistry
         var errors = new List<string>();
         var keys = new HashSet<(string, string)>();
         var seenProfiles = new HashSet<string>(StringComparer.Ordinal);
-        var core = typeof(UsbSmartCardConnection).Assembly;
+        var core = typeof(PcscConnection).Assembly;
         var tests = typeof(AdapterContractRegistryTests).Assembly;
 
         foreach (var row in rows)

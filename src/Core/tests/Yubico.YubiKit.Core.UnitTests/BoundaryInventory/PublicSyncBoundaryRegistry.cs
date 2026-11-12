@@ -35,10 +35,10 @@ internal static class PublicSyncBoundaryRegistry
         ("feature get", "Yubico.YubiKit.Core.Transports.Hid.IHidConnection", "GetReport", "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSHidFeatureReportConnection", "GetReport"),
         ("feature set", "Yubico.YubiKit.Core.Transports.Hid.IHidConnection", "SetReport", "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSHidFeatureReportConnection", "SetReport"),
         ("feature dispose", "System.IDisposable", "Dispose", "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSHidFeatureReportConnection", "Dispose"),
-        ("smart begin", "Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardConnection", "BeginTransaction", "Yubico.YubiKit.Core.Transports.SmartCard.UsbSmartCardConnection", "BeginTransaction"),
+        ("smart begin", "Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardConnection", "BeginTransaction", "Yubico.YubiKit.Core.Transports.SmartCard.PcscConnection", "BeginTransaction"),
         ("smart async default", "Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardConnection", "BeginTransactionAsync", "Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardConnection", "BeginTransactionAsync"),
-        ("smart scope end", "System.IDisposable", "Dispose", "Yubico.YubiKit.Core.Transports.SmartCard.PcscConnectionNativeState+TransactionScope", "Dispose"),
-        ("smart dispose", "System.IDisposable", "Dispose", "Yubico.YubiKit.Core.Transports.SmartCard.UsbSmartCardConnection", "Dispose"),
+        ("smart scope end", "System.IDisposable", "Dispose", "Yubico.YubiKit.Core.Transports.SmartCard.PcscConnectionNativeOwner+TransactionScope", "Dispose"),
+        ("smart dispose", "System.IDisposable", "Dispose", "Yubico.YubiKit.Core.Transports.SmartCard.PcscConnection", "Dispose"),
         ("listener start", "Yubico.YubiKit.Core.Transports.Hid.HidDeviceListener", "Start", "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSHidDeviceListener", "Start"),
         ("listener stop", "Yubico.YubiKit.Core.Transports.Hid.HidDeviceListener", "Stop", "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSHidDeviceListener", "Stop"),
         ("HID scan dispatch", "Yubico.YubiKit.Core.Transports.Hid.FindHidInterfaces", "FindAllAsync", "Yubico.YubiKit.Core.Transports.Hid.FindHidInterfaces", "FindAllAsync")
@@ -71,10 +71,10 @@ internal static class PublicSyncBoundaryRegistry
         new("feature get", "Yubico.YubiKit.Core.Transports.Hid.IHidConnection", "GetReport", "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSHidFeatureReportConnection", "GetReport", "MacOSHidFeatureFacadeTests.NativeGetError_IsPreservedAndPartialBufferCleared"),
         new("feature set", "Yubico.YubiKit.Core.Transports.Hid.IHidConnection", "SetReport", "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSHidFeatureReportConnection", "SetReport", "MacOSHidFeatureCompatibilityTests.PendingExpertSetDrainsBeforeAsyncDispose_AndConcurrentDisposeSharesClose"),
         new("feature dispose", "System.IDisposable", "Dispose", "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSHidFeatureReportConnection", "Dispose", "MacOSHidFeatureCompatibilityTests.UnprovenCloseRetainsNativeObjectAndSharesFailure"),
-        new("smart begin", "Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardConnection", "BeginTransaction", "Yubico.YubiKit.Core.Transports.SmartCard.UsbSmartCardConnection", "BeginTransaction", "PcscConnectionLifetimeTests.BuiltInPcscConnection_ConcurrentBeginWhileFirstIsHeld_IsRefusedBeforeSecondSubmission"),
+        new("smart begin", "Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardConnection", "BeginTransaction", "Yubico.YubiKit.Core.Transports.SmartCard.PcscConnection", "BeginTransaction", "PcscConnectionLifetimeTests.BuiltInPcscConnection_ConcurrentBeginWhileFirstIsHeld_IsRefusedBeforeSecondSubmission"),
         new("smart async default", "Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardConnection", "BeginTransactionAsync", "Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardConnection", "BeginTransactionAsync", "PcscConnectionLifetimeTests.AsyncTransaction_ExternalDefaultFallback_BlocksCallerUntilSynchronousBeginReturns"),
-        new("smart scope end", "System.IDisposable", "Dispose", "Yubico.YubiKit.Core.Transports.SmartCard.PcscConnectionNativeState+TransactionScope", "Dispose", "PcscConnectionLifetimeTests.BuiltInPcscConnection_TransactionEndAndShutdownDuringTransmit_AreOrderedAndCoalesced"),
-        new("smart dispose", "System.IDisposable", "Dispose", "Yubico.YubiKit.Core.Transports.SmartCard.UsbSmartCardConnection", "Dispose", "PcscConnectionLifetimeTests.BuiltInPcscConnection_SynchronousDispose_DrainsHeldNativeTransmitBeforeReleasingContext"),
+        new("smart scope end", "System.IDisposable", "Dispose", "Yubico.YubiKit.Core.Transports.SmartCard.PcscConnectionNativeOwner+TransactionScope", "Dispose", "PcscConnectionLifetimeTests.BuiltInPcscConnection_TransactionEndAndShutdownDuringTransmit_AreOrderedAndCoalesced"),
+        new("smart dispose", "System.IDisposable", "Dispose", "Yubico.YubiKit.Core.Transports.SmartCard.PcscConnection", "Dispose", "PcscConnectionLifetimeTests.BuiltInPcscConnection_SynchronousDispose_DrainsHeldNativeTransmitBeforeReleasingContext"),
         new("listener start", "Yubico.YubiKit.Core.Transports.Hid.HidDeviceListener", "Start", "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSHidDeviceListener", "Start", "MacOSHidListenerLifetimeTests.Start_RegistersAndSchedulesBeforeOpen_ThenRunsAndClosesBeforeRelease"),
         new("listener stop", "Yubico.YubiKit.Core.Transports.Hid.HidDeviceListener", "Stop", "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSHidDeviceListener", "Stop", "MacOSHidListenerLifetimeTests.CallbackSelfStop_DoesNotJoinItself_AndDrainsBeforeRelease"),
         // Task.Run is a per-call dispatch, not a bounded executor or a cancellable native operation.
@@ -85,7 +85,7 @@ internal static class PublicSyncBoundaryRegistry
     {
         var rows = input.ToArray();
         var errors = new List<string>();
-        var core = typeof(UsbSmartCardConnection).Assembly;
+        var core = typeof(PcscConnection).Assembly;
         foreach (var (Entry, PublicType, PublicSymbol, Owner, Symbol) in Required)
         {
             var matches = rows.Where(row => row.Entry == Entry).ToArray();

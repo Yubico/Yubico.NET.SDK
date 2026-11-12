@@ -219,7 +219,7 @@ public class BoundaryInventoryTests
     {
         var root = BoundaryScanner.CoreSourceRoot();
         var sites = BoundaryScanner.ScanDirectory(root);
-        // Retain every 239-site entry and classify six Windows synchronous facade waits.
+        // Retain all 245 reviewed sites through the one-to-one native owner/seam identity refresh.
         Assert.Equal(245, sites.Count);
         Assert.Equal(sites.Count, sites.Select(site => site.Id).Distinct(StringComparer.Ordinal).Count());
         Assert.Equal(141, sites.Count(site => site.Kind == "native-import"));

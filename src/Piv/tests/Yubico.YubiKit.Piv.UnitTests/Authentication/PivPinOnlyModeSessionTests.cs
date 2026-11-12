@@ -48,7 +48,7 @@ public class PivPinOnlyModeSessionTests
     {
         await using var connection = new MixedPinOnlyRecoveryConnection(true, cancelDerived: true);
         await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
-        var captured = CaptureAuthenticationBuffers(session);
+        var captured = CaptureAuthenticationResponses(session);
 
         await Assert.ThrowsAsync<OperationCanceledException>(() => session.RecoverPinOnlyModeAsync(
             "123456"u8.ToArray(), TestContext.Current.CancellationToken));
@@ -56,7 +56,7 @@ public class PivPinOnlyModeSessionTests
         Assert.Equal(2, connection.AuthenticationAttempts);
         Assert.False(session.IsManagementKeyAuthenticated);
         Assert.Equal([1], connection.WitnessSubmissionAttempts);
-        captured.AssertCleared();
+        captured.AssertResponsesCleared();
     }
     [Theory]
     [InlineData(0x6A80)]
@@ -65,7 +65,7 @@ public class PivPinOnlyModeSessionTests
     {
         await using var connection = new MixedPinOnlyRecoveryConnection(true, (ushort)status);
         await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
-        var captured = CaptureAuthenticationBuffers(session);
+        var captured = CaptureAuthenticationResponses(session);
 
         var exception = await Assert.ThrowsAsync<ApduException>(() => session.RecoverPinOnlyModeAsync(
             "123456"u8.ToArray(), TestContext.Current.CancellationToken));
@@ -74,7 +74,7 @@ public class PivPinOnlyModeSessionTests
         Assert.Equal(2, connection.AuthenticationAttempts);
         Assert.False(session.IsManagementKeyAuthenticated);
         Assert.Equal([1], connection.WitnessSubmissionAttempts);
-        captured.AssertCleared();
+        captured.AssertResponsesCleared();
     }
     [Fact]
     public async Task GetPinOnlyModeAsync_NoAdminData_ReturnsNone()
@@ -163,7 +163,7 @@ public class PivPinOnlyModeSessionTests
     {
         await using var connection = new MixedPinOnlyRecoveryConnection(restoreProtectedAuthentication: true);
         await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
-        var captured = CaptureAuthenticationBuffers(session);
+        var captured = CaptureAuthenticationResponses(session);
 
         var mode = await session.RecoverPinOnlyModeAsync("123456"u8.ToArray(), TestContext.Current.CancellationToken);
 
@@ -172,7 +172,7 @@ public class PivPinOnlyModeSessionTests
         Assert.Equal(3, connection.AuthenticationAttempts);
         Assert.Equal([1, 2, 3], connection.WitnessSubmissionAttempts);
         Assert.True(connection.DerivedWitnessValidated);
-        captured.AssertCleared();
+        captured.AssertResponsesCleared();
     }
 
     [Fact]
@@ -180,7 +180,7 @@ public class PivPinOnlyModeSessionTests
     {
         await using var connection = new MixedPinOnlyRecoveryConnection(restoreProtectedAuthentication: false);
         await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
-        var captured = CaptureAuthenticationBuffers(session);
+        var captured = CaptureAuthenticationResponses(session);
 
         var mode = await session.RecoverPinOnlyModeAsync("123456"u8.ToArray(), TestContext.Current.CancellationToken);
 
@@ -189,7 +189,7 @@ public class PivPinOnlyModeSessionTests
         Assert.Equal(3, connection.AuthenticationAttempts);
         Assert.Equal([1, 2, 3], connection.WitnessSubmissionAttempts);
         Assert.True(connection.DerivedWitnessValidated);
-        captured.AssertCleared();
+        captured.AssertResponsesCleared();
     }
 
     [Fact]
@@ -197,7 +197,7 @@ public class PivPinOnlyModeSessionTests
     {
         await using var connection = new MixedPinOnlyRecoveryConnection(true);
         await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
-        var captured = CaptureAuthenticationBuffers(session);
+        var captured = CaptureAuthenticationResponses(session);
         byte[] wrongKey = Enumerable.Range(1, 24).Select(value => (byte)value).ToArray();
         try
         {
@@ -206,7 +206,7 @@ public class PivPinOnlyModeSessionTests
             Assert.True(exception.SW == 0x6982);
             Assert.False(session.IsManagementKeyAuthenticated);
             Assert.Equal([1], connection.WitnessSubmissionAttempts);
-            captured.AssertCleared();
+            captured.AssertResponsesCleared();
         }
         finally
         {
@@ -214,18 +214,17 @@ public class PivPinOnlyModeSessionTests
         }
     }
 
-    private static AuthenticationBufferCapture CaptureAuthenticationBuffers(PivSession session)
+    private static AuthenticationResponseCapture CaptureAuthenticationResponses(PivSession session)
     {
         var field = typeof(PivSession).GetField("_backend", BindingFlags.Instance | BindingFlags.NonPublic)
             ?? throw new InvalidOperationException("PIV backend field not found.");
-        var captured = new AuthenticationBufferCapture(Assert.IsAssignableFrom<IBackend>(field.GetValue(session)));
+        var captured = new AuthenticationResponseCapture(Assert.IsAssignableFrom<IBackend>(field.GetValue(session)));
         field.SetValue(session, captured);
         return captured;
     }
 
-    private sealed class AuthenticationBufferCapture(IBackend backend) : IBackend
+    private sealed class AuthenticationResponseCapture(IBackend backend) : IBackend
     {
-        private readonly List<ReadOnlyMemory<byte>> _payloads = [];
         private readonly List<ReadOnlyMemory<byte>> _responses = [];
 
         public Task<Initialization> ReadInitialStateAsync(CancellationToken cancellationToken = default) =>
@@ -233,20 +232,18 @@ public class PivPinOnlyModeSessionTests
 
         public async Task<ApduResponse> SendAsync(ApduCommand command, bool throwOnError = true, CancellationToken cancellationToken = default)
         {
-            // Retain original owned-memory views, not snapshots. Assertions run before connection disposal.
-            if (command.Ins == 0x87 && command.Data.Length > 4)
-                _payloads.Add(command.Data);
+            // Responses own non-pooled storage. Command payload storage is returned to the pool
+            // before recovery completes; AuthenticationProtocolTests checks it at Return instead.
             var response = await backend.SendAsync(command, throwOnError, cancellationToken);
             if (command.Ins == 0x87)
                 _responses.Add(response.RawData);
             return response;
         }
 
-        public void AssertCleared()
+        public void AssertResponsesCleared()
         {
-            Assert.NotEmpty(_payloads);
             Assert.NotEmpty(_responses);
-            Assert.All(_payloads.Concat(_responses), bytes => Assert.All(bytes.ToArray(), value => Assert.Equal(0, value)));
+            Assert.All(_responses, bytes => Assert.True(bytes.Span.IndexOfAnyExcept((byte)0) < 0));
         }
     }
 
